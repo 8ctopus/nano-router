@@ -1,8 +1,18 @@
 <?php
 
-require_once 'NanoRouter.php';
+use oct8pus\NanoRouter;
+
+require_once '../vendor/autoload.php';
 
 $router = new NanoRouter();
+
+$router->addRoute('/test.php', 'test');
+
+$router->addRouteRegex('/php.*/', 'phpinfo2');
+
+// resolve route
+$router->resolve();
+
 
 function test()
 {
@@ -13,10 +23,3 @@ function phpinfo2()
 {
     echo __FUNCTION__;
 }
-
-$router->addRoute('/test.php', 'test');
-
-$router->addRouteRegex('/php.*/', 'phpinfo2');
-
-// resolve route
-$router->resolve();
