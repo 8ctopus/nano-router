@@ -43,6 +43,14 @@ class NanoRouter
                 }
             }
         }
+
+        if ($this->routes['404']) {
+            // call route
+            $route['callback']();
+        } else {
+            // route not found
+            http_response_code(404);
+        }
     }
 
     /**
