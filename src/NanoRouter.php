@@ -1,9 +1,13 @@
 <?php
+
 /**
  * Nano router
  *
  * @author 8ctopus <hello@octopuslabs.io>
  */
+
+namespace oct8pus;
+
 class NanoRouter
 {
     private array $routes;
