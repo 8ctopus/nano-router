@@ -17,7 +17,7 @@ RewriteEngine on
 
 # redirect all not existing files to router
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ /index.php
+RewriteRule ^ /index.php [L]
 ```
 
 - And finally `index.php`

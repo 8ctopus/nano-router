@@ -2,4 +2,4 @@ RewriteEngine on
 
 # redirect all not existing files to index
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ /index.php
+RewriteRule ^ /index.php [L]
