@@ -10,7 +10,7 @@ $router->addRoute('/test.php', function () {
     echo 'test';
 });
 
-$router->addRouteRegex('#/php(.*)/#', function (?array $matches) {
+$router->addRouteRegex('#^/php(.*)/#', function (?array $matches) {
     echo 'phpinfo '. $matches[1];
 });
 
