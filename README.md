@@ -1,10 +1,10 @@
 # nano router
 
-An experiment at creating a simple router.
+An experimental and extremely simple php router
 
-# install
+## install
 
-- install
+-
 
 ```sh
 composer require 8ctopus/nano-router
@@ -25,7 +25,7 @@ RewriteRule ^ /index.php [L]
 ```php
 use oct8pus\NanoRouter;
 
-require_once '../../vendor/autoload.php';
+require_once 'vendor/autoload.php';
 
 $router = new NanoRouter();
 
@@ -39,4 +39,10 @@ $router->addRouteRegex('/php.*/', function () {
 
 // resolve route
 $router->resolve();
+```
+
+## clean code
+
+```sh
+vendor/bin/php-cs-fixer fix
 ```
