@@ -2,7 +2,7 @@
 
 use oct8pus\NanoRouter;
 
-require_once '../vendor/autoload.php';
+require_once '../../vendor/autoload.php';
 
 $router = new NanoRouter();
 

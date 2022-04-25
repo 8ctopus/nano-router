@@ -10,10 +10,10 @@ services:
       - 443:443
     environment:
       - DOMAIN=localhost
-      - DOCUMENT_ROOT=/public
+      - DOCUMENT_ROOT=/test/public
     volumes:
       # development directory
-      - ./test/:/var/www/html/
+      - ./:/var/www/html/
       # expose apache logs to host
       - ./docker/log/:/var/log/apache2/
       # expose apache2 and php config to host

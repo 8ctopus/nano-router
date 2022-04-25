@@ -9,7 +9,7 @@
       "log": false,
       "stopOnEntry": false,
       "pathMappings": {
-        "/var/www/html/": "${workspaceRoot}/html/"
+        "/var/www/html/": "${workspaceRoot}/"
       }
     },
     {
