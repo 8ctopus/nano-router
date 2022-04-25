@@ -12,7 +12,7 @@ composer require 8ctopus/nano-router
 
 - redirect all traffic (except existing files) to the router in `.htaccess`
 
-```htaccess
+```apache
 RewriteEngine on
 
 # redirect all not existing files to router
