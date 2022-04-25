@@ -1,5 +1,5 @@
 {
-    "name": "8ctopus/php-nano-router",
+    "name": "8ctopus/nano-router",
     "type": "library",
     "description": "An experimental nano router.",
     "keywords": ["router"],
