@@ -5,3 +5,4 @@
 /html/vendor/
 /php-spx/lib/
 /*.sublime-workspace
+/.php-cs-fixer.cache
