@@ -10,8 +10,8 @@ $router->addRoute('/test.php', function () {
     echo 'test';
 });
 
-$router->addRouteRegex('/php.*/', function () {
-    echo 'phpinfo';
+$router->addRouteRegex('#/php(.*)/#', function (?array $matches) {
+    echo 'phpinfo '. $matches[1];
 });
 
 $router->addRoute('404', function () {

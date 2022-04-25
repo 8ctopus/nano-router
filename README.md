@@ -33,7 +33,8 @@ $router->addRoute('/test.php', function () {
     echo 'test';
 });
 
-$router->addRouteRegex('/php.*/', function () {
+// do not use / as regex delimiter
+$router->addRouteRegex('#/php(.*)/#', function (array $matches) {
     echo 'phpinfo';
 });
 

@@ -35,9 +35,11 @@ class NanoRouter
                     return;
                 }
             } else {
-                if (preg_match($routePath, $requestPath) === 1) {
+                $matches = null;
+
+                if (preg_match($routePath, $requestPath, $matches) === 1) {
                     // call route
-                    $route['callback']();
+                    $route['callback']($matches);
 
                     return;
                 }
