@@ -1,0 +1,7 @@
+# docker
+/docker/
+
+# other
+/html/vendor/
+/php-spx/lib/
+/*.sublime-workspace

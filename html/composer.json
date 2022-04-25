@@ -1,0 +1,11 @@
+{
+    "name": "8ctopus/php-nano-router",
+    "authors": [
+        {
+            "name": "8ctopus",
+            "email": "hello@octopuslabs.io"
+        }
+    ],
+    "require": {
+    }
+}

@@ -1,0 +1,22 @@
+version: '3.7'
+
+services:
+  web:
+    # php 8.0.17
+    image: 8ct8pus/apache-php-fpm-alpine:1.2.8
+    container_name: web
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - DOMAIN=localhost
+      - DOCUMENT_ROOT=/public
+    volumes:
+      # development directory
+      - ./html/:/var/www/html/
+      # expose apache logs to host
+      - ./docker/log/:/var/log/apache2/
+      # expose apache2 and php config to host
+      - ./docker/etc/:/docker/etc/
+      # expose ssl certificates to host
+      - ./docker/ssl/:/etc/ssl/apache2/
