@@ -1,10 +1,9 @@
-<?php 
-
+<?php
 /**
  * Nano router
+ *
  * @author 8ctopus <hello@octopuslabs.io>
  */
-
 class NanoRouter
 {
     private array $routes;
@@ -16,6 +15,7 @@ class NanoRouter
 
     /**
      * Resolve route
+     *
      * @return void
      */
     public function resolve() : void
@@ -43,8 +43,10 @@ class NanoRouter
 
     /**
      * Add route
+     *
      * @param string   $path
      * @param callable $callback
+     *
      * @return void
      */
     public function addRoute(string $path, callable $callback) : void
@@ -57,8 +59,10 @@ class NanoRouter
 
     /**
      * Add regex route
+     *
      * @param string   $path
      * @param callable $callback
+     *
      * @return void
      */
     public function addRouteRegex(string $path, callable $callback) : void
