@@ -20,7 +20,7 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ /index.php
 ```
 
-- And finally index
+- And finally `index.php`
 
 ```php
 <?php
