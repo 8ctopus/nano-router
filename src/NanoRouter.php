@@ -34,11 +34,11 @@ class NanoRouter
                     if (in_array($route['type'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
                         // call route
                         $route['callback']();
-
-                        return;
                     } else {
                         $this->error(405);
                     }
+
+                    return;
                 }
             } else {
                 $matches = null;
@@ -51,6 +51,8 @@ class NanoRouter
                         return;
                     } else {
                         $this->error(405);
+
+                        return;
                     }
                 }
             }

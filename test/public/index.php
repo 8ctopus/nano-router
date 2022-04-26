@@ -12,7 +12,7 @@ $whoops->register();
 
 $router = new NanoRouter();
 
-$router->addRoute('*', '/test.php', function () {
+$router->addRoute('GET', '/test.php', function () {
     echo 'test';
 });
 
