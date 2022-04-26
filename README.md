@@ -30,12 +30,12 @@ require_once 'vendor/autoload.php';
 $router = new NanoRouter();
 
 // add simple route
-$router->addRoute('/test.php', function () {
+$router->addRoute('GET', '/test.php', function () {
     echo 'test';
 });
 
 // add regex route - do not use / as regex delimiter
-$router->addRouteRegex('#/php(.*)/#', function (array $matches) {
+$router->addRouteRegex('*', '#/php(.*)/#', function (array $matches) {
     echo 'phpinfo';
 });
 

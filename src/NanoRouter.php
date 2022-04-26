@@ -29,19 +29,29 @@ class NanoRouter
         foreach ($this->routes as $routePath => $route) {
             if (!$route['regex']) {
                 if ($requestPath === $routePath) {
-                    // call route
-                    $route['callback']();
+                    if (in_array($route['type'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
+                        // call route
+                        $route['callback']();
 
-                    return;
+                        return;
+                    } else {
+                        // method not allowed
+                        http_response_code(405);
+                    }
                 }
             } else {
                 $matches = null;
 
                 if (preg_match($routePath, $requestPath, $matches) === 1) {
-                    // call route
-                    $route['callback']($matches);
+                    if (in_array($route['type'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
+                        // call route
+                        $route['callback']($matches);
 
-                    return;
+                        return;
+                    } else {
+                        // method not allowed
+                        http_response_code(405);
+                    }
                 }
             }
         }
@@ -58,14 +68,16 @@ class NanoRouter
     /**
      * Add route
      *
+     * @param string   $type
      * @param string   $path
      * @param callable $callback
      *
      * @return void
      */
-    public function addRoute(string $path, callable $callback) : void
+    public function addRoute(string $type, string $path, callable $callback) : void
     {
         $this->routes[$path] = [
+            'type' => $type,
             'callback' => $callback,
             'regex' => false,
         ];
@@ -74,6 +86,7 @@ class NanoRouter
     /**
      * Add regex route
      *
+     * @param string   $type
      * @param string   $path
      * @param callable $callback
      *
@@ -81,7 +94,7 @@ class NanoRouter
      *
      * @return void
      */
-    public function addRouteRegex(string $path, callable $callback) : void
+    public function addRouteRegex(string $type, string $path, callable $callback) : void
     {
         // validate regex
         if (!is_int(@preg_match($path, ''))) {
@@ -89,6 +102,7 @@ class NanoRouter
         }
 
         $this->routes[$path] = [
+            'type' => $type,
             'callback' => $callback,
             'regex' => true,
         ];
