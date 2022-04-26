@@ -20,10 +20,16 @@ $router->addRouteRegex('*', '#^/php(.*)/#', function (?array $matches) {
     echo 'phpinfo '. $matches[1];
 });
 
-$router->addRoute('*', '404', function () {
+$router->addErrorHandler(404, function () {
     http_response_code(404);
 
-    echo '404 route';
+    echo 'Page not found';
+});
+
+$router->addErrorHandler(405, function () {
+    http_response_code(405);
+
+    echo 'Method not allowed';
 });
 
 // resolve route

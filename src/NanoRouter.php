@@ -11,10 +11,12 @@ namespace oct8pus\NanoRouter;
 class NanoRouter
 {
     private array $routes;
+    private array $errors;
 
     public function __construct()
     {
         $this->routes = [];
+        $this->errors = [];
     }
 
     /**
@@ -35,8 +37,7 @@ class NanoRouter
 
                         return;
                     } else {
-                        // method not allowed
-                        http_response_code(405);
+                        $this->error(405);
                     }
                 }
             } else {
@@ -49,20 +50,13 @@ class NanoRouter
 
                         return;
                     } else {
-                        // method not allowed
-                        http_response_code(405);
+                        $this->error(405);
                     }
                 }
             }
         }
 
-        if ($this->routes['404']) {
-            // call route
-            $route['callback']();
-        } else {
-            // route not found
-            http_response_code(404);
-        }
+        $this->error(404);
     }
 
     /**
@@ -106,5 +100,35 @@ class NanoRouter
             'callback' => $callback,
             'regex' => true,
         ];
+    }
+
+    /**
+     * Add error handler
+     * @param  int      $error
+     * @param  callable $handler
+     * @return void
+     */
+    public function addErrorHandler(int $error, callable $handler) : void
+    {
+        $this->errors[$error] = [
+            'callback' => $handler,
+        ];
+    }
+
+    /**
+     * Deal with error
+     * @param  int    $error
+     * @return void
+     */
+    private function error(int $error) : void
+    {
+        $handler = $this->errors[$error] ?? null;
+
+        if ($handler) {
+            // call route
+            $handler['callback']();
+        } else {
+            http_response_code($error);
+        }
     }
 }
