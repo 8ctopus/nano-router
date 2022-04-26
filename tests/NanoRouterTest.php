@@ -1,7 +1,9 @@
-<?php declare(strict_types=1);
+<?php
 
-use PHPUnit\Framework\TestCase;
+declare(strict_types=1);
+
 use oct8pus\NanoRouter\NanoRouter;
+use PHPUnit\Framework\TestCase;
 
 final class NanoRouterTest extends TestCase
 {
@@ -79,7 +81,7 @@ final class NanoRouterTest extends TestCase
 
         $result = false;
 
-        $router->addErrorHandler(404, function() use (&$result) {
+        $router->addErrorHandler(404, function () use (&$result) {
             $result = true;
         });
 
