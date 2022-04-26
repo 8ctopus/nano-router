@@ -3,7 +3,7 @@
 
 # other
 /vendor/
-/php-spx/lib/
+/coverage/
 /*.sublime-workspace
 /.php-cs-fixer.cache
 /.phpunit.result.cache

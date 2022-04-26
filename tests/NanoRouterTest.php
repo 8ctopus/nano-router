@@ -20,19 +20,22 @@ final class NanoRouterTest extends TestCase
             $result = true;
         });
 
+        // success
         $this->mockRequest('GET', '/test.php');
         $router->resolve();
         $this->assertTrue($result);
 
         $result = false;
 
+        // 404
         $this->mockRequest('GET', '/test2.php');
         $router->resolve();
         $this->assertFalse($result);
 
         $result = false;
 
-        $this->mockRequest('POST', '/test2.php');
+        // method not allowed
+        $this->mockRequest('POST', '/test.php');
         $router->resolve();
         $this->assertFalse($result);
     }
@@ -62,6 +65,27 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('GET', '/tes.php');
         $router->resolve();
         $this->assertFalse($result);
+
+        $result = false;
+
+        $this->mockRequest('POST', '/test.php');
+        $router->resolve();
+        $this->assertFalse($result);
+    }
+
+    public function testErrorHandler() : void
+    {
+        $router = new NanoRouter();
+
+        $result = false;
+
+        $router->addErrorHandler(404, function() use (&$result) {
+            $result = true;
+        });
+
+        $this->mockRequest('GET', '/test.php');
+        $router->resolve();
+        $this->assertTrue($result);
     }
 
     public function testInvalidRegexRoute() : void

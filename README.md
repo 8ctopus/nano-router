@@ -48,3 +48,10 @@ $router->resolve();
 ```sh
 vendor/bin/php-cs-fixer fix
 ```
+
+## run tests
+
+```sh
+./vendor/bin/phpunit .
+./vendor/bin/phpunit . --coverage-text
+```
