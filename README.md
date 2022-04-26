@@ -43,15 +43,15 @@ $router->addRouteRegex('*', '#/php(.*)/#', function (array $matches) {
 $router->resolve();
 ```
 
-## clean code
-
-```sh
-vendor/bin/php-cs-fixer fix
-```
-
 ## run tests
 
 ```sh
 ./vendor/bin/phpunit .
 ./vendor/bin/phpunit . --coverage-text
+```
+
+## clean code
+
+```sh
+vendor/bin/php-cs-fixer fix
 ```
