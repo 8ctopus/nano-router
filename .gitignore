@@ -6,3 +6,4 @@
 /php-spx/lib/
 /*.sublime-workspace
 /.php-cs-fixer.cache
+/.phpunit.result.cache
