@@ -1,6 +1,6 @@
 <?php
 
-use oct8pus\NanoRouter;
+use oct8pus\NanoRouter\NanoRouter;
 
 require_once '../../vendor/autoload.php';
 
