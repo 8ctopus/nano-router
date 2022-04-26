@@ -16,7 +16,7 @@
       "name": "php listen CLI",
       "type": "php",
       "port": 9000,
-      "stopOnEntry": true,
+      "stopOnEntry": false,
       "request": "launch"
     },
     {
