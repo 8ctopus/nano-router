@@ -1,8 +1,8 @@
 <?php
 
 use oct8pus\NanoRouter\NanoRouter;
-use Whoops\Run;
 use Whoops\Handler\PrettyPageHandler;
+use Whoops\Run;
 
 require_once '../../vendor/autoload.php';
 
@@ -17,7 +17,7 @@ $router->addRoute('*', '/test.php', function () {
 });
 
 $router->addRouteRegex('*', '#^/php(.*)/#', function (?array $matches) {
-    echo 'phpinfo '. $matches[1];
+    echo 'phpinfo ' . $matches[1];
 });
 
 $router->addErrorHandler(404, function () {

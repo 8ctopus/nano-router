@@ -104,8 +104,10 @@ class NanoRouter
 
     /**
      * Add error handler
-     * @param  int      $error
-     * @param  callable $handler
+     *
+     * @param int      $error
+     * @param callable $handler
+     *
      * @return void
      */
     public function addErrorHandler(int $error, callable $handler) : void
@@ -117,7 +119,9 @@ class NanoRouter
 
     /**
      * Deal with error
-     * @param  int    $error
+     *
+     * @param int $error
+     *
      * @return void
      */
     private function error(int $error) : void
