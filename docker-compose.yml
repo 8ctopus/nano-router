@@ -10,7 +10,7 @@ services:
       - 443:443
     environment:
       - DOMAIN=localhost
-      - DOCUMENT_ROOT=/test/public
+      - DOCUMENT_ROOT=/demo/public
     volumes:
       # development directory
       - ./:/var/www/html/
