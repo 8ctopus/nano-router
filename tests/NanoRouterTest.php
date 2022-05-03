@@ -5,6 +5,10 @@ declare(strict_types=1);
 use oct8pus\NanoRouter\NanoRouter;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ * @covers \oct8pus\NanoRouter\NanoRouter
+ */
 final class NanoRouterTest extends TestCase
 {
     public function setUp() : void
@@ -44,13 +48,12 @@ final class NanoRouterTest extends TestCase
 
     public function testRegexRoute() : void
     {
-        $router = new NanoRouter();
-
         $result = false;
 
-        $router->addRouteRegex('GET', '#/test(.*).php#', function () use (&$result) {
-            $result = true;
-        });
+        $router = (new NanoRouter())
+            ->addRouteRegex('GET', '#/test(.*).php#', function () use (&$result) {
+                $result = true;
+            });
 
         $this->mockRequest('GET', '/test.php');
         $router->resolve();
