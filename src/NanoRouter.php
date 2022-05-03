@@ -22,9 +22,9 @@ class NanoRouter
     /**
      * Resolve route
      *
-     * @return void
+     * @return self
      */
-    public function resolve() : void
+    public function resolve() : self
     {
         $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -38,7 +38,7 @@ class NanoRouter
                         $this->error(405);
                     }
 
-                    return;
+                    return $this;
                 }
             } else {
                 $matches = null;
@@ -51,12 +51,13 @@ class NanoRouter
                         $this->error(405);
                     }
 
-                    return;
+                    return $this;
                 }
             }
         }
 
         $this->error(404);
+        return $this;
     }
 
     /**
@@ -66,15 +67,17 @@ class NanoRouter
      * @param string   $path
      * @param callable $callback
      *
-     * @return void
+     * @return self
      */
-    public function addRoute(string $type, string $path, callable $callback) : void
+    public function addRoute(string $type, string $path, callable $callback) : self
     {
         $this->routes[$path] = [
             'type' => $type,
             'callback' => $callback,
             'regex' => false,
         ];
+
+        return $this;
     }
 
     /**
@@ -86,9 +89,9 @@ class NanoRouter
      *
      * @throws Exception if regex is invalid
      *
-     * @return void
+     * @return self
      */
-    public function addRouteRegex(string $type, string $path, callable $callback) : void
+    public function addRouteRegex(string $type, string $path, callable $callback) : self
     {
         // validate regex
         if (!is_int(@preg_match($path, ''))) {
@@ -100,6 +103,8 @@ class NanoRouter
             'callback' => $callback,
             'regex' => true,
         ];
+
+        return $this;
     }
 
     /**
@@ -108,13 +113,15 @@ class NanoRouter
      * @param int      $error
      * @param callable $handler
      *
-     * @return void
+     * @return self
      */
-    public function addErrorHandler(int $error, callable $handler) : void
+    public function addErrorHandler(int $error, callable $handler) : self
     {
         $this->errors[$error] = [
             'callback' => $handler,
         ];
+
+        return $this;
     }
 
     /**
