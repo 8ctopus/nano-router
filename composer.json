@@ -10,6 +10,9 @@
             "email": "hello@octopuslabs.io"
         }
     ],
+    "require": {
+        "php": ">=7.0"
+    },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.4",
         "filp/whoops": "^2.14",
