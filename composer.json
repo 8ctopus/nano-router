@@ -1,7 +1,7 @@
 {
     "name": "8ctopus/nano-router",
     "type": "library",
-    "description": "An experimental nano router.",
+    "description": "An experimental php router.",
     "keywords": ["router"],
     "license": "MIT",
     "authors": [
