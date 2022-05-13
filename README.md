@@ -48,8 +48,7 @@ RewriteRule ^ /index.php [L]
 ## run tests
 
 ```sh
-./vendor/bin/phpunit .
-./vendor/bin/phpunit . --coverage-text
+vendor/bin/phpunit --coverage-html coverage
 ```
 
 ## clean code
