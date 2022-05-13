@@ -12,17 +12,7 @@ An experimental and extremely simple php router
 composer require 8ctopus/nano-router
 ```
 
-- redirect all traffic (except existing files) to the router in `.htaccess`
-
-```apache
-RewriteEngine on
-
-# redirect all not existing files to router
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ /index.php [L]
-```
-
-- And finally `index.php`
+- in `index.php`
 
 ```php
 use Oct8pus\NanoRouter\NanoRouter;
@@ -43,6 +33,16 @@ $router->addRouteRegex('*', '#/php(.*)/#', function (array $matches) {
 
 // resolve route
 $router->resolve();
+```
+
+- redirect all traffic (except existing files) to the router in `.htaccess` for those using Apache
+
+```apache
+RewriteEngine on
+
+# redirect all not existing files to router
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ /index.php [L]
 ```
 
 ## run tests
