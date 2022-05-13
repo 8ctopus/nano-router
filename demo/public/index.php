@@ -1,6 +1,6 @@
 <?php
 
-use oct8pus\NanoRouter\NanoRouter;
+use Oct8pus\NanoRouter\NanoRouter;
 use Whoops\Handler\PrettyPageHandler;
 use Whoops\Run;
 

@@ -17,7 +17,7 @@
     },
     "autoload": {
         "psr-4": {
-            "oct8pus\\NanoRouter\\": "src"
+            "Oct8pus\\NanoRouter\\": "src"
         }
     }
 }

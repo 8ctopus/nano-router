@@ -23,7 +23,7 @@ RewriteRule ^ /index.php [L]
 - And finally `index.php`
 
 ```php
-use oct8pus\NanoRouter\NanoRouter;
+use Oct8pus\NanoRouter\NanoRouter;
 
 require_once 'vendor/autoload.php';
 

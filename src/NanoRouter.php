@@ -6,7 +6,7 @@
  * @author 8ctopus <hello@octopuslabs.io>
  */
 
-namespace oct8pus\NanoRouter;
+namespace Oct8pus\NanoRouter;
 
 class NanoRouter
 {

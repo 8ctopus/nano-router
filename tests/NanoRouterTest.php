@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use oct8pus\NanoRouter\NanoRouter;
+use Oct8pus\NanoRouter\NanoRouter;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \oct8pus\NanoRouter\NanoRouter
+ * @covers \Oct8pus\NanoRouter\NanoRouter
  */
 final class NanoRouterTest extends TestCase
 {
