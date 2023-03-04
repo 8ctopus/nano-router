@@ -1,10 +1,6 @@
 <?php
 
-/**
- * Nano router
- *
- * @author 8ctopus <hello@octopuslabs.io>
- */
+declare(strict_types=1);
 
 namespace Oct8pus\NanoRouter;
 
