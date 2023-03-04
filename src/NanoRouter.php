@@ -89,13 +89,13 @@ class NanoRouter
      *
      * @return self
      *
-     * @throws Exception if regex is invalid
+     * @throws NanoRouterException if regex is invalid
      */
     public function addRouteRegex(string $type, string $path, callable $callback) : self
     {
         // validate regex
         if (!is_int(@preg_match($path, ''))) {
-            throw new \Exception('invalid regex');
+            throw new NanoRouterException('invalid regex');
         }
 
         $this->routes[$path] = [

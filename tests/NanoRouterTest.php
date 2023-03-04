@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Oct8pus\NanoRouter\NanoRouter;
+use Oct8pus\NanoRouter\NanoRouterException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -97,7 +98,7 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouter();
 
-        $this->expectException(Exception::class);
+        $this->expectException(NanoRouterException::class);
 
         $router->addRouteRegex('GET', '#/test(.*).php', function () {});
     }
