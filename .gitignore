@@ -1,11 +1,12 @@
 # composer
-/vendor/
 /composer.lock
+/vendor/
 
 # docker
 /docker/
 
 # phpunit
+/.phpunit.cache/
 /.phpunit.result.cache
 /coverage/
 
