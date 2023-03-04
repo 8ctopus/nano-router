@@ -87,9 +87,9 @@ class NanoRouter
      * @param string   $path
      * @param callable $callback
      *
-     * @throws Exception if regex is invalid
-     *
      * @return self
+     *
+     * @throws Exception if regex is invalid
      */
     public function addRouteRegex(string $type, string $path, callable $callback) : self
     {
