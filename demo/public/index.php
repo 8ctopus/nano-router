@@ -16,20 +16,18 @@ $router->addRoute('GET', '/test.php', function () {
     echo 'test';
 });
 
-$router->addRouteRegex('*', '#^/php(.*)/#', function (?array $matches) {
+$router->addRouteRegex('*', '~^/php(.*)/~', function (?array $matches) {
     echo 'phpinfo ' . $matches[1];
 });
 
 $router->addErrorHandler(404, function () {
     http_response_code(404);
-
-    echo 'Page not found';
+    echo 'page not found';
 });
 
 $router->addErrorHandler(405, function () {
     http_response_code(405);
-
-    echo 'Method not allowed';
+    echo 'method not allowed';
 });
 
 // resolve route

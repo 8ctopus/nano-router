@@ -32,9 +32,14 @@ $router->addRoute('GET', '/test.php', function () {
     echo 'test';
 });
 
-// add regex route - do not use / as regex delimiter
-$router->addRouteRegex('*', '#/php(.*)/#', function (array $matches) {
+// add regex route
+$router->addRouteRegex('*', '~/php(.*)/~', function (array $matches) {
     echo 'phpinfo';
+});
+
+$router->addErrorHandler(404, function () {
+    http_response_code(404);
+    echo 'page not found';
 });
 
 // resolve route
