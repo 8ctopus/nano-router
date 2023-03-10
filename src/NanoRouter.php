@@ -31,7 +31,7 @@ class NanoRouter
                         // call route
                         $route['callback']();
                     } else {
-                        $this->error(405);
+                        $this->error(405, $requestPath);
                     }
 
                     return $this;
@@ -44,7 +44,7 @@ class NanoRouter
                         // call route
                         $route['callback']($matches);
                     } else {
-                        $this->error(405);
+                        $this->error(405, $requestPath);
                     }
 
                     return $this;
@@ -52,7 +52,7 @@ class NanoRouter
             }
         }
 
-        $this->error(404);
+        $this->error(404, $requestPath);
         return $this;
     }
 
@@ -124,19 +124,19 @@ class NanoRouter
      * Deal with error
      *
      * @param int $error
+     * @param string $requestPath
      *
      * @return void
      */
-    private function error(int $error) : void
+    private function error(int $error, string $requestPath) : void
     {
         $handler = $this->errors[$error] ?? null;
 
         if ($handler) {
             // call route
-            $handler['callback']();
+            $handler['callback']($requestPath);
         } else {
             http_response_code($error);
         }
     }
 }
-

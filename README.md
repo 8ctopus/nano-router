@@ -37,9 +37,9 @@ $router->addRouteRegex('*', '~/php(.*)/~', function (array $matches) {
     echo 'phpinfo';
 });
 
-$router->addErrorHandler(404, function () {
+$router->addErrorHandler(404, function (string $requestPath) {
     http_response_code(404);
-    echo 'page not found';
+    echo "page not found {$requestPath}";
 });
 
 // resolve route
