@@ -46,7 +46,7 @@ $router->addErrorHandler(404, function (string $requestPath) : Response {
 $response = $router->resolve();
 
 // send response to client
-echo $response->send();
+$response->send();
 ```
 
 - redirect all traffic (except existing files) to the router in `.htaccess` for those using Apache
