@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\NanoRouterException;
+use Oct8pus\NanoRouter\Response;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -21,77 +22,83 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouter();
 
-        $result = false;
+        // 404
+        $this->mockRequest('GET', '/');
+        $response = $router->resolve();
 
-        $router->addRoute('GET', '/test.php', function () use (&$result) {
-            $result = true;
+        $this->assertEquals(404, $response->status());
+        $this->assertEquals('Not Found', $response->body());
+
+        // add index route
+        $router->addRoute('GET', '/', function () : Response {
+            return new Response(200, 'index');
         });
 
-        // success
-        $this->mockRequest('GET', '/test.php');
-        $router->resolve();
-        $this->assertTrue($result);
+        // add another route
+        $router->addRoute('GET', '/hello/', function () : Response {
+            return new Response(200, 'hello');
+        });
 
-        $result = false;
+        $this->mockRequest('GET', '/');
+        $response = $router->resolve();
 
-        // 404
-        $this->mockRequest('GET', '/test2.php');
-        $router->resolve();
-        $this->assertFalse($result);
+        $this->assertEquals(200, $response->status());
+        $this->assertEquals('index', $response->body());
 
-        $result = false;
+        $this->mockRequest('GET', '/hello/');
+        $response = $router->resolve();
+
+        $this->assertEquals(200, $response->status());
+        $this->assertEquals('hello', $response->body());
 
         // method not allowed
-        $this->mockRequest('POST', '/test.php');
-        $router->resolve();
-        $this->assertFalse($result);
+        $this->mockRequest('POST', '/');
+        $response = $router->resolve();
+
+        $this->assertEquals(405, $response->status());
+        $this->assertEquals('Method Not Allowed', $response->body());
     }
 
     public function testRegexRoute() : void
     {
-        $result = false;
-
         $router = (new NanoRouter())
             ->addRouteRegex('GET', '~/test(.*).php~', function () use (&$result) {
-                $result = true;
+                return new Response(200, 'test regex');
             });
 
         $this->mockRequest('GET', '/test.php');
-        $router->resolve();
-        $this->assertTrue($result);
+        $response = $router->resolve();
 
-        $result = false;
+        $this->assertEquals(200, $response->status());
+        $this->assertEquals('test regex', $response->body());
 
         $this->mockRequest('GET', '/test2.php');
-        $router->resolve();
-        $this->assertTrue($result);
+        $response = $router->resolve();
 
-        $result = false;
+        $this->assertEquals(200, $response->status());
+        $this->assertEquals('test regex', $response->body());
 
         $this->mockRequest('GET', '/tes.php');
-        $router->resolve();
-        $this->assertFalse($result);
+        $response = $router->resolve();
 
-        $result = false;
+        $this->assertEquals(new Response(404, 'Not Found'), $response);
 
         $this->mockRequest('POST', '/test.php');
-        $router->resolve();
-        $this->assertFalse($result);
+        $response = $router->resolve();
+
+        $this->assertEquals(new Response(405, 'Method Not Allowed'), $response);
     }
 
     public function testErrorHandler() : void
     {
         $router = new NanoRouter();
 
-        $result = false;
-
-        $router->addErrorHandler(404, function () use (&$result) {
-            $result = true;
+        $router->addErrorHandler(404, function () : Response {
+            return new Response(404, 'This page does not exist on the server');
         });
 
         $this->mockRequest('GET', '/test.php');
-        $router->resolve();
-        $this->assertTrue($result);
+        $this->assertEquals(new Response(404, 'This page does not exist on the server'), $router->resolve());
     }
 
     public function testInvalidRegexRoute() : void

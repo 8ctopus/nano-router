@@ -18,9 +18,9 @@ class NanoRouter
     /**
      * Resolve route
      *
-     * @return self
+     * @return Response
      */
-    public function resolve() : self
+    public function resolve() : Response
     {
         $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -29,12 +29,10 @@ class NanoRouter
                 if ($requestPath === $routePath) {
                     if (in_array($route['type'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
                         // call route
-                        $route['callback']();
+                        return $route['callback']();
                     } else {
-                        $this->error(405, $requestPath);
+                        return $this->error(405, $requestPath);
                     }
-
-                    return $this;
                 }
             } else {
                 $matches = null;
@@ -42,18 +40,15 @@ class NanoRouter
                 if (preg_match($routePath, $requestPath, $matches) === 1) {
                     if (in_array($route['type'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
                         // call route
-                        $route['callback']($matches);
+                        return $route['callback']($matches);
                     } else {
-                        $this->error(405, $requestPath);
+                        return $this->error(405, $requestPath);
                     }
-
-                    return $this;
                 }
             }
         }
 
-        $this->error(404, $requestPath);
-        return $this;
+        return $this->error(404, $requestPath);
     }
 
     /**
@@ -126,17 +121,49 @@ class NanoRouter
      * @param int $error
      * @param string $requestPath
      *
-     * @return void
+     * @return Response
      */
-    private function error(int $error, string $requestPath) : void
+    private function error(int $error, string $requestPath) : Response
     {
-        $handler = $this->errors[$error] ?? null;
+        $handler = array_key_exists($error, $this->errors) ? $this->errors[$error] : null;
 
         if ($handler) {
             // call route
-            $handler['callback']($requestPath);
+            return $handler['callback']($requestPath);
         } else {
-            http_response_code($error);
+            $messages = [
+                400 => 'Bad Request',
+                401 => 'Unauthorized',
+                402 => 'Payment Required',
+                403 => 'Forbidden',
+                404 => 'Not Found',
+                405 => 'Method Not Allowed',
+                406 => 'Not Acceptable',
+                407 => 'Proxy Authentication Required',
+                408 => 'Request Timeout',
+                409 => 'Conflict',
+                410 => 'Gone',
+                411 => 'Length Required',
+                412 => 'Precondition Failed',
+                413 => 'Payload Too Large',
+                414 => 'URI Too Long',
+                415 => 'Unsupported Media Type',
+                416 => 'Range Not Satisfiable',
+                417 => 'Expectation Failed',
+                418 => 'I\'m a teapot (RFC 2324, RFC 7168)',
+                421 => 'Misdirected Request',
+                422 => 'Unprocessable Entity',
+                423 => 'Locked (WebDAV; RFC 4918)',
+                424 => 'Failed Dependency (WebDAV; RFC 4918)',
+                425 => 'Too Early (RFC 8470)',
+                426 => 'Upgrade Required',
+                428 => 'Precondition Required (RFC 6585)',
+                429 => 'Too Many Requests (RFC 6585)',
+                431 => 'Request Header Fields Too Large (RFC 6585)',
+                451 => 'Unavailable For Legal Reasons (RFC 7725)',
+            ];
+
+            return new Response($error, $messages[$error]);
         }
     }
 }
