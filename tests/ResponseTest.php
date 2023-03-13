@@ -17,24 +17,24 @@ final class ResponseTest extends TestCase
     {
         $response = new Response(200, 'hello');
 
-        $this->assertEquals(200, $response->status());
-        $this->assertEquals('hello', $response->body());
+        static::assertSame(200, $response->status());
+        static::assertSame('hello', $response->body());
 
         $response->setStatus(201);
         $response->setBody('world');
 
-        $this->assertEquals(201, $response->status());
-        $this->assertEquals('world', $response->body());
+        static::assertSame(201, $response->status());
+        static::assertSame('world', $response->body());
     }
 
     public function testResponseError() : void
     {
         $response = new Response(404);
 
-        $this->assertEquals(404, $response->status());
-        $this->assertEquals('Not Found', $response->body());
+        static::assertSame(404, $response->status());
+        static::assertSame('Not Found', $response->body());
 
-        $this->assertEquals(new Response(410, 'custom message'), new Response(410, 'custom message'));
+        static::assertEquals(new Response(410, 'custom message'), new Response(410, 'custom message'));
     }
 
     public function testToString() : void
@@ -47,7 +47,7 @@ final class ResponseTest extends TestCase
 
         STR;
 
-        $this->assertEquals($expected, $result);
+        static::assertSame($expected, $result);
     }
 
     public function testSend() : void

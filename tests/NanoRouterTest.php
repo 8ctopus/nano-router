@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
  */
 final class NanoRouterTest extends TestCase
 {
-    public function setUp() : void
+    protected function setUp() : void
     {
         parent::setUp();
     }
@@ -27,8 +27,8 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('GET', '/');
         $response = $router->resolve();
 
-        $this->assertEquals(404, $response->status());
-        $this->assertEquals('Not Found', $response->body());
+        static::assertSame(404, $response->status());
+        static::assertSame('Not Found', $response->body());
 
         // add index route
         $router->addRoute('GET', '/', function () : Response {
@@ -43,21 +43,21 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('GET', '/');
         $response = $router->resolve();
 
-        $this->assertEquals(200, $response->status());
-        $this->assertEquals('index', $response->body());
+        static::assertSame(200, $response->status());
+        static::assertSame('index', $response->body());
 
         $this->mockRequest('GET', '/hello/');
         $response = $router->resolve();
 
-        $this->assertEquals(200, $response->status());
-        $this->assertEquals('hello', $response->body());
+        static::assertSame(200, $response->status());
+        static::assertSame('hello', $response->body());
 
         // method not allowed
         $this->mockRequest('POST', '/');
         $response = $router->resolve();
 
-        $this->assertEquals(405, $response->status());
-        $this->assertEquals('Method Not Allowed', $response->body());
+        static::assertSame(405, $response->status());
+        static::assertSame('Method Not Allowed', $response->body());
     }
 
     public function testRegexRoute() : void
@@ -70,24 +70,24 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('GET', '/test.php');
         $response = $router->resolve();
 
-        $this->assertEquals(200, $response->status());
-        $this->assertEquals('test regex', $response->body());
+        static::assertSame(200, $response->status());
+        static::assertSame('test regex', $response->body());
 
         $this->mockRequest('GET', '/test2.php');
         $response = $router->resolve();
 
-        $this->assertEquals(200, $response->status());
-        $this->assertEquals('test regex', $response->body());
+        static::assertSame(200, $response->status());
+        static::assertSame('test regex', $response->body());
 
         $this->mockRequest('GET', '/tes.php');
         $response = $router->resolve();
 
-        $this->assertEquals(new Response(404, 'Not Found'), $response);
+        static::assertEquals(new Response(404, 'Not Found'), $response);
 
         $this->mockRequest('POST', '/test.php');
         $response = $router->resolve();
 
-        $this->assertEquals(new Response(405, 'Method Not Allowed'), $response);
+        static::assertEquals(new Response(405, 'Method Not Allowed'), $response);
     }
 
     public function testErrorHandler() : void
@@ -99,7 +99,7 @@ final class NanoRouterTest extends TestCase
         });
 
         $this->mockRequest('GET', '/test.php');
-        $this->assertEquals(new Response(404, 'This page does not exist on the server'), $router->resolve());
+        static::assertEquals(new Response(404, 'This page does not exist on the server'), $router->resolve());
     }
 
     public function testInvalidRegexRoute() : void
@@ -108,7 +108,7 @@ final class NanoRouterTest extends TestCase
 
         $this->expectException(NanoRouterException::class);
 
-        $router->addRouteRegex('GET', '~/test(.*).php', function () {});
+        $router->addRouteRegex('GET', '~/test(.*).php', function (): void {});
     }
 
     private function mockRequest($method, $uri) : void
