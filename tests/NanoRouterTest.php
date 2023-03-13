@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
+ *
  * @covers \Oct8pus\NanoRouter\NanoRouter
  */
 final class NanoRouterTest extends TestCase

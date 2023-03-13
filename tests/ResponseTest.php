@@ -41,7 +41,7 @@ final class ResponseTest extends TestCase
     {
         $result = (string) new Response(200, 'hello world');
 
-        $expected = <<<STR
+        $expected = <<<'STR'
             status: 200
             body: hello world
 

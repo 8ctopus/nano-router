@@ -118,7 +118,7 @@ class NanoRouter
     /**
      * Deal with error
      *
-     * @param int $error
+     * @param int    $error
      * @param string $requestPath
      *
      * @return Response

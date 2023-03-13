@@ -56,6 +56,15 @@ class Response
         }
     }
 
+    public function __toString() : string
+    {
+        return <<<STR
+            status: {$this->status}
+            body: {$this->body}
+
+        STR;
+    }
+
     public function send() : self
     {
         if ($this->sent) {
@@ -92,14 +101,5 @@ class Response
     public function setBody(string $body) : void
     {
         $this->body = $body;
-    }
-
-    public function __toString() : string
-    {
-        return <<<STR
-            status: {$this->status}
-            body: {$this->body}
-
-        STR;
     }
 }
