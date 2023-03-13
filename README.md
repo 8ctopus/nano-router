@@ -22,28 +22,31 @@ composer require 8ctopus/nano-router
 
 ```php
 use Oct8pus\NanoRouter\NanoRouter;
+use Oct8pus\NanoRouter\Response;
 
 require_once 'vendor/autoload.php';
 
 $router = new NanoRouter();
 
 // add simple route
-$router->addRoute('GET', '/test.php', function () {
-    echo 'test';
+$router->addRoute('GET', '/test.php', function () : Response {
+    return new Response(200, 'test');
 });
 
 // add regex route
-$router->addRouteRegex('*', '~/php(.*)/~', function (array $matches) {
-    echo 'phpinfo';
+$router->addRouteRegex('*', '~/php(.*)/~', function (array $matches) : Response {
+    return new Response(200, 'phpinfo');
 });
 
-$router->addErrorHandler(404, function (string $requestPath) {
-    http_response_code(404);
-    echo "page not found {$requestPath}";
+$router->addErrorHandler(404, function (string $requestPath) : Response {
+    return new Response(404, "page not found {$requestPath}");
 });
 
 // resolve route
-$router->resolve();
+$response = $router->resolve();
+
+// send response to client
+echo $response->send();
 ```
 
 - redirect all traffic (except existing files) to the router in `.htaccess` for those using Apache
@@ -58,12 +61,8 @@ RewriteRule ^ /index.php [L]
 
 ## run tests
 
-```sh
-vendor/bin/phpunit --coverage-html coverage
-```
+    composer test
 
 ## clean code
 
-```sh
-vendor/bin/php-cs-fixer fix
-```
+    composer fix(-risky)
