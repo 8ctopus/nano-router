@@ -52,14 +52,14 @@ final class ResponseTest extends TestCase
 
     public function testSend() : void
     {
-        $this->expectOutputString('hello world');
+        static::expectOutputString('hello world');
         $response = new Response(200, 'hello world');
         $response->send();
     }
 
     public function testReSend() : void
     {
-        $this->expectException(NanoRouterException::class, 'Response already sent');
+        static::expectException(NanoRouterException::class, 'Response already sent');
 
         (new Response(200, 'hello world'))
             ->send()

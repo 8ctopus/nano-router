@@ -106,7 +106,7 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouter();
 
-        $this->expectException(NanoRouterException::class);
+        static::expectException(NanoRouterException::class);
 
         $router->addRouteRegex('GET', '~/test(.*).php', function (): void {});
     }
