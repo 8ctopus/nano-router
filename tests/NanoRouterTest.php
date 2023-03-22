@@ -108,7 +108,7 @@ final class NanoRouterTest extends TestCase
 
         static::expectException(NanoRouterException::class);
 
-        $router->addRouteRegex('GET', '~/test(.*).php', function (): void {});
+        $router->addRouteRegex('GET', '~/test(.*).php', function () : void {});
     }
 
     private function mockRequest($method, $uri) : void

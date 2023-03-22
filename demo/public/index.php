@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\Response;
 use Whoops\Handler\PrettyPageHandler;
