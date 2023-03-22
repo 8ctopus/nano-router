@@ -63,7 +63,7 @@ final class NanoRouterTest extends TestCase
     public function testRegexRoute() : void
     {
         $router = (new NanoRouter())
-            ->addRouteRegex('GET', '~/test(.*).php~', function () use (&$result) {
+            ->addRouteRegex('GET', '~/test(.*).php~', function () {
                 return new Response(200, 'test regex');
             });
 
