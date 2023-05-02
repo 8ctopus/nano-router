@@ -15,8 +15,22 @@ $whoops->register();
 
 $router = new NanoRouter();
 
-$router->addRoute('GET', '/test.php', function () : Response {
-    return new Response(200, 'test');
+$router->addRoute('GET', '/', function () : Response {
+    $body = <<<BODY
+    <html>
+    <body>
+    <h1>Hello World!</h1>
+
+    Here's a link to the <a href="/test/">test page</a>!
+    </body>
+    </html>
+    BODY;
+
+    return new Response(200, $body);
+});
+
+$router->addRoute('GET', '/test/', function () : Response {
+    return new Response(200, 'This is the test page');
 });
 
 $router->addRouteRegex('*', '~^/php(.*)/~', function (?array $matches) : Response {
@@ -32,4 +46,6 @@ $router->addErrorHandler(405, function () : Response {
 });
 
 // resolve route
-$router->resolve();
+$response = $router->resolve();
+
+$response->send();
