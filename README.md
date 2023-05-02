@@ -8,15 +8,11 @@
 ![code coverage badge](https://raw.githubusercontent.com/8ctopus/nano-router/image-data/coverage.svg)
 ![lines of code](https://raw.githubusercontent.com/8ctopus/nano-router/image-data/lines.svg)
 
-An experimental and extremely simple php router
+An experimental and extremely simple router for php
 
 ## install
 
--
-
-```sh
-composer require 8ctopus/nano-router
-```
+- `composer require 8ctopus/nano-router`
 
 - in `index.php`
 
@@ -42,7 +38,7 @@ $router->addErrorHandler(404, function (string $requestPath) : Response {
     return new Response(404, "page not found {$requestPath}");
 });
 
-// resolve route
+// resolve request
 $response = $router->resolve();
 
 // send response to client
@@ -57,6 +53,14 @@ RewriteEngine on
 # redirect all not existing files to router
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ /index.php [L]
+```
+
+and for nginx (untested)
+
+```nginx
+location / {
+    try_files $uri $uri/ /index.php$is_args$args;
+}
 ```
 
 ## run tests
