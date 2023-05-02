@@ -65,6 +65,13 @@ class Response
         STR;
     }
 
+    /**
+     * Send response
+     *
+     * @return self
+     *
+     * @throws NanoRouterException
+     */
     public function send() : self
     {
         if ($this->sent) {
