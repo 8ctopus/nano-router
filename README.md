@@ -12,9 +12,9 @@ An experimental and extremely simple router for php
 
 ## demo
 
-The demo in the `demo/public` directory, start it with `php -S localhost:80` and open your browser at `http://localhost`.
+To view the demo, run `php -S localhost:80 -t demo/public/` and open your browser at `http://localhost`.
 
-Alternatively the demo can also be run using `docker-compose up &`.
+The demo can also be started using Docker `docker-compose up &`.
 
 ## install
 
