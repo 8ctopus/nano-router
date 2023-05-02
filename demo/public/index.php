@@ -20,8 +20,7 @@ $router->addRoute('GET', '/', function () : Response {
     <html>
     <body>
     <h1>Hello World!</h1>
-
-    Here's a link to the <a href="/test/">test page</a>!
+    <p>You're on the index page.Here's a link to the <a href="/test/">test page</a>.</p>
     </body>
     </html>
     BODY;
@@ -30,7 +29,16 @@ $router->addRoute('GET', '/', function () : Response {
 });
 
 $router->addRoute('GET', '/test/', function () : Response {
-    return new Response(200, 'This is the test page');
+    $body = <<<BODY
+    <html>
+    <body>
+    <h1>You're on test page</h1>
+    <p>Here's a link to <a href="/">return to the index</a>!</p>
+    </body>
+    </html>
+    BODY;
+
+    return new Response(200, $body);
 });
 
 $router->addRouteRegex('*', '~^/php(.*)/~', function (?array $matches) : Response {
