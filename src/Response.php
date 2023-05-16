@@ -100,11 +100,11 @@ class Response
 
         $this->sent = true;
 
-        http_response_code($this->status);
-
         foreach ($this->headers as $name => $value) {
-            header("{$name}: {$value}");
+            $this->header("{$name}: {$value}");
         }
+
+        http_response_code($this->status);
 
         echo $this->body;
 
@@ -152,6 +152,12 @@ class Response
     public function setBody(string $body) : self
     {
         $this->body = $body;
+        return $this;
+    }
+
+    protected function header(string $header) : self
+    {
+        header($header);
         return $this;
     }
 }

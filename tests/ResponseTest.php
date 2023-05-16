@@ -70,12 +70,14 @@ final class ResponseTest extends TestCase
 
     public function testSend() : void
     {
-        static::expectOutputString('{"title": "hello world"}');
+        static::expectOutputString(<<<OUTPUT
+        header: content-type: application/json
+        {"title": "hello world"}
+        OUTPUT);
 
-        $response = new Response(200, '{"title": "hello world"}', ['content-type' => 'application/json']);
+        $response = new MockResponse(200, '{"title": "hello world"}', ['content-type' => 'application/json']);
         $response->send();
 
-        static::assertEquals(['content-type: application/json'], xdebug_get_headers());
     }
 
     public function testReSend() : void
@@ -85,5 +87,14 @@ final class ResponseTest extends TestCase
         (new Response(200, 'hello world', []))
             ->send()
             ->send();
+    }
+}
+
+class MockResponse extends Response
+{
+    protected function header(string $header) : self
+    {
+        echo "header: {$header}\n";
+        return $this;
     }
 }
