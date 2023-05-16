@@ -9,11 +9,19 @@ class Response
     private array $messages;
 
     private int $status;
+    private array $headers;
     private string $body;
 
     private bool $sent;
 
-    public function __construct(int $status = 200, string $body = '')
+    /**
+     * Constructor
+     *
+     * @param int    $status
+     * @param array  $headers
+     * @param string $body
+     */
+    public function __construct(int $status = 200, array $headers = [], string $body = '')
     {
         $this->messages = [
             400 => 'Bad Request',
@@ -47,20 +55,32 @@ class Response
             451 => 'Unavailable For Legal Reasons (RFC 7725)',
         ];
 
-        $this->setBody($body);
-        $this->setStatus($status);
         $this->sent = false;
 
+        $this->setStatus($status);
+
+        $this->headers = $headers;
+
         if (empty($body) && $status >= 400) {
-            $this->body = $this->messages[$status];
+            $body = $this->messages[$status];
         }
+
+        $this->setBody($body);
     }
 
     public function __toString() : string
     {
+        $headers = "";
+
+        foreach ($this->headers as $name => $value) {
+            $headers .= "    {$name}: {$value}\n";
+        }
+
         return <<<STR
-            status: {$this->status}
-            body: {$this->body}
+        status: {$this->status}
+        headers:
+        {$headers}body:
+            {$this->body}
 
         STR;
     }
@@ -81,6 +101,11 @@ class Response
         $this->sent = true;
 
         http_response_code($this->status);
+
+        foreach ($this->headers as $name => $value) {
+            header("{$name}: {$value}");
+        }
+
         echo $this->body;
 
         return $this;
@@ -91,13 +116,32 @@ class Response
         return $this->status;
     }
 
-    public function setStatus(int $status) : void
+    public function setStatus(int $status) : self
     {
         $this->status = $status;
 
         if (empty($this->body) && $status >= 400) {
             $this->body = $this->messages[$status];
         }
+
+        return $this;
+    }
+
+    public function headers() : array
+    {
+        return $this->headers;
+    }
+
+    public function setHeader(string $name, string $value) : self
+    {
+        $this->headers[$name] = $value;
+        return $this;
+    }
+
+    public function removeHeader(string $name) : self
+    {
+        unset($this->headers[$name]);
+        return $this;
     }
 
     public function body() : string
@@ -105,8 +149,9 @@ class Response
         return $this->body;
     }
 
-    public function setBody(string $body) : void
+    public function setBody(string $body) : self
     {
         $this->body = $body;
+        return $this;
     }
 }

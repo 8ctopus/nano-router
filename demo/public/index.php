@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Demo;
+
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\Response;
 use Whoops\Handler\PrettyPageHandler;
@@ -9,9 +11,9 @@ use Whoops\Run;
 
 require_once '../../vendor/autoload.php';
 
-$whoops = new Run();
-$whoops->pushHandler(new PrettyPageHandler());
-$whoops->register();
+(new Run())
+    ->pushHandler(new PrettyPageHandler())
+    ->register();
 
 $router = new NanoRouter();
 
