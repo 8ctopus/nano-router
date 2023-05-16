@@ -32,12 +32,12 @@ final class NanoRouterTest extends TestCase
 
         // add index route
         $router->addRoute('GET', '/', function () : Response {
-            return new Response(200, [], 'index');
+            return new Response(200, 'index');
         });
 
         // add another route
         $router->addRoute('GET', '/hello/', function () : Response {
-            return new Response(200, [], 'hello');
+            return new Response(200, 'hello');
         });
 
         $this->mockRequest('GET', '/');
@@ -64,7 +64,7 @@ final class NanoRouterTest extends TestCase
     {
         $router = (new NanoRouter())
             ->addRouteRegex('GET', '~/test(.*).php~', function () {
-                return new Response(200, [], 'test regex');
+                return new Response(200, 'test regex');
             });
 
         $this->mockRequest('GET', '/test.php');
@@ -82,12 +82,12 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('GET', '/tes.php');
         $response = $router->resolve();
 
-        static::assertEquals(new Response(404, [], 'Not Found'), $response);
+        static::assertEquals(new Response(404, 'Not Found'), $response);
 
         $this->mockRequest('POST', '/test.php');
         $response = $router->resolve();
 
-        static::assertEquals(new Response(405, [], 'Method Not Allowed'), $response);
+        static::assertEquals(new Response(405, 'Method Not Allowed'), $response);
     }
 
     public function testErrorHandler() : void
@@ -95,11 +95,11 @@ final class NanoRouterTest extends TestCase
         $router = new NanoRouter();
 
         $router->addErrorHandler(404, function () : Response {
-            return new Response(404, [], 'This page does not exist on the server');
+            return new Response(404, 'This page does not exist on the server');
         });
 
         $this->mockRequest('GET', '/test.php');
-        static::assertEquals(new Response(404, [], 'This page does not exist on the server'), $router->resolve());
+        static::assertEquals(new Response(404, 'This page does not exist on the server'), $router->resolve());
     }
 
     public function testInvalidRegexRoute() : void

@@ -18,10 +18,10 @@ class Response
      * Constructor
      *
      * @param int    $status
-     * @param array  $headers
      * @param string $body
+     * @param array  $headers
      */
-    public function __construct(int $status = 200, array $headers = [], string $body = '')
+    public function __construct(int $status = 200, string $body = '', array $headers = [])
     {
         $this->messages = [
             400 => 'Bad Request',
@@ -59,13 +59,13 @@ class Response
 
         $this->setStatus($status);
 
-        $this->headers = $headers;
-
         if (empty($body) && $status >= 400) {
             $body = $this->messages[$status];
         }
 
         $this->setBody($body);
+
+        $this->headers = $headers;
     }
 
     public function __toString() : string

@@ -15,7 +15,7 @@ final class ResponseTest extends TestCase
 {
     public function testResponse() : void
     {
-        $response = new Response(200, [], 'hello');
+        $response = new Response(200, 'hello');
 
         static::assertSame(200, $response->status());
         static::assertSame('hello', $response->body());
@@ -34,12 +34,12 @@ final class ResponseTest extends TestCase
         static::assertSame(404, $response->status());
         static::assertSame('Not Found', $response->body());
 
-        static::assertEquals(new Response(410, [], 'custom message'), new Response(410, [], 'custom message'));
+        static::assertEquals(new Response(410, 'custom message'), new Response(410, 'custom message'));
     }
 
     public function testToString() : void
     {
-        $result = (string) new Response(200, ['content-type' => 'application/json'], '{"title": "hello world"}');
+        $result = (string) new Response(200, '{"title": "hello world"}', ['content-type' => 'application/json']);
 
         $expected = <<<'STR'
         status: 200
@@ -55,7 +55,7 @@ final class ResponseTest extends TestCase
 
     public function testHeaders() : void
     {
-        $response = new Response(301, ['location' => 'http://localhost'], '');
+        $response = new Response(301, '', ['location' => 'http://localhost']);
 
         static::assertEquals(['location' => 'http://localhost'], $response->headers());
 
@@ -72,7 +72,7 @@ final class ResponseTest extends TestCase
     {
         static::expectOutputString('{"title": "hello world"}');
 
-        $response = new Response(200, ['content-type' => 'application/json'], '{"title": "hello world"}');
+        $response = new Response(200, '{"title": "hello world"}', ['content-type' => 'application/json']);
         $response->send();
 
         static::assertEquals(['content-type: application/json'], xdebug_get_headers());
@@ -82,7 +82,7 @@ final class ResponseTest extends TestCase
     {
         static::expectException(NanoRouterException::class, 'Response already sent');
 
-        (new Response(200, [], 'hello world'))
+        (new Response(200, 'hello world', []))
             ->send()
             ->send();
     }
