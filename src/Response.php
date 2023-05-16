@@ -157,7 +157,9 @@ class Response
 
     protected function header(string $header) : self
     {
+        // @codeCoverageIgnoreStart
         header($header);
         return $this;
+        // @codeCoverageIgnoreEnd
     }
 }
