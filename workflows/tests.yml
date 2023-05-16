@@ -1,9 +1,18 @@
 name: tests
 
 on:
-  push:
+  pull_request:
     paths:
       - 'src/**'
+      - 'tests/**'
+      - composer.json
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - composer.json
 
 env:
   COMPOSER_ROOT_VERSION: 1.99
@@ -53,33 +62,4 @@ jobs:
 
       - name: Run tests
         timeout-minutes: 3
-        run: vendor/bin/phpunit --coverage-clover clover.xml
-
-      - name: Get lines of code (more sophisticated)
-        id: scc
-        uses: iryanbell/scc-docker-action@v1.0.2
-        with:
-          args: ${{ env.workspace }} -i php --exclude-dir vendor --format json src
-
-      - name: Make lines of code badge
-        uses: emibcn/badge-action@v2.0.2
-        with:
-          label: Lines of Code
-          status: ${{ fromJson(steps.scc.outputs.scc)[0].Code }}
-          color: 'blue'
-          path: .github/lines.svg
-
-      - name: Make code coverage badge
-        uses: timkrase/phpunit-coverage-badge@v1.2.1
-        with:
-          coverage_badge_path: .github/coverage.svg
-          push_badge: false
-
-      - name: Git push badges to image-data branch
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          publish_dir: .github
-          publish_branch: image-data
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+        run: vendor/bin/phpunit
