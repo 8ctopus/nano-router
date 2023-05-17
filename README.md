@@ -72,6 +72,9 @@ $router
         $stream->write("page not found {$requestPath}");
 
         return new Response(404, [], $stream);
+    })
+    ->addMiddleware('*', '~(.*)~', function (array $matches, ResponseInterface $response) : ResponseInterface {
+        return $response->withHeader('X-Powered-By', '8ctopus');
     });
 
 // resolve request
