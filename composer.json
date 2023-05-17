@@ -1,8 +1,8 @@
 {
     "name": "8ctopus/nano-router",
     "type": "library",
-    "description": "An experimental php router.",
-    "keywords": ["router"],
+    "description": "An experimental psr-7 router",
+    "keywords": ["router", "psr-7"],
     "homepage": "https://github.com/8ctopus/nano-router",
     "license": "MIT",
     "authors": [
