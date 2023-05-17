@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * This is not a proper PSR-7 Response implementation - DO NOT USE IT
+ */
+
 declare(strict_types=1);
 
 namespace Oct8pus\NanoRouter;
