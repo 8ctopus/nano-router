@@ -99,7 +99,7 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('POST', '/test.php');
         $response = $router->resolve();
 
-        static::assertEquals(new Response(405), $response);
+        static::assertSame(405, $response->getStatusCode());
     }
 
     public function testErrorHandler() : void
@@ -116,9 +116,9 @@ final class NanoRouterTest extends TestCase
 
         $response = $router->resolve();
 
-        static::assertEquals(404, $response->getStatusCode());
-        static::assertEquals('Not Found', $response->getReasonPhrase());
-        static::assertEquals('This page does not exist on the server', (string) $response->getBody());
+        static::assertSame(404, $response->getStatusCode());
+        static::assertSame('Not Found', $response->getReasonPhrase());
+        static::assertSame('This page does not exist on the server', (string) $response->getBody());
     }
 
     public function testInvalidRegexRoute() : void

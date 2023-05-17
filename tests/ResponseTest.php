@@ -37,7 +37,10 @@ final class ResponseTest extends TestCase
         static::assertSame('', $response->getBodyText());
         static::assertSame('Not Found', $response->getReasonPhrase());
 
-        static::assertEquals(new Response(410, 'custom message'), new Response(410, 'custom message'));
+        $response = new Response(410, 'custom message');
+
+        static::assertSame(410, $response->getStatusCode());
+        static::assertSame('custom message', $response->getBodyText());
     }
 
     public function testToString() : void
@@ -60,15 +63,15 @@ final class ResponseTest extends TestCase
     {
         $response = new Response(301, '', ['location' => 'http://localhost']);
 
-        static::assertEquals(['location' => 'http://localhost'], $response->getHeaders());
+        static::assertSame(['location' => 'http://localhost'], $response->getHeaders());
 
         $response = $response->withoutHeader('location');
 
-        static::assertEquals([], $response->getHeaders());
+        static::assertSame([], $response->getHeaders());
 
         $response->withHeader('content-type', 'application/json');
 
-        static::assertEquals(['content-type' => 'application/json'], $response->getHeaders());
+        static::assertSame(['content-type' => 'application/json'], $response->getHeaders());
     }
 
     public function testSend() : void
