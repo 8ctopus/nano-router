@@ -8,7 +8,7 @@
 ![code coverage badge](https://raw.githubusercontent.com/8ctopus/nano-router/image-data/coverage.svg)
 ![lines of code](https://raw.githubusercontent.com/8ctopus/nano-router/image-data/lines.svg)
 
-An experimental and extremely simple router for php
+An experimental and extremely simple PSR-7 router
 
 ## demo
 
@@ -19,37 +19,6 @@ The demo can also be started using Docker `docker-compose up &`.
 ## install
 
 - `composer require 8ctopus/nano-router`
-
-- in `index.php`
-
-```php
-use Oct8pus\NanoRouter\NanoRouter;
-use Oct8pus\NanoRouter\Response;
-
-require_once 'vendor/autoload.php';
-
-$router = new NanoRouter();
-
-// add simple route
-$router->addRoute('GET', '/test.php', function () : Response {
-    return new Response(200, 'test');
-});
-
-// add regex route
-$router->addRouteRegex('*', '~/php(.*)/~', function (array $matches) : Response {
-    return new Response(200, 'phpinfo');
-});
-
-$router->addErrorHandler(404, function (string $requestPath) : Response {
-    return new Response(404, "page not found {$requestPath}");
-});
-
-// resolve request
-$response = $router->resolve();
-
-// send response to client
-$response->send();
-```
 
 - redirect all traffic (except existing files) to the router in `.htaccess` for those using Apache
 
@@ -67,6 +36,40 @@ and for nginx (untested)
 location / {
     try_files $uri $uri/ /index.php$is_args$args;
 }
+```
+
+- create `index.php`
+
+```php
+// use any PSR-7 implementation
+use HttpSoft\Message\Response;
+use HttpSoft\Emitter\SapiEmitter;
+use Oct8pus\NanoRouter\NanoRouter;
+use Psr\Http\Message\ResponseInterface;
+
+require_once 'vendor/autoload.php';
+
+$router = new NanoRouter(Response::class);
+
+$router
+    // add simple route
+    ->addRoute('GET', '/test.php', function () : ResponseInterface {
+        return new Response(200, 'test');
+    })
+    // add regex route
+    ->addRouteRegex('*', '~/php(.*)/~', function (array $matches) : ResponseInterface {
+        return new Response(200, 'phpinfo');
+    })
+    ->addErrorHandler(404, function (string $requestPath) : ResponseInterface {
+        return new Response(404, "page not found {$requestPath}");
+    });
+
+// resolve request
+$response = $router->resolve();
+
+// send response to client
+(new SapiEmitter())
+    ->emit($response);
 ```
 
 ## run tests
