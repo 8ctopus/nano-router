@@ -73,7 +73,7 @@ $router
 
         return new Response(404, [], $stream);
     })
-    ->addMiddleware('*', '~(.*)~', function (ResponseInterface $response) : ResponseInterface {
+    ->addMiddleware('*', '~(.*)~', 'post', function (ResponseInterface $response) : ResponseInterface {
         return $response->withHeader('X-Powered-By', '8ctopus');
     });
 
