@@ -218,7 +218,7 @@ class Response implements ResponseInterface
 
     public function getProtocolVersion(): string
     {
-        return $this->protocolVersion;
+        throw new Exception('not implemented');
     }
 
     public function withProtocolVersion(string $version) : self
