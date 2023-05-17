@@ -84,7 +84,7 @@ class Response implements ResponseInterface
     private string $reasonPhrase;
 
     private array $headers;
-    private string|StreamInterface $body;
+    private string $body;
 
     private bool $sent;
 
