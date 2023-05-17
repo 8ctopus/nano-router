@@ -27,8 +27,12 @@ $router->addRoute('GET', '/', function () : ResponseInterface {
     <html>
     <body>
     <h1>Hello World!</h1>
-    <p>You're on the index page. Here's a link to the <a href="/test/">test page</a>.</p>
-    <p>This is a <a href="/not-found/">broken link</a> for testing purposes.</p>
+    <p>You're on the index page. Here's a list of links: </p>
+    <ul>
+    <li>link to the <a href="/test/">test page</a></li>
+    <li>link to <a href="/phpinfo/">one</a> of the php.* pages</li>
+    <li>This is a <a href="/not-found/">broken link</a> for testing purposes.</li>
+    </ul>
     </body>
     </html>
     BODY);
@@ -52,7 +56,7 @@ $router->addRoute('GET', '/test/', function () : ResponseInterface {
 
 $router->addRouteRegex('*', '~^/php(.*)/~', function (?array $matches) : ResponseInterface {
     $stream = new Stream();
-    $stream->write('phpinfo ' . $matches[1]);
+    $stream->write('php - regex pattern - ' . $matches[1]);
 
     return new Response(200, [], $stream);
 });
