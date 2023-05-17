@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Demo;
 
-// use any PSR-7 implementation
-use HttpSoft\Message\Response;
-use HttpSoft\Message\Stream;
-use HttpSoft\Emitter\SapiEmitter;
 use Oct8pus\NanoRouter\NanoRouter;
+use Oct8pus\NanoRouter\Response;
 use Psr\Http\Message\ResponseInterface;
 use Whoops\Handler\PrettyPageHandler;
 use Whoops\Run;
@@ -22,8 +19,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 $router = new NanoRouter(Response::class);
 
 $router->addRoute('GET', '/', function () : ResponseInterface {
-    $stream = new Stream();
-    $stream->write(<<<BODY
+    $body = <<<BODY
     <html>
     <body>
     <h1>Hello World!</h1>
@@ -31,43 +27,38 @@ $router->addRoute('GET', '/', function () : ResponseInterface {
     <p>This is a <a href="/not-found/">broken link</a> for testing purposes.</p>
     </body>
     </html>
-    BODY);
+    BODY;
 
-    return new Response(200, [], $stream);
+    return new Response(200, $body);
 });
 
 $router->addRoute('GET', '/test/', function () : ResponseInterface {
-    $stream = new Stream();
-    $stream->write(<<<BODY
+    $body = <<<BODY
     <html>
     <body>
     <h1>You're on test page</h1>
     <p>Here's a link to <a href="/">return to the index</a>!</p>
     </body>
     </html>
-    BODY);
+    BODY;
 
-    return new Response(200, [], $stream);
+    return new Response(200, $body);
 });
 
 $router->addRouteRegex('*', '~^/php(.*)/~', function (?array $matches) : ResponseInterface {
-    $stream = new Stream();
-    $stream->write('phpinfo ' . $matches[1]);
-
-    return new Response(200, [], $stream);
+    return new Response(200, 'phpinfo ' . $matches[1]);
 });
 
 $router->addErrorHandler(404, function () : ResponseInterface {
-    $stream = new Stream();
-    $stream->write(<<<BODY
+    $body = <<<BODY
     <html>
     <body>
     <h1>Sorry we lost that page</h1>
     </body>
     </html>
-    BODY);
+    BODY;
 
-    return new Response(404, [], $stream);
+    return new Response(404, $body);
 });
 
 $router->addErrorHandler(405, function () : ResponseInterface {
@@ -77,5 +68,4 @@ $router->addErrorHandler(405, function () : ResponseInterface {
 // resolve route
 $response = $router->resolve();
 
-(new SapiEmitter())
-    ->emit($response);
+$response->send();
