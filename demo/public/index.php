@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Demo;
 
 // use any PSR-7 implementation
+use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
 use HttpSoft\Message\Stream;
-use HttpSoft\Emitter\SapiEmitter;
 use Oct8pus\NanoRouter\NanoRouter;
 use Psr\Http\Message\ResponseInterface;
 use Whoops\Handler\PrettyPageHandler;
@@ -23,7 +23,7 @@ $router = new NanoRouter(Response::class);
 
 $router->addRoute('GET', '/', function () : ResponseInterface {
     $stream = new Stream();
-    $stream->write(<<<BODY
+    $stream->write(<<<'BODY'
     <html>
     <body>
     <h1>Hello World!</h1>
@@ -42,7 +42,7 @@ $router->addRoute('GET', '/', function () : ResponseInterface {
 
 $router->addRoute('GET', '/test/', function () : ResponseInterface {
     $stream = new Stream();
-    $stream->write(<<<BODY
+    $stream->write(<<<'BODY'
     <html>
     <body>
     <h1>You're on test page</h1>
@@ -63,7 +63,7 @@ $router->addRouteRegex('*', '~^/php(.*)/~', function (?array $matches) : Respons
 
 $router->addErrorHandler(404, function () : ResponseInterface {
     $stream = new Stream();
-    $stream->write(<<<BODY
+    $stream->write(<<<'BODY'
     <html>
     <body>
     <h1>Sorry we lost that page</h1>

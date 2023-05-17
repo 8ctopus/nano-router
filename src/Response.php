@@ -105,6 +105,23 @@ class Response implements ResponseInterface
         $this->headers = $headers;
     }
 
+    public function __toString() : string
+    {
+        $headers = '';
+
+        foreach ($this->headers as $name => $value) {
+            $headers .= "    {$name}: {$value}\n";
+        }
+
+        return <<<STR
+        status: {$this->status}
+        headers:
+        {$headers}body:
+            {$this->body}
+
+        STR;
+    }
+
     /**
      * Send response
      *
@@ -216,7 +233,7 @@ class Response implements ResponseInterface
         return $this->reasonPhrase;
     }
 
-    public function getProtocolVersion(): string
+    public function getProtocolVersion() : string
     {
         throw new Exception('not implemented');
     }
@@ -224,23 +241,6 @@ class Response implements ResponseInterface
     public function withProtocolVersion(string $version) : self
     {
         throw new Exception('not implemented');
-    }
-
-    public function __toString() : string
-    {
-        $headers = "";
-
-        foreach ($this->headers as $name => $value) {
-            $headers .= "    {$name}: {$value}\n";
-        }
-
-        return <<<STR
-        status: {$this->status}
-        headers:
-        {$headers}body:
-            {$this->body}
-
-        STR;
     }
 
     protected function header(string $header) : self

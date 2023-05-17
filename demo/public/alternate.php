@@ -19,7 +19,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 $router = new NanoRouter(Response::class);
 
 $router->addRoute('GET', '/', function () : ResponseInterface {
-    $body = <<<BODY
+    $body = <<<'BODY'
     <html>
     <body>
     <h1>Hello World!</h1>
@@ -37,7 +37,7 @@ $router->addRoute('GET', '/', function () : ResponseInterface {
 });
 
 $router->addRoute('GET', '/test/', function () : ResponseInterface {
-    $body = <<<BODY
+    $body = <<<'BODY'
     <html>
     <body>
     <h1>You're on test page</h1>
@@ -54,7 +54,7 @@ $router->addRouteRegex('*', '~^/php(.*)/~', function (?array $matches) : Respons
 });
 
 $router->addErrorHandler(404, function () : ResponseInterface {
-    $body = <<<BODY
+    $body = <<<'BODY'
     <html>
     <body>
     <h1>Sorry we lost that page</h1>

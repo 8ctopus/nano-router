@@ -73,14 +73,13 @@ final class ResponseTest extends TestCase
 
     public function testSend() : void
     {
-        static::expectOutputString(<<<OUTPUT
+        static::expectOutputString(<<<'OUTPUT'
         header: content-type: application/json
         {"title": "hello world"}
         OUTPUT);
 
         $response = new MockResponse(200, '{"title": "hello world"}', ['content-type' => 'application/json']);
         $response->send();
-
     }
 
     public function testReSend() : void
