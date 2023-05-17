@@ -78,12 +78,12 @@ $router->addErrorHandler(405, function () : ResponseInterface {
     return new Response(405);
 });
 
-$router->addMiddleware('*', '~(.*)~', function (?array $matches, ResponseInterface $response) : ResponseInterface {
+$router->addMiddleware('*', '~(.*)~', function (array $matches, ResponseInterface $response) : ResponseInterface {
     error_log('middleware intercepted - ' . $matches[1]);
     return $response;
 });
 
-$router->addMiddleware('*', '~(.*)~', function (?array $matches, ResponseInterface $response) : ResponseInterface {
+$router->addMiddleware('*', '~(.*)~', function (array $matches, ResponseInterface $response) : ResponseInterface {
     return $response->withHeader('X-Powered-By', '8ctopus');
 });
 
