@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Tests;
+
 use Oct8pus\NanoRouter\NanoRouterException;
 use Oct8pus\NanoRouter\Response;
 use PHPUnit\Framework\TestCase;

@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
+namespace Tests;
+
+use HttpSoft\Message\Response;
+use HttpSoft\Message\Stream;
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\NanoRouterException;
-use Oct8pus\NanoRouter\Response;
+//use Oct8pus\NanoRouter\Response;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -21,65 +25,71 @@ final class NanoRouterTest extends TestCase
 
     public function testRoute() : void
     {
-        $router = new NanoRouter();
+        $router = new NanoRouter(Response::class);
 
         // 404
         $this->mockRequest('GET', '/');
         $response = $router->resolve();
 
         static::assertSame(404, $response->getStatusCode());
-        static::assertSame('', $response->getBodyText());
+        static::assertSame('', (string) $response->getBody());
         static::assertSame('Not Found', $response->getReasonPhrase());
 
         // add index route
         $router->addRoute('GET', '/', function () : Response {
-            return new Response(200, 'index');
+            $stream = new Stream();
+            $stream->write('index');
+            return new Response(200, [], $stream);
         });
 
         // add another route
         $router->addRoute('GET', '/hello/', function () : Response {
-            return new Response(200, 'hello');
+            $stream = new Stream();
+            $stream->write('hello');
+            return new Response(200, [], $stream);
         });
 
         $this->mockRequest('GET', '/');
         $response = $router->resolve();
 
         static::assertSame(200, $response->getStatusCode());
-        static::assertSame('index', $response->getBodyText());
+        static::assertSame('index', (string) $response->getBody());
 
         $this->mockRequest('GET', '/hello/');
         $response = $router->resolve();
 
         static::assertSame(200, $response->getStatusCode());
-        static::assertSame('hello', $response->getBodyText());
+        static::assertSame('hello', (string) $response->getBody());
 
         // method not allowed
         $this->mockRequest('POST', '/');
         $response = $router->resolve();
 
         static::assertSame(405, $response->getStatusCode());
-        static::assertSame('', $response->getBodyText());
+        static::assertSame('', (string) $response->getBody());
         static::assertSame('Method Not Allowed', $response->getReasonPhrase());
     }
 
     public function testRegexRoute() : void
     {
-        $router = (new NanoRouter())
+        $router = (new NanoRouter(Response::class))
             ->addRouteRegex('GET', '~/test(.*).php~', function () {
-                return new Response(200, 'test regex');
+                $stream = new Stream();
+                $stream->write('test regex');
+                return new Response(200, [], $stream);
             });
 
         $this->mockRequest('GET', '/test.php');
         $response = $router->resolve();
 
         static::assertSame(200, $response->getStatusCode());
-        static::assertSame('test regex', $response->getBodyText());
+        static::assertSame('test regex', (string) $response->getBody());
 
         $this->mockRequest('GET', '/test2.php');
         $response = $router->resolve();
 
         static::assertSame(200, $response->getStatusCode());
-        static::assertSame('test regex', $response->getBodyText());
+        static::assertSame('test regex', (string) $response->getBody());
 
         $this->mockRequest('GET', '/tes.php');
         $response = $router->resolve();
@@ -94,19 +104,26 @@ final class NanoRouterTest extends TestCase
 
     public function testErrorHandler() : void
     {
-        $router = new NanoRouter();
+        $router = new NanoRouter(Response::class);
 
         $router->addErrorHandler(404, function () : Response {
-            return new Response(404, 'This page does not exist on the server');
+            $stream = new Stream();
+            $stream->write('This page does not exist on the server');
+            return new Response(404, [], $stream);
         });
 
         $this->mockRequest('GET', '/test.php');
-        static::assertEquals(new Response(404, 'This page does not exist on the server'), $router->resolve());
+
+        $response = $router->resolve();
+
+        static::assertEquals(404, $response->getStatusCode());
+        static::assertEquals('Not Found', $response->getReasonPhrase());
+        static::assertEquals('This page does not exist on the server', (string) $response->getBody());
     }
 
     public function testInvalidRegexRoute() : void
     {
-        $router = new NanoRouter();
+        $router = new NanoRouter(Response::class);
 
         static::expectException(NanoRouterException::class);
 
