@@ -10,6 +10,7 @@ use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\NanoRouterException;
 //use Oct8pus\NanoRouter\Response;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * @internal
@@ -102,6 +103,24 @@ final class NanoRouterTest extends TestCase
         static::assertSame(405, $response->getStatusCode());
     }
 
+    public function testMiddleware() : void
+    {
+        $router = (new NanoRouter(Response::class))
+            ->addMiddleware('GET', '~(.*)~', function (array $matches, ResponseInterface $response) : ResponseInterface {
+                return $response->withHeader('X-Test', 'test');
+            })
+            ->addMiddleware('GET', '~(.*)~', function (array $matches, ResponseInterface $response) : ResponseInterface {
+                return $response->withHeader('X-Powered-By', '8ctopus');
+            });
+
+        $this->mockRequest('GET', '/test.php');
+        $response = $router->resolve();
+
+        static::assertSame(404, $response->getStatusCode());
+        static::assertTrue($response->hasHeader('X-Test'));
+        static::assertSame('8ctopus', $response->getHeaderLine('X-Powered-By'));
+    }
+
     public function testErrorHandler() : void
     {
         $router = new NanoRouter(Response::class);
@@ -121,13 +140,22 @@ final class NanoRouterTest extends TestCase
         static::assertSame('This page does not exist on the server', (string) $response->getBody());
     }
 
-    public function testInvalidRegexRoute() : void
+    public function testRouteInvalidRegex() : void
     {
         $router = new NanoRouter(Response::class);
 
         static::expectException(NanoRouterException::class);
 
         $router->addRouteRegex('GET', '~/test(.*).php', function () : void {});
+    }
+
+    public function testMiddlewareInvalidRegex() : void
+    {
+        $router = new NanoRouter(Response::class);
+
+        static::expectException(NanoRouterException::class);
+
+        $router->addMiddleware('GET', '~/test(.*).php', function () : void {});
     }
 
     private function mockRequest($method, $uri) : void
