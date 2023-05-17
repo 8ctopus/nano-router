@@ -21,6 +21,10 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 $router = new NanoRouter(Response::class);
 
+$router->addMiddleware('GET', '~(.*)~', function (?array $matches) : void {
+    error_log('middleware - ' . $matches[1] . '<br>');
+});
+
 $router->addRoute('GET', '/', function () : ResponseInterface {
     $stream = new Stream();
     $stream->write(<<<'BODY'

@@ -9,7 +9,9 @@ use Psr\Http\Message\ResponseInterface;
 class NanoRouter
 {
     private string $class;
+
     private array $routes;
+    private array $middleware;
     private array $errors;
 
     /**
@@ -22,6 +24,7 @@ class NanoRouter
         $this->class = $class;
 
         $this->routes = [];
+        $this->middleware = [];
         $this->errors = [];
     }
 
@@ -34,9 +37,20 @@ class NanoRouter
     {
         $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        foreach ($this->routes as $routePath => $route) {
+        foreach ($this->middleware as $regex => $route) {
+            $matches = null;
+
+            if (preg_match($regex, $requestPath, $matches) === 1) {
+                if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
+                    // call middleware
+                    $route['callback']($matches);
+                }
+            }
+        }
+
+        foreach ($this->routes as $regex => $route) {
             if (!$route['regex']) {
-                if ($requestPath === $routePath) {
+                if ($requestPath === $regex) {
                     if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
                         // call route
                         return $route['callback']();
@@ -47,7 +61,7 @@ class NanoRouter
             } else {
                 $matches = null;
 
-                if (preg_match($routePath, $requestPath, $matches) === 1) {
+                if (preg_match($regex, $requestPath, $matches) === 1) {
                     if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
                         // call route
                         return $route['callback']($matches);
@@ -73,9 +87,10 @@ class NanoRouter
     public function addRoute(string $method, string $path, callable $callback) : self
     {
         $this->routes[$path] = [
+            'type' => 'route',
+            'regex' => false,
             'method' => $method,
             'callback' => $callback,
-            'regex' => false,
         ];
 
         return $this;
@@ -85,24 +100,25 @@ class NanoRouter
      * Add regex route
      *
      * @param string   $method
-     * @param string   $path
+     * @param string   $regex
      * @param callable $callback
      *
      * @return self
      *
      * @throws NanoRouterException if regex is invalid
      */
-    public function addRouteRegex(string $method, string $path, callable $callback) : self
+    public function addRouteRegex(string $method, string $regex, callable $callback) : self
     {
         // validate regex
-        if (!is_int(@preg_match($path, ''))) {
+        if (!is_int(@preg_match($regex, ''))) {
             throw new NanoRouterException('invalid regex');
         }
 
-        $this->routes[$path] = [
+        $this->routes[$regex] = [
+            'type' => 'route',
+            'regex' => true,
             'method' => $method,
             'callback' => $callback,
-            'regex' => true,
         ];
 
         return $this;
@@ -120,6 +136,32 @@ class NanoRouter
     {
         $this->errors[$error] = [
             'callback' => $handler,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Add middleware
+     *
+     * @param string   $method
+     * @param string   $regex
+     * @param callable $callback
+     *
+     * @return self
+     *
+     * @throws NanoRouterException if regex is invalid
+     */
+    public function addMiddleware(string $method, string $regex, callable $callback) : self
+    {
+        // validate regex
+        if (!is_int(@preg_match($regex, ''))) {
+            throw new NanoRouterException('invalid regex');
+        }
+
+        $this->middleware[$regex] = [
+            'method' => $method,
+            'callback' => $callback,
         ];
 
         return $this;
