@@ -38,27 +38,17 @@ class NanoRouter
         $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
         foreach ($this->routes as $regex => $route) {
-            if (!$route['regex']) {
-                if ($requestPath === $regex) {
-                    if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
-                        // call route
-                        $response = $route['callback']();
-                        break;
-                    } else {
-                        $response = $this->error(405, $requestPath);
-                        break;
-                    }
-                }
-            } else {
-                if (preg_match($regex, $requestPath, $matches) === 1) {
-                    if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
-                        // call route
-                        $response = $route['callback']();
-                        break;
-                    } else {
-                        $response = $this->error(405, $requestPath);
-                        break;
-                    }
+            if (
+                (!$route['regex'] && $requestPath === $regex) ||
+                ($route['regex'] && preg_match($regex, $requestPath, $matches) === 1)
+            ) {
+                if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
+                    // call route
+                    $response = $route['callback']();
+                    break;
+                } else {
+                    $response = $this->error(405, $requestPath);
+                    break;
                 }
             }
         }
