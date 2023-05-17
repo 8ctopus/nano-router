@@ -21,10 +21,6 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 $router = new NanoRouter(Response::class);
 
-$router->addMiddleware('GET', '~(.*)~', function (?array $matches) : void {
-    error_log('middleware - ' . $matches[1] . '<br>');
-});
-
 $router->addRoute('GET', '/', function () : ResponseInterface {
     $stream = new Stream();
     $stream->write(<<<'BODY'
@@ -80,6 +76,15 @@ $router->addErrorHandler(404, function () : ResponseInterface {
 
 $router->addErrorHandler(405, function () : ResponseInterface {
     return new Response(405);
+});
+
+$router->addMiddleware('*', '~(.*)~', function (?array $matches, ResponseInterface $response) : ResponseInterface {
+    error_log('middleware intercepted - ' . $matches[1]);
+    return $response;
+});
+
+$router->addMiddleware('*', '~(.*)~', function (?array $matches, ResponseInterface $response) : ResponseInterface {
+    return $response->withHeader('X-Powered-By', '8ctopus');
 });
 
 // resolve route

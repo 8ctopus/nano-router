@@ -37,25 +37,16 @@ class NanoRouter
     {
         $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        foreach ($this->middleware as $regex => $route) {
-            $matches = null;
-
-            if (preg_match($regex, $requestPath, $matches) === 1) {
-                if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
-                    // call middleware
-                    $route['callback']($matches);
-                }
-            }
-        }
-
         foreach ($this->routes as $regex => $route) {
             if (!$route['regex']) {
                 if ($requestPath === $regex) {
                     if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
                         // call route
-                        return $route['callback']();
+                        $response = $route['callback']();
+                        break;
                     } else {
-                        return $this->error(405, $requestPath);
+                        $response = $this->error(405, $requestPath);
+                        break;
                     }
                 }
             } else {
@@ -64,15 +55,34 @@ class NanoRouter
                 if (preg_match($regex, $requestPath, $matches) === 1) {
                     if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
                         // call route
-                        return $route['callback']($matches);
+                        $response = $route['callback']($matches);
+                        break;
                     } else {
-                        return $this->error(405, $requestPath);
+                        $response = $this->error(405, $requestPath);
+                        break;
                     }
                 }
             }
         }
 
-        return $this->error(404, $requestPath);
+        if (!isset($response)) {
+            $response = $this->error(404, $requestPath);
+        }
+
+        foreach ($this->middleware as $middleware) {
+            foreach ($middleware as $regex => $route) {
+                $matches = null;
+
+                if (preg_match($regex, $requestPath, $matches) === 1) {
+                    if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
+                        // call middleware
+                        $response = $route['callback']($matches, $response);
+                    }
+                }
+            }
+        }
+
+        return $response;
     }
 
     /**
@@ -159,9 +169,11 @@ class NanoRouter
             throw new NanoRouterException('invalid regex');
         }
 
-        $this->middleware[$regex] = [
-            'method' => $method,
-            'callback' => $callback,
+        $this->middleware[] = [
+            $regex => [
+                'method' => $method,
+                'callback' => $callback,
+            ]
         ];
 
         return $this;
