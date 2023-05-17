@@ -12,9 +12,15 @@ class NanoRouter
     private array $routes;
     private array $errors;
 
-    public function __construct(string $class = Response::class)
+    /**
+     * Constructor
+     *
+     * @param string $class ResponseInterface implementation
+     */
+    public function __construct(string $class)
     {
         $this->class = $class;
+
         $this->routes = [];
         $this->errors = [];
     }
