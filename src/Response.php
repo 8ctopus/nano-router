@@ -83,8 +83,6 @@ class Response implements ResponseInterface
     private int $status;
     private string $reasonPhrase;
 
-    private string $protocolVersion;
-
     private array $headers;
     private string|StreamInterface $body;
 
@@ -102,27 +100,9 @@ class Response implements ResponseInterface
         $this->sent = false;
 
         $this->withStatus($status);
-
         $this->withBodyText($body);
 
         $this->headers = $headers;
-    }
-
-    public function __toString() : string
-    {
-        $headers = "";
-
-        foreach ($this->headers as $name => $value) {
-            $headers .= "    {$name}: {$value}\n";
-        }
-
-        return <<<STR
-        status: {$this->status}
-        headers:
-        {$headers}body:
-            {$this->body}
-
-        STR;
     }
 
     /**
@@ -180,17 +160,17 @@ class Response implements ResponseInterface
 
     public function hasHeader(string $name) : bool
     {
-        return false;
+        return array_key_exists($name, $this->headers);
     }
 
     public function getHeader(string $name) : array
     {
-        return [];
+        return $this->headers[$name];
     }
 
     public function getHeaderLine(string $name) : string
     {
-        return '';
+        throw new Exception('not implemented');
     }
 
     public function withHeader(string $name, $value) : self
@@ -201,8 +181,7 @@ class Response implements ResponseInterface
 
     public function withAddedHeader(string $name, $value) : self
     {
-        $this->headers[$name] = $value;
-        return $this;
+        throw new Exception('not implemented');
     }
 
     public function withoutHeader(string $name) : self
@@ -213,7 +192,7 @@ class Response implements ResponseInterface
 
     public function getBody() : StreamInterface
     {
-        return $this->body;
+        throw new Exception('not implemented');
     }
 
     public function getBodyText() : string
@@ -223,8 +202,7 @@ class Response implements ResponseInterface
 
     public function withBody(StreamInterface $body) : self
     {
-        $this->body = $body;
-        return $this;
+        throw new Exception('not implemented');
     }
 
     public function withBodyText(string $body) : self
@@ -245,8 +223,24 @@ class Response implements ResponseInterface
 
     public function withProtocolVersion(string $version) : self
     {
-        $this->protocolVersion = $version;
-        return $this;
+        throw new Exception('not implemented');
+    }
+
+    public function __toString() : string
+    {
+        $headers = "";
+
+        foreach ($this->headers as $name => $value) {
+            $headers .= "    {$name}: {$value}\n";
+        }
+
+        return <<<STR
+        status: {$this->status}
+        headers:
+        {$headers}body:
+            {$this->body}
+
+        STR;
     }
 
     protected function header(string $header) : self
