@@ -37,7 +37,7 @@ class NanoRouter
         foreach ($this->routes as $routePath => $route) {
             if (!$route['regex']) {
                 if ($requestPath === $routePath) {
-                    if (in_array($route['type'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
+                    if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
                         // call route
                         return $route['callback']();
                     } else {
@@ -48,7 +48,7 @@ class NanoRouter
                 $matches = null;
 
                 if (preg_match($routePath, $requestPath, $matches) === 1) {
-                    if (in_array($route['type'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
+                    if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
                         // call route
                         return $route['callback']($matches);
                     } else {
@@ -64,16 +64,16 @@ class NanoRouter
     /**
      * Add route
      *
-     * @param string   $type
+     * @param string   $method
      * @param string   $path
      * @param callable $callback
      *
      * @return self
      */
-    public function addRoute(string $type, string $path, callable $callback) : self
+    public function addRoute(string $method, string $path, callable $callback) : self
     {
         $this->routes[$path] = [
-            'type' => $type,
+            'method' => $method,
             'callback' => $callback,
             'regex' => false,
         ];
@@ -84,7 +84,7 @@ class NanoRouter
     /**
      * Add regex route
      *
-     * @param string   $type
+     * @param string   $method
      * @param string   $path
      * @param callable $callback
      *
@@ -92,7 +92,7 @@ class NanoRouter
      *
      * @throws NanoRouterException if regex is invalid
      */
-    public function addRouteRegex(string $type, string $path, callable $callback) : self
+    public function addRouteRegex(string $method, string $path, callable $callback) : self
     {
         // validate regex
         if (!is_int(@preg_match($path, ''))) {
@@ -100,7 +100,7 @@ class NanoRouter
         }
 
         $this->routes[$path] = [
-            'type' => $type,
+            'method' => $method,
             'callback' => $callback,
             'regex' => true,
         ];
