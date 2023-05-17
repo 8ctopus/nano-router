@@ -27,8 +27,8 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('GET', '/');
         $response = $router->resolve();
 
-        static::assertSame(404, $response->status());
-        static::assertSame('Not Found', $response->body());
+        static::assertSame(404, $response->getStatusCode());
+        static::assertSame('Not Found', $response->getBody());
 
         // add index route
         $router->addRoute('GET', '/', function () : Response {
@@ -43,21 +43,21 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('GET', '/');
         $response = $router->resolve();
 
-        static::assertSame(200, $response->status());
-        static::assertSame('index', $response->body());
+        static::assertSame(200, $response->getStatusCode());
+        static::assertSame('index', $response->getBody());
 
         $this->mockRequest('GET', '/hello/');
         $response = $router->resolve();
 
-        static::assertSame(200, $response->status());
-        static::assertSame('hello', $response->body());
+        static::assertSame(200, $response->getStatusCode());
+        static::assertSame('hello', $response->getBody());
 
         // method not allowed
         $this->mockRequest('POST', '/');
         $response = $router->resolve();
 
-        static::assertSame(405, $response->status());
-        static::assertSame('Method Not Allowed', $response->body());
+        static::assertSame(405, $response->getStatusCode());
+        static::assertSame('Method Not Allowed', $response->getBody());
     }
 
     public function testRegexRoute() : void
@@ -70,14 +70,14 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('GET', '/test.php');
         $response = $router->resolve();
 
-        static::assertSame(200, $response->status());
-        static::assertSame('test regex', $response->body());
+        static::assertSame(200, $response->getStatusCode());
+        static::assertSame('test regex', $response->getBody());
 
         $this->mockRequest('GET', '/test2.php');
         $response = $router->resolve();
 
-        static::assertSame(200, $response->status());
-        static::assertSame('test regex', $response->body());
+        static::assertSame(200, $response->getStatusCode());
+        static::assertSame('test regex', $response->getBody());
 
         $this->mockRequest('GET', '/tes.php');
         $response = $router->resolve();

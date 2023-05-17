@@ -17,22 +17,23 @@ final class ResponseTest extends TestCase
     {
         $response = new Response(200, 'hello');
 
-        static::assertSame(200, $response->status());
-        static::assertSame('hello', $response->body());
+        static::assertSame(200, $response->getStatusCode());
+        static::assertSame('hello', $response->getBodyText());
 
-        $response->setStatus(201);
-        $response->setBody('world');
+        $response->withStatus(201);
+        $response->withBodyText('world');
 
-        static::assertSame(201, $response->status());
-        static::assertSame('world', $response->body());
+        static::assertSame(201, $response->getStatusCode());
+        static::assertSame('world', $response->getBodyText());
     }
 
     public function testResponseError() : void
     {
         $response = new Response(404);
 
-        static::assertSame(404, $response->status());
-        static::assertSame('Not Found', $response->body());
+        static::assertSame(404, $response->getStatusCode());
+        static::assertSame('', $response->getBodyText());
+        static::assertSame('Not Found', $response->getReasonPhrase());
 
         static::assertEquals(new Response(410, 'custom message'), new Response(410, 'custom message'));
     }
@@ -57,15 +58,15 @@ final class ResponseTest extends TestCase
     {
         $response = new Response(301, '', ['location' => 'http://localhost']);
 
-        static::assertEquals(['location' => 'http://localhost'], $response->headers());
+        static::assertEquals(['location' => 'http://localhost'], $response->getHeaders());
 
-        $response = $response->removeHeader('location');
+        $response = $response->withoutHeader('location');
 
-        static::assertEquals([], $response->headers());
+        static::assertEquals([], $response->getHeaders());
 
-        $response->setHeader('content-type', 'application/json');
+        $response->withHeader('content-type', 'application/json');
 
-        static::assertEquals(['content-type' => 'application/json'], $response->headers());
+        static::assertEquals(['content-type' => 'application/json'], $response->getHeaders());
     }
 
     public function testSend() : void

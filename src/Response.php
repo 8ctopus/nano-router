@@ -4,13 +4,89 @@ declare(strict_types=1);
 
 namespace Oct8pus\NanoRouter;
 
-class Response
+use Exception;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
+
+class Response implements ResponseInterface
 {
-    private array $messages;
+    private static array $reasons = [
+        // informational
+        100 => 'Continue',
+        101 => 'Switching Protocols',
+        102 => 'Processing',
+        103 => 'Early Hints',
+        // successful
+        200 => 'OK',
+        201 => 'Created',
+        202 => 'Accepted',
+        203 => 'Non-Authoritative Information',
+        204 => 'No Content',
+        205 => 'Reset Content',
+        206 => 'Partial Content',
+        207 => 'Multi-Status',
+        208 => 'Already Reported',
+        226 => 'IM Used',
+        // redirection
+        300 => 'Multiple Choices',
+        301 => 'Moved Permanently',
+        302 => 'Found',
+        303 => 'See Other',
+        304 => 'Not Modified',
+        305 => 'Use Proxy',
+        307 => 'Temporary Redirect',
+        308 => 'Permanent Redirect',
+        // client errors
+        400 => 'Bad Request',
+        401 => 'Unauthorized',
+        402 => 'Payment Required',
+        403 => 'Forbidden',
+        404 => 'Not Found',
+        405 => 'Method Not Allowed',
+        406 => 'Not Acceptable',
+        407 => 'Proxy Authentication Required',
+        408 => 'Request Timeout',
+        409 => 'Conflict',
+        410 => 'Gone',
+        411 => 'Length Required',
+        412 => 'Precondition Failed',
+        413 => 'Payload Too Large',
+        414 => 'URI Too Long',
+        415 => 'Unsupported Media Type',
+        416 => 'Range Not Satisfiable',
+        417 => 'Expectation Failed',
+        418 => 'I\'m a teapot',
+        421 => 'Misdirected Request',
+        422 => 'Unprocessable Entity',
+        423 => 'Locked',
+        424 => 'Failed Dependency',
+        425 => 'Too Early',
+        426 => 'Upgrade Required',
+        428 => 'Precondition Required',
+        429 => 'Too Many Requests',
+        431 => 'Request Header Fields Too Large',
+        451 => 'Unavailable For Legal Reasons',
+        // server errors
+        500 => 'Internal Server Error',
+        501 => 'Not Implemented',
+        502 => 'Bad Gateway',
+        503 => 'Service Unavailable',
+        504 => 'Gateway Timeout',
+        505 => 'HTTP Version Not Supported',
+        506 => 'Variant Also Negotiates',
+        507 => 'Insufficient Storage',
+        508 => 'Loop Detected',
+        510 => 'Not Extended',
+        511 => 'Network Authentication Required',
+    ];
 
     private int $status;
+    private string $reasonPhrase;
+
+    private string $protocolVersion;
+
     private array $headers;
-    private string $body;
+    private string|StreamInterface $body;
 
     private bool $sent;
 
@@ -23,47 +99,11 @@ class Response
      */
     public function __construct(int $status = 200, string $body = '', array $headers = [])
     {
-        $this->messages = [
-            400 => 'Bad Request',
-            401 => 'Unauthorized',
-            402 => 'Payment Required',
-            403 => 'Forbidden',
-            404 => 'Not Found',
-            405 => 'Method Not Allowed',
-            406 => 'Not Acceptable',
-            407 => 'Proxy Authentication Required',
-            408 => 'Request Timeout',
-            409 => 'Conflict',
-            410 => 'Gone',
-            411 => 'Length Required',
-            412 => 'Precondition Failed',
-            413 => 'Payload Too Large',
-            414 => 'URI Too Long',
-            415 => 'Unsupported Media Type',
-            416 => 'Range Not Satisfiable',
-            417 => 'Expectation Failed',
-            418 => 'I\'m a teapot (RFC 2324, RFC 7168)',
-            421 => 'Misdirected Request',
-            422 => 'Unprocessable Entity',
-            423 => 'Locked (WebDAV; RFC 4918)',
-            424 => 'Failed Dependency (WebDAV; RFC 4918)',
-            425 => 'Too Early (RFC 8470)',
-            426 => 'Upgrade Required',
-            428 => 'Precondition Required (RFC 6585)',
-            429 => 'Too Many Requests (RFC 6585)',
-            431 => 'Request Header Fields Too Large (RFC 6585)',
-            451 => 'Unavailable For Legal Reasons (RFC 7725)',
-        ];
-
         $this->sent = false;
 
-        $this->setStatus($status);
+        $this->withStatus($status);
 
-        if (empty($body) && $status >= 400) {
-            $body = $this->messages[$status];
-        }
-
-        $this->setBody($body);
+        $this->withBodyText($body);
 
         $this->headers = $headers;
     }
@@ -111,47 +151,101 @@ class Response
         return $this;
     }
 
-    public function status() : int
+    public function getStatusCode() : int
     {
         return $this->status;
     }
 
-    public function setStatus(int $status) : self
+    public function withStatus(int $status, string $reasonPhrase = '') : self
     {
+        if ($status < 100 || $status > 599) {
+            throw new Exception('status must be in [100,600[ range');
+        }
+
         $this->status = $status;
 
-        if (empty($this->body) && $status >= 400) {
-            $this->body = $this->messages[$status];
+        if ($reasonPhrase === '') {
+            $reasonPhrase = static::$reasons[$status];
         }
+
+        $this->reasonPhrase = $reasonPhrase;
 
         return $this;
     }
 
-    public function headers() : array
+    public function getHeaders() : array
     {
         return $this->headers;
     }
 
-    public function setHeader(string $name, string $value) : self
+    public function hasHeader(string $name) : bool
+    {
+        return false;
+    }
+
+    public function getHeader(string $name) : array
+    {
+        return [];
+    }
+
+    public function getHeaderLine(string $name) : string
+    {
+        return '';
+    }
+
+    public function withHeader(string $name, $value) : self
     {
         $this->headers[$name] = $value;
         return $this;
     }
 
-    public function removeHeader(string $name) : self
+    public function withAddedHeader(string $name, $value) : self
+    {
+        $this->headers[$name] = $value;
+        return $this;
+    }
+
+    public function withoutHeader(string $name) : self
     {
         unset($this->headers[$name]);
         return $this;
     }
 
-    public function body() : string
+    public function getBody() : StreamInterface
     {
         return $this->body;
     }
 
-    public function setBody(string $body) : self
+    public function getBodyText() : string
+    {
+        return $this->body;
+    }
+
+    public function withBody(StreamInterface $body) : self
     {
         $this->body = $body;
+        return $this;
+    }
+
+    public function withBodyText(string $body) : self
+    {
+        $this->body = $body;
+        return $this;
+    }
+
+    public function getReasonPhrase() : string
+    {
+        return $this->reasonPhrase;
+    }
+
+    public function getProtocolVersion(): string
+    {
+        return $this->protocolVersion;
+    }
+
+    public function withProtocolVersion(string $version) : self
+    {
+        $this->protocolVersion = $version;
         return $this;
     }
 
