@@ -41,11 +41,12 @@ location / {
 - create `index.php`
 
 ```php
-// use any PSR-7 implementation
-use HttpSoft\Message\Response;
-use HttpSoft\Emitter\SapiEmitter;
 use Oct8pus\NanoRouter\NanoRouter;
 use Psr\Http\Message\ResponseInterface;
+
+// use any PSR-7 implementation, here HttpSoft's one
+use HttpSoft\Message\Response;
+use HttpSoft\Emitter\SapiEmitter;
 
 require_once 'vendor/autoload.php';
 
@@ -54,14 +55,23 @@ $router = new NanoRouter(Response::class);
 $router
     // add simple route
     ->addRoute('GET', '/test.php', function () : ResponseInterface {
-        return new Response(200, 'test');
+        $stream = new Stream();
+        $stream->write('test');
+
+        return new Response(200, [], $stream);
     })
     // add regex route
     ->addRouteRegex('*', '~/php(.*)/~', function (array $matches) : ResponseInterface {
-        return new Response(200, 'phpinfo');
+        $stream = new Stream();
+        $stream->write('phpinfo');
+
+        return new Response(200, [], $stream);
     })
     ->addErrorHandler(404, function (string $requestPath) : ResponseInterface {
-        return new Response(404, "page not found {$requestPath}");
+        $stream = new Stream();
+        $stream->write("page not found {$requestPath}");
+
+        return new Response(404, [], $stream);
     });
 
 // resolve request
