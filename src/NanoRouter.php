@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace Oct8pus\NanoRouter;
 
+use Psr\Http\Message\ResponseInterface;
+
 class NanoRouter
 {
+    private string $class;
     private array $routes;
     private array $errors;
 
-    public function __construct()
+    public function __construct(string $class = Response::class)
     {
+        $this->class = $class;
         $this->routes = [];
         $this->errors = [];
     }
@@ -18,9 +22,9 @@ class NanoRouter
     /**
      * Resolve route
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    public function resolve() : Response
+    public function resolve() : ResponseInterface
     {
         $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -121,9 +125,9 @@ class NanoRouter
      * @param int    $error
      * @param string $requestPath
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    private function error(int $error, string $requestPath) : Response
+    private function error(int $error, string $requestPath) : ResponseInterface
     {
         $handler = array_key_exists($error, $this->errors) ? $this->errors[$error] : null;
 
@@ -131,7 +135,7 @@ class NanoRouter
             // call route
             return $handler['callback']($requestPath);
         } else {
-            return new Response($error);
+            return new $this->class($error);
         }
     }
 }
