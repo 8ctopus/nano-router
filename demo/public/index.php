@@ -54,9 +54,9 @@ $router->addRoute('GET', '/test/', function () : ResponseInterface {
     return new Response(200, [], $stream);
 });
 
-$router->addRouteRegex('*', '~^/php(.*)/~', function (?array $matches) : ResponseInterface {
+$router->addRouteRegex('*', '~^/php(.*)/~', function () : ResponseInterface {
     $stream = new Stream();
-    $stream->write('php - regex pattern - ' . $matches[1]);
+    $stream->write('match regex route');
 
     return new Response(200, [], $stream);
 });
@@ -78,12 +78,12 @@ $router->addErrorHandler(405, function () : ResponseInterface {
     return new Response(405);
 });
 
-$router->addMiddleware('*', '~(.*)~', function (array $matches, ResponseInterface $response) : ResponseInterface {
-    error_log('middleware intercepted - ' . $matches[1]);
+$router->addMiddleware('*', '~(.*)~', function (ResponseInterface $response) : ResponseInterface {
+    error_log('middleware intercepted - ' . $_SERVER['REQUEST_URI']);
     return $response;
 });
 
-$router->addMiddleware('*', '~(.*)~', function (array $matches, ResponseInterface $response) : ResponseInterface {
+$router->addMiddleware('*', '~(.*)~', function (ResponseInterface $response) : ResponseInterface {
     return $response->withHeader('X-Powered-By', '8ctopus');
 });
 

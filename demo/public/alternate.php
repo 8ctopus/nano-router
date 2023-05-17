@@ -49,8 +49,8 @@ $router->addRoute('GET', '/test/', function () : ResponseInterface {
     return new Response(200, $body);
 });
 
-$router->addRouteRegex('*', '~^/php(.*)/~', function (?array $matches) : ResponseInterface {
-    return new Response(200, 'php - regex pattern - ' . $matches[1]);
+$router->addRouteRegex('*', '~^/php(.*)/~', function () : ResponseInterface {
+    return new Response(200, 'match regex route');
 });
 
 $router->addErrorHandler(404, function () : ResponseInterface {

@@ -50,12 +50,10 @@ class NanoRouter
                     }
                 }
             } else {
-                $matches = null;
-
                 if (preg_match($regex, $requestPath, $matches) === 1) {
                     if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
                         // call route
-                        $response = $route['callback']($matches);
+                        $response = $route['callback']();
                         break;
                     } else {
                         $response = $this->error(405, $requestPath);
@@ -71,12 +69,10 @@ class NanoRouter
 
         foreach ($this->middleware as $middleware) {
             foreach ($middleware as $regex => $route) {
-                $matches = null;
-
                 if (preg_match($regex, $requestPath, $matches) === 1) {
                     if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
                         // call middleware
-                        $response = $route['callback']($matches, $response);
+                        $response = $route['callback']($response);
                     }
                 }
             }

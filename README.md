@@ -61,7 +61,7 @@ $router
         return new Response(200, [], $stream);
     })
     // add regex route
-    ->addRouteRegex('*', '~/php(.*)/~', function (array $matches) : ResponseInterface {
+    ->addRouteRegex('*', '~/php(.*)/~', function () : ResponseInterface {
         $stream = new Stream();
         $stream->write('phpinfo');
 
@@ -73,7 +73,7 @@ $router
 
         return new Response(404, [], $stream);
     })
-    ->addMiddleware('*', '~(.*)~', function (array $matches, ResponseInterface $response) : ResponseInterface {
+    ->addMiddleware('*', '~(.*)~', function (ResponseInterface $response) : ResponseInterface {
         return $response->withHeader('X-Powered-By', '8ctopus');
     });
 

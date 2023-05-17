@@ -106,10 +106,10 @@ final class NanoRouterTest extends TestCase
     public function testMiddleware() : void
     {
         $router = (new NanoRouter(Response::class))
-            ->addMiddleware('GET', '~(.*)~', function (array $matches, ResponseInterface $response) : ResponseInterface {
+            ->addMiddleware('GET', '~(.*)~', function (ResponseInterface $response) : ResponseInterface {
                 return $response->withHeader('X-Test', 'test');
             })
-            ->addMiddleware('GET', '~(.*)~', function (array $matches, ResponseInterface $response) : ResponseInterface {
+            ->addMiddleware('GET', '~(.*)~', function (ResponseInterface $response) : ResponseInterface {
                 return $response->withHeader('X-Powered-By', '8ctopus');
             });
 
