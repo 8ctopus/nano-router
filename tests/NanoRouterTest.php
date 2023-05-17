@@ -28,7 +28,8 @@ final class NanoRouterTest extends TestCase
         $response = $router->resolve();
 
         static::assertSame(404, $response->getStatusCode());
-        static::assertSame('Not Found', $response->getBody());
+        static::assertSame('', $response->getBodyText());
+        static::assertSame('Not Found', $response->getReasonPhrase());
 
         // add index route
         $router->addRoute('GET', '/', function () : Response {
@@ -44,20 +45,21 @@ final class NanoRouterTest extends TestCase
         $response = $router->resolve();
 
         static::assertSame(200, $response->getStatusCode());
-        static::assertSame('index', $response->getBody());
+        static::assertSame('index', $response->getBodyText());
 
         $this->mockRequest('GET', '/hello/');
         $response = $router->resolve();
 
         static::assertSame(200, $response->getStatusCode());
-        static::assertSame('hello', $response->getBody());
+        static::assertSame('hello', $response->getBodyText());
 
         // method not allowed
         $this->mockRequest('POST', '/');
         $response = $router->resolve();
 
         static::assertSame(405, $response->getStatusCode());
-        static::assertSame('Method Not Allowed', $response->getBody());
+        static::assertSame('', $response->getBodyText());
+        static::assertSame('Method Not Allowed', $response->getReasonPhrase());
     }
 
     public function testRegexRoute() : void
@@ -71,23 +73,23 @@ final class NanoRouterTest extends TestCase
         $response = $router->resolve();
 
         static::assertSame(200, $response->getStatusCode());
-        static::assertSame('test regex', $response->getBody());
+        static::assertSame('test regex', $response->getBodyText());
 
         $this->mockRequest('GET', '/test2.php');
         $response = $router->resolve();
 
         static::assertSame(200, $response->getStatusCode());
-        static::assertSame('test regex', $response->getBody());
+        static::assertSame('test regex', $response->getBodyText());
 
         $this->mockRequest('GET', '/tes.php');
         $response = $router->resolve();
 
-        static::assertEquals(new Response(404, 'Not Found'), $response);
+        static::assertEquals(new Response(404), $response);
 
         $this->mockRequest('POST', '/test.php');
         $response = $router->resolve();
 
-        static::assertEquals(new Response(405, 'Method Not Allowed'), $response);
+        static::assertEquals(new Response(405), $response);
     }
 
     public function testErrorHandler() : void
