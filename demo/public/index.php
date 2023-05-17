@@ -78,13 +78,21 @@ $router->addErrorHandler(405, function () : ResponseInterface {
     return new Response(405);
 });
 
-$router->addMiddleware('*', '~(.*)~', function (ResponseInterface $response) : ResponseInterface {
-    error_log('middleware intercepted - ' . $_SERVER['REQUEST_URI']);
-    return $response;
+$router->addMiddleware('*', '~(.*)~', 'post', function (ResponseInterface $response) : ResponseInterface {
+    return $response->withHeader('X-Powered-By', '8ctopus');
 });
 
-$router->addMiddleware('*', '~(.*)~', function (ResponseInterface $response) : ResponseInterface {
-    return $response->withHeader('X-Powered-By', '8ctopus');
+$router->addMiddleware('*', '~(.*)~', 'pre', function () : ?ResponseInterface {
+    error_log('middleware intercepted - ' . $_SERVER['REQUEST_URI']);
+    return null;
+});
+
+$router->addMiddleware('*', '~/api/~', 'pre', function () : ?ResponseInterface {
+    if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+        return new Response(401, ['WWW-Authenticate' => 'Basic']);
+    }
+
+    return null;
 });
 
 // resolve route

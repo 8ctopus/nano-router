@@ -37,6 +37,25 @@ class NanoRouter
     {
         $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
+        foreach ($this->middleware as $middleware) {
+            foreach ($middleware as $regex => $route) {
+                if ($route['when'] !== 'pre') {
+                    continue;
+                }
+
+                if (preg_match($regex, $requestPath, $matches) === 1) {
+                    if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
+                        // call middleware
+                        $response = $route['callback']();
+
+                        if ($response instanceof ResponseInterface) {
+                            return $response;
+                        }
+                    }
+                }
+            }
+        }
+
         foreach ($this->routes as $regex => $route) {
             if (
                 (!$route['regex'] && $requestPath === $regex) ||
@@ -59,6 +78,10 @@ class NanoRouter
 
         foreach ($this->middleware as $middleware) {
             foreach ($middleware as $regex => $route) {
+                if ($route['when'] !== 'post') {
+                    continue;
+                }
+
                 if (preg_match($regex, $requestPath, $matches) === 1) {
                     if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
                         // call middleware
@@ -142,22 +165,28 @@ class NanoRouter
      *
      * @param string   $method
      * @param string   $regex
+     * @param string   $when - pre or post
      * @param callable $callback
      *
      * @return self
      *
      * @throws NanoRouterException if regex is invalid
      */
-    public function addMiddleware(string $method, string $regex, callable $callback) : self
+    public function addMiddleware(string $method, string $regex, string $when, callable $callback) : self
     {
         // validate regex
         if (!is_int(@preg_match($regex, ''))) {
             throw new NanoRouterException('invalid regex');
         }
 
+        if (!in_array($when, ['pre', 'post'], true)) {
+            throw new NanoRouterException('invalid when clause');
+        }
+
         $this->middleware[] = [
             $regex => [
                 'method' => $method,
+                'when' => $when,
                 'callback' => $callback,
             ]
         ];
