@@ -61,7 +61,8 @@ class NanoRouter
                     try {
                         $response = $route['callback']();
                     } catch (RouteException $exception) {
-                        $response = new $this->class($exception->getCode());
+                        $headers = $exception->debug() ? ['reason' => $exception->getMessage()] : [];
+                        $response = new $this->class($exception->getCode(), $headers);
                     }
 
                     break;

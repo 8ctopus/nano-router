@@ -25,6 +25,13 @@ final class RouteExceptionTest extends TestCase
 
         static::assertSame('hello', $exception->getMessage());
         static::assertSame(403, $exception->getCode());
+        static::assertFalse($exception->debug());
+
+        $exception = new RouteException('hello', 403, true);
+
+        static::assertSame('hello', $exception->getMessage());
+        static::assertSame(403, $exception->getCode());
+        static::assertTrue($exception->debug());
     }
 
     public function testInvalidStatusCode() : void

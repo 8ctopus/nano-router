@@ -37,7 +37,7 @@ final class NanoRouterTest extends TestCase
         static::assertSame('Not Found', $response->getReasonPhrase());
 
         // add index route
-        $router->addRoute(['HEAD', 'GET'], '/', function () : Response {
+        $router->addRoute(['HEAD', 'GET'], '/', function () : ResponseInterface {
             if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
                 return new Response(200);
             }
@@ -48,7 +48,7 @@ final class NanoRouterTest extends TestCase
         });
 
         // add another route
-        $router->addRoute('*', '/hello/', function () : Response {
+        $router->addRoute('*', '/hello/', function () : ResponseInterface {
             $stream = new Stream();
             $stream->write('hello');
             return new Response(200, [], $stream);
@@ -128,7 +128,7 @@ final class NanoRouterTest extends TestCase
         $router = new NanoRouter(Response::class);
 
         // add index route
-        $router->addRoute('GET', '/', function () : Response {
+        $router->addRoute('GET', '/', function () : ResponseInterface {
             throw new RouteException('test', 403);
         });
 
@@ -181,7 +181,7 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouter(Response::class);
 
-        $router->addErrorHandler(404, function () : Response {
+        $router->addErrorHandler(404, function () : ResponseInterface {
             $stream = new Stream();
             $stream->write('This page does not exist on the server');
             return new Response(404, [], $stream);
