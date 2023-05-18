@@ -37,7 +37,11 @@ final class NanoRouterTest extends TestCase
         static::assertSame('Not Found', $response->getReasonPhrase());
 
         // add index route
-        $router->addRoute('GET', '/', function () : Response {
+        $router->addRoute(['HEAD', 'GET'], '/', function () : Response {
+            if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
+                return new Response(200);
+            }
+
             $stream = new Stream();
             $stream->write('index');
             return new Response(200, [], $stream);
@@ -55,6 +59,12 @@ final class NanoRouterTest extends TestCase
 
         static::assertSame(200, $response->getStatusCode());
         static::assertSame('index', (string) $response->getBody());
+
+        $this->mockRequest('HEAD', '/');
+        $response = $router->resolve();
+
+        static::assertSame(200, $response->getStatusCode());
+        static::assertSame('', (string) $response->getBody());
 
         $this->mockRequest('GET', '/hello/');
         $response = $router->resolve();
@@ -74,7 +84,11 @@ final class NanoRouterTest extends TestCase
     public function testRegexRoute() : void
     {
         $router = (new NanoRouter(Response::class))
-            ->addRouteRegex('GET', '~/test(.*).php~', function () {
+            ->addRouteRegex(['HEAD', 'GET'], '~/test(.*).php~', function () {
+                if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
+                    return new Response(200);
+                }
+
                 $stream = new Stream();
                 $stream->write('test regex');
                 return new Response(200, [], $stream);
@@ -85,6 +99,12 @@ final class NanoRouterTest extends TestCase
 
         static::assertSame(200, $response->getStatusCode());
         static::assertSame('test regex', (string) $response->getBody());
+
+        $this->mockRequest('HEAD', '/test.php');
+        $response = $router->resolve();
+
+        static::assertSame(200, $response->getStatusCode());
+        static::assertSame('', (string) $response->getBody());
 
         $this->mockRequest('GET', '/test2.php');
         $response = $router->resolve();

@@ -40,7 +40,7 @@ $router->addRoute('GET', '/', function () : ResponseInterface {
     return new Response(200, [], $stream);
 });
 
-$router->addRoute('GET', '/test/', function () : ResponseInterface {
+$router->addRoute(['HEAD', 'GET'], '/test/', function () : ResponseInterface {
     $stream = new Stream();
     $stream->write(<<<'BODY'
     <html>

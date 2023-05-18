@@ -43,25 +43,20 @@ class NanoRouter
                     continue;
                 }
 
-                if (preg_match($regex, $requestPath, $matches) === 1) {
-                    if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
-                        // call middleware
-                        $response = $route['callback']();
+                if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
+                    // call middleware
+                    $response = $route['callback']();
 
-                        if ($response instanceof ResponseInterface) {
-                            return $response;
-                        }
+                    if ($response instanceof ResponseInterface) {
+                        return $response;
                     }
                 }
             }
         }
 
         foreach ($this->routes as $regex => $route) {
-            if (
-                (!$route['regex'] && $requestPath === $regex) ||
-                ($route['regex'] && preg_match($regex, $requestPath, $matches) === 1)
-            ) {
-                if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
+            if ($this->routeMatches($regex, $route['regex'], $requestPath)) {
+                if ($this->methodMatches($route['method'])) {
                     // call route
                     $response = $route['callback']();
                     break;
@@ -82,11 +77,9 @@ class NanoRouter
                     continue;
                 }
 
-                if (preg_match($regex, $requestPath, $matches) === 1) {
-                    if (in_array($route['method'], ['*', $_SERVER['REQUEST_METHOD']], true)) {
-                        // call middleware
-                        $response = $route['callback']($response);
-                    }
+                if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
+                    // call middleware
+                    $response = $route['callback']($response);
                 }
             }
         }
@@ -97,18 +90,17 @@ class NanoRouter
     /**
      * Add route
      *
-     * @param string   $method
+     * @param string|array   $methods
      * @param string   $path
      * @param callable $callback
      *
      * @return self
      */
-    public function addRoute(string $method, string $path, callable $callback) : self
+    public function addRoute($methods, string $path, callable $callback) : self
     {
         $this->routes[$path] = [
-            'type' => 'route',
             'regex' => false,
-            'method' => $method,
+            'method' => $methods,
             'callback' => $callback,
         ];
 
@@ -118,7 +110,7 @@ class NanoRouter
     /**
      * Add regex route
      *
-     * @param string   $method
+     * @param string|array   $methods
      * @param string   $regex
      * @param callable $callback
      *
@@ -126,7 +118,7 @@ class NanoRouter
      *
      * @throws NanoRouterException if regex is invalid
      */
-    public function addRouteRegex(string $method, string $regex, callable $callback) : self
+    public function addRouteRegex($methods, string $regex, callable $callback) : self
     {
         // validate regex
         if (!is_int(@preg_match($regex, ''))) {
@@ -134,9 +126,8 @@ class NanoRouter
         }
 
         $this->routes[$regex] = [
-            'type' => 'route',
             'regex' => true,
-            'method' => $method,
+            'method' => $methods,
             'callback' => $callback,
         ];
 
@@ -192,6 +183,40 @@ class NanoRouter
         ];
 
         return $this;
+    }
+
+    /**
+     * Check if route matches
+     *
+     * @param string $route
+     * @param bool $regex
+     * @param string $requestPath
+     *
+     * @return bool
+     */
+    private function routeMatches(string $route, bool $regex, string $requestPath) : bool
+    {
+        return (!$regex && $requestPath === $route) ||
+        ($regex && preg_match($route, $requestPath, $matches) === 1);
+    }
+
+    /**
+     * Check if method matches
+     *
+     * @param  string|array  $methods
+     * @return [type]
+     */
+    private function methodMatches(mixed $methods) : bool
+    {
+        if ($methods === '*') {
+            return true;
+        }
+
+        if (is_string($methods)) {
+            $methods = [$methods];
+        }
+
+        return in_array($_SERVER['REQUEST_METHOD'], $methods, true);
     }
 
     /**
