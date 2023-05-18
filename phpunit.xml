@@ -19,5 +19,8 @@
     <include>
       <directory suffix=".php">./src</directory>
     </include>
+    <exclude>
+      <file>./src/Response.php</file>
+    </exclude>
   </source>
 </phpunit>
