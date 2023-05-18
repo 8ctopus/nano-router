@@ -206,7 +206,7 @@ class NanoRouter
      * @param  string|array  $methods
      * @return [type]
      */
-    private function methodMatches(mixed $methods) : bool
+    private function methodMatches($methods) : bool
     {
         if ($methods === '*') {
             return true;
