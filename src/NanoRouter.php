@@ -58,7 +58,12 @@ class NanoRouter
             if ($this->routeMatches($regex, $route['regex'], $requestPath)) {
                 if ($this->methodMatches($route['method'])) {
                     // call route
-                    $response = $route['callback']();
+                    try {
+                        $response = $route['callback']();
+                    } catch (RouteException $exception) {
+                        $response = new $this->class($exception->getCode());
+                    }
+
                     break;
                 } else {
                     $response = $this->error(405, $requestPath);

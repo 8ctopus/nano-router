@@ -8,7 +8,7 @@ use HttpSoft\Message\Response;
 use HttpSoft\Message\Stream;
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\NanoRouterException;
-//use Oct8pus\NanoRouter\Response;
+use Oct8pus\NanoRouter\RouteException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
@@ -16,6 +16,7 @@ use Psr\Http\Message\ResponseInterface;
  * @internal
  *
  * @covers \Oct8pus\NanoRouter\NanoRouter
+ * @covers \Oct8pus\NanoRouter\RouteException
  */
 final class NanoRouterTest extends TestCase
 {
@@ -123,6 +124,39 @@ final class NanoRouterTest extends TestCase
         static::assertSame(405, $response->getStatusCode());
     }
 
+    public function testRouteExceptionHandling() : void
+    {
+        $router = new NanoRouter(Response::class);
+
+        // add index route
+        $router->addRoute('GET', '/', function () : Response {
+            throw new RouteException('test', 403);
+        });
+
+        $this->mockRequest('GET', '/');
+        $response = $router->resolve();
+
+        static::assertSame(403, $response->getStatusCode());
+    }
+
+    public function testPreMiddleware() : void
+    {
+        $router = (new NanoRouter(Response::class))
+            ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
+                if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+                    return new Response(401, ['WWW-Authenticate' => 'Basic']);
+                }
+
+                return null;
+            });
+
+        $this->mockRequest('GET', '/api/test.php');
+        $response = $router->resolve();
+
+        static::assertSame(401, $response->getStatusCode());
+        static::assertTrue($response->hasHeader('WWW-Authenticate'));
+    }
+
     public function testPostMiddleware() : void
     {
         $router = (new NanoRouter(Response::class))
@@ -142,24 +176,6 @@ final class NanoRouterTest extends TestCase
         static::assertSame(404, $response->getStatusCode());
         static::assertTrue($response->hasHeader('X-Test'));
         static::assertSame('8ctopus', $response->getHeaderLine('X-Powered-By'));
-    }
-
-    public function testPreMiddleware() : void
-    {
-        $router = (new NanoRouter(Response::class))
-            ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
-                if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
-                    return new Response(401, ['WWW-Authenticate' => 'Basic']);
-                }
-
-                return null;
-            });
-
-        $this->mockRequest('GET', '/api/test.php');
-        $response = $router->resolve();
-
-        static::assertSame(401, $response->getStatusCode());
-        static::assertTrue($response->hasHeader('WWW-Authenticate'));
     }
 
     public function testErrorHandler() : void
