@@ -16,7 +16,6 @@ use Psr\Http\Message\ResponseInterface;
  * @internal
  *
  * @covers \Oct8pus\NanoRouter\NanoRouter
- * @covers \Oct8pus\NanoRouter\RouteException
  */
 final class NanoRouterTest extends TestCase
 {
