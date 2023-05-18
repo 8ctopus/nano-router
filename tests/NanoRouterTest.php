@@ -49,7 +49,7 @@ final class NanoRouterTest extends TestCase
         });
 
         // add another route
-        $router->addRoute('GET', '/hello/', function () : Response {
+        $router->addRoute('*', '/hello/', function () : Response {
             $stream = new Stream();
             $stream->write('hello');
             return new Response(200, [], $stream);
