@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use HttpSoft\Message\Response;
-use HttpSoft\Message\Stream;
-use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\NanoRouterException;
 use Oct8pus\NanoRouter\RouteException;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
 
 /**
  * @internal
@@ -25,13 +21,11 @@ final class RouteExceptionTest extends TestCase
 
         static::assertSame('hello', $exception->getMessage());
         static::assertSame(403, $exception->getCode());
-        static::assertFalse($exception->debug());
 
-        $exception = new RouteException('hello', 403, true);
+        $exception = new RouteException('hello', 403);
 
         static::assertSame('hello', $exception->getMessage());
         static::assertSame(403, $exception->getCode());
-        static::assertTrue($exception->debug());
     }
 
     public function testInvalidStatusCode() : void

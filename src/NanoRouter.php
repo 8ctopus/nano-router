@@ -14,18 +14,23 @@ class NanoRouter
     private array $middleware;
     private array $errors;
 
+    private $onException;
+
     /**
      * Constructor
      *
      * @param string $class ResponseInterface implementation
+     * @param ?callable $onException
      */
-    public function __construct(string $class)
+    public function __construct(string $class, ?callable $onException)
     {
         $this->class = $class;
 
         $this->routes = [];
         $this->middleware = [];
         $this->errors = [];
+
+        $this->onException = $onException;
     }
 
     /**
@@ -48,8 +53,11 @@ class NanoRouter
                     try {
                         $response = $route['callback']();
                     } catch (RouteException $exception) {
-                        $headers = $exception->debug() ? ['reason' => $exception->getMessage()] : [];
-                        $response = new $this->class($exception->getCode(), $headers);
+                        if (is_callable($this->onException)) {
+                            call_user_func($this->onException, $exception);
+                        }
+
+                        $response = new $this->class($exception->getCode(), []);
                     }
 
                     if ($response instanceof ResponseInterface) {
@@ -66,8 +74,11 @@ class NanoRouter
                     try {
                         $response = $route['callback']();
                     } catch (RouteException $exception) {
-                        $headers = $exception->debug() ? ['reason' => $exception->getMessage()] : [];
-                        $response = new $this->class($exception->getCode(), $headers);
+                        if (is_callable($this->onException)) {
+                            call_user_func($this->onException, $exception);
+                        }
+
+                        $response = new $this->class($exception->getCode(), []);
                     }
 
                     break;
@@ -93,8 +104,11 @@ class NanoRouter
                     try {
                         $response = $route['callback']($response);
                     } catch (RouteException $exception) {
-                        $headers = $exception->debug() ? ['reason' => $exception->getMessage()] : [];
-                        $response = new $this->class($exception->getCode(), $headers);
+                        if (is_callable($this->onException)) {
+                            call_user_func($this->onException, $exception);
+                        }
+
+                        $response = new $this->class($exception->getCode(), []);
                     }
                 }
             }
