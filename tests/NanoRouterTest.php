@@ -156,6 +156,20 @@ final class NanoRouterTest extends TestCase
         static::assertTrue($response->hasHeader('WWW-Authenticate'));
     }
 
+    public function testPreMiddlewareException() : void
+    {
+        $router = (new NanoRouter(Response::class))
+            ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
+                throw new RouteException('not authorized', 401);
+            });
+
+        $this->mockRequest('GET', '/api/test.php');
+        $response = $router->resolve();
+
+        static::assertSame(401, $response->getStatusCode());
+        static::assertFalse($response->hasHeader('reason'));
+    }
+
     public function testPostMiddleware() : void
     {
         $router = (new NanoRouter(Response::class))
@@ -175,6 +189,20 @@ final class NanoRouterTest extends TestCase
         static::assertSame(404, $response->getStatusCode());
         static::assertTrue($response->hasHeader('X-Test'));
         static::assertSame('8ctopus', $response->getHeaderLine('X-Powered-By'));
+    }
+
+    public function testPostMiddlewareException() : void
+    {
+        $router = (new NanoRouter(Response::class))
+            ->addMiddleware('GET', '~/api/~', 'post', function () : ?ResponseInterface {
+                throw new RouteException('not authorized', 401);
+            });
+
+        $this->mockRequest('GET', '/api/test.php');
+        $response = $router->resolve();
+
+        static::assertSame(401, $response->getStatusCode());
+        static::assertFalse($response->hasHeader('reason'));
     }
 
     public function testErrorHandler() : void
