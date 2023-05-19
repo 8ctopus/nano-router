@@ -45,7 +45,12 @@ class NanoRouter
 
                 if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
                     // call middleware
-                    $response = $route['callback']();
+                    try {
+                        $response = $route['callback']();
+                    } catch (RouteException $exception) {
+                        $headers = $exception->debug() ? ['reason' => $exception->getMessage()] : [];
+                        $response = new $this->class($exception->getCode(), $headers);
+                    }
 
                     if ($response instanceof ResponseInterface) {
                         return $response;
@@ -85,7 +90,12 @@ class NanoRouter
 
                 if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
                     // call middleware
-                    $response = $route['callback']($response);
+                    try {
+                        $response = $route['callback']($response);
+                    } catch (RouteException $exception) {
+                        $headers = $exception->debug() ? ['reason' => $exception->getMessage()] : [];
+                        $response = new $this->class($exception->getCode(), $headers);
+                    }
                 }
             }
         }
