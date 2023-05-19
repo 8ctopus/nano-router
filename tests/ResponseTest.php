@@ -89,6 +89,8 @@ final class ResponseTest extends TestCase
     {
         static::expectException(NanoRouterException::class, 'Response already sent');
 
+        static::expectOutputString('hello world');
+
         (new Response(200, 'hello world', []))
             ->send()
             ->send();

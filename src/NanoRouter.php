@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Oct8pus\NanoRouter;
 
 use Psr\Http\Message\ResponseInterface;
+use Exception;
 
 class NanoRouter
 {
@@ -14,15 +15,24 @@ class NanoRouter
     private array $middleware;
     private array $errors;
 
+    /**
+     * @var ?callable
+     */
+    private $onRouteException;
+
+    /**
+     * @var ?callable
+     */
     private $onException;
 
     /**
      * Constructor
      *
      * @param string $class ResponseInterface implementation
+     * @param ?callable $onRouteException
      * @param ?callable $onException
      */
-    public function __construct(string $class, ?callable $onException)
+    public function __construct(string $class, ?callable $onRouteException, ?callable $onException)
     {
         $this->class = $class;
 
@@ -30,6 +40,7 @@ class NanoRouter
         $this->middleware = [];
         $this->errors = [];
 
+        $this->onRouteException = $onRouteException;
         $this->onException = $onException;
     }
 
@@ -52,12 +63,8 @@ class NanoRouter
                     // call middleware
                     try {
                         $response = $route['callback']();
-                    } catch (RouteException $exception) {
-                        if (is_callable($this->onException)) {
-                            call_user_func($this->onException, $exception);
-                        }
-
-                        $response = new $this->class($exception->getCode(), []);
+                    } catch (Exception $exception) {
+                        $response = $this->handleExceptions($exception);
                     }
 
                     if ($response instanceof ResponseInterface) {
@@ -73,12 +80,8 @@ class NanoRouter
                     // call route
                     try {
                         $response = $route['callback']();
-                    } catch (RouteException $exception) {
-                        if (is_callable($this->onException)) {
-                            call_user_func($this->onException, $exception);
-                        }
-
-                        $response = new $this->class($exception->getCode(), []);
+                    } catch (Exception $exception) {
+                        $response = $this->handleExceptions($exception);
                     }
 
                     break;
@@ -103,12 +106,8 @@ class NanoRouter
                     // call middleware
                     try {
                         $response = $route['callback']($response);
-                    } catch (RouteException $exception) {
-                        if (is_callable($this->onException)) {
-                            call_user_func($this->onException, $exception);
-                        }
-
-                        $response = new $this->class($exception->getCode(), []);
+                    } catch (Exception $exception) {
+                        $response = $this->handleExceptions($exception);
                     }
                 }
             }
@@ -247,6 +246,37 @@ class NanoRouter
         }
 
         return in_array($_SERVER['REQUEST_METHOD'], $methods, true);
+    }
+
+    /**
+     * Handle exceptions
+     *
+     * @param  Exception $exception
+     *
+     * @return ResponseInterface
+     *
+     * @throws Exception
+     */
+    private function handleExceptions(Exception $exception) : ResponseInterface
+    {
+        // route exceptions always return an error response
+        if ($exception instanceof RouteException) {
+            if (is_callable($this->onRouteException)) {
+                call_user_func($this->onRouteException, $exception);
+            }
+
+            return new $this->class($exception->getCode(), []);
+        }
+
+        // exceptions return a server error response when they handler returns true
+        if (is_callable($this->onException)) {
+            if (call_user_func($this->onException, $exception)) {
+                return new $this->class(500, []);
+            }
+        }
+
+        // otherwise the exception is rethrown
+        throw $exception;
     }
 
     /**

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Demo;
 
+use Exception;
+
 // use any PSR-7 implementation
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
@@ -20,11 +22,15 @@ require_once __DIR__ . '/../../vendor/autoload.php';
     ->pushHandler(new PrettyPageHandler())
     ->register();
 
-function exceptionHandler(RouteException $exception) {
+function routeExceptionHandler(RouteException $exception) {
+    error_log("handled route exception [{$exception->getCode()}] {$exception->getMessage()}");
+}
+
+function exceptionHandler(Exception $exception) {
     error_log("handled exception [{$exception->getCode()}] {$exception->getMessage()}");
 }
 
-$router = new NanoRouter(Response::class, exceptionHandler(...));
+$router = new NanoRouter(Response::class, routeExceptionHandler(...), exceptionHandler(...));
 
 $router->addRoute('GET', '/', function () : ResponseInterface {
     $stream = new Stream();
