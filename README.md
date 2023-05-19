@@ -85,6 +85,17 @@ $response = $router->resolve();
     ->emit($response);
 ```
 
+## advanced functionalities
+
+There is more to it, it's just not in the readme yet, such as:
+
+- multiple route methods
+- pre and post middleware
+- route exception handling
+- generic exception handling
+
+Most of it is shown in the demo
+
 ## run tests
 
     composer test
