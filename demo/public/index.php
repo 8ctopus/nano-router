@@ -9,6 +9,7 @@ use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
 use HttpSoft\Message\Stream;
 use Oct8pus\NanoRouter\NanoRouter;
+use Oct8pus\NanoRouter\RouteException;
 use Psr\Http\Message\ResponseInterface;
 use Whoops\Handler\PrettyPageHandler;
 use Whoops\Run;
@@ -19,7 +20,11 @@ require_once __DIR__ . '/../../vendor/autoload.php';
     ->pushHandler(new PrettyPageHandler())
     ->register();
 
-$router = new NanoRouter(Response::class);
+function exceptionHandler(RouteException $exception) {
+    error_log("handled exception [{$exception->getCode()}] {$exception->getMessage()}");
+}
+
+$router = new NanoRouter(Response::class, exceptionHandler(...));
 
 $router->addRoute('GET', '/', function () : ResponseInterface {
     $stream = new Stream();
@@ -31,7 +36,8 @@ $router->addRoute('GET', '/', function () : ResponseInterface {
     <ul>
     <li>link to the <a href="/test/">test page</a></li>
     <li>link to <a href="/phpinfo/">one</a> of the php.* pages</li>
-    <li>This is a <a href="/not-found/">broken link</a> for testing purposes.</li>
+    <li>This is a <a href="/not-found/">broken link</a> for testing purposes</li>
+    <li>This is a <a href="/exception/">exception handling</a> test</li>
     </ul>
     </body>
     </html>
@@ -59,6 +65,10 @@ $router->addRouteRegex('*', '~^/php(.*)/~', function () : ResponseInterface {
     $stream->write('match regex route');
 
     return new Response(200, [], $stream);
+});
+
+$router->addRoute('GET', '/exception/', function () : ResponseInterface {
+    throw new RouteException('not authorized', 403);
 });
 
 $router->addErrorHandler(404, function () : ResponseInterface {
