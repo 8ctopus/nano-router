@@ -50,7 +50,7 @@ use HttpSoft\Emitter\SapiEmitter;
 
 require_once 'vendor/autoload.php';
 
-$router = new NanoRouter(Response::class);
+$router = new NanoRouter(Response::class, null);
 
 $router
     // add simple route
