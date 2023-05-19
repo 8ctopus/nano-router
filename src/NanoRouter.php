@@ -125,7 +125,7 @@ class NanoRouter
      *
      * @return self
      */
-    public function addRoute($methods, string $path, callable $callback) : self
+    public function addRoute(string|array $methods, string $path, callable $callback) : self
     {
         $this->routes[$path] = [
             'regex' => false,
@@ -147,7 +147,7 @@ class NanoRouter
      *
      * @throws NanoRouterException if regex is invalid
      */
-    public function addRouteRegex($methods, string $regex, callable $callback) : self
+    public function addRouteRegex(string|array $methods, string $regex, callable $callback) : self
     {
         // validate regex
         if (!is_int(@preg_match($regex, ''))) {
@@ -235,7 +235,7 @@ class NanoRouter
      * @param  string|array  $methods
      * @return [type]
      */
-    private function methodMatches($methods) : bool
+    private function methodMatches(string|array $methods) : bool
     {
         if ($methods === '*') {
             return true;
