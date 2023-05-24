@@ -53,25 +53,10 @@ class NanoRouter
     {
         $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        foreach ($this->middleware as $middleware) {
-            foreach ($middleware as $regex => $route) {
-                if ($route['when'] !== 'pre') {
-                    continue;
-                }
+        $response = $this->preMiddleware($requestPath);
 
-                if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
-                    // call middleware
-                    try {
-                        $response = $route['callback']();
-                    } catch (Exception $exception) {
-                        $response = $this->handleExceptions($exception);
-                    }
-
-                    if ($response instanceof ResponseInterface) {
-                        return $response;
-                    }
-                }
-            }
+        if ($response) {
+            return $response;
         }
 
         foreach ($this->routes as $regex => $route) {
@@ -96,6 +81,55 @@ class NanoRouter
             $response = $this->error(404, $requestPath);
         }
 
+        return $this->postMiddleware($response, $requestPath);
+    }
+
+    /**
+     * Pre request middleware
+     *
+     * @param  string $requestPath
+     *
+     * @return ?ResponseInterface
+     *
+     * @note only first pre request middlware will be processed
+     */
+    protected function preMiddleware(string $requestPath) : ?ResponseInterface
+    {
+        foreach ($this->middleware as $middleware) {
+            foreach ($middleware as $regex => $route) {
+                if ($route['when'] !== 'pre') {
+                    continue;
+                }
+
+                if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
+                    // call middleware
+                    try {
+                        $response = $route['callback']();
+                    } catch (Exception $exception) {
+                        $response = $this->handleExceptions($exception);
+                    }
+
+                    if ($response instanceof ResponseInterface) {
+                        return $response;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Post request middleware
+     *
+     * @param  string $requestPath
+     *
+     * @return ?ResponseInterface
+     *
+     * @note all post request middleware will be processed
+     */
+    protected function postMiddleware(ResponseInterface $response, string $requestPath) : ?ResponseInterface
+    {
         foreach ($this->middleware as $middleware) {
             foreach ($middleware as $regex => $route) {
                 if ($route['when'] !== 'post') {
@@ -113,7 +147,7 @@ class NanoRouter
             }
         }
 
-        return $response;
+        return isset($response) ? $response : null;
     }
 
     /**
