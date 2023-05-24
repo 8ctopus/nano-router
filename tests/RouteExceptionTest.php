@@ -19,27 +19,27 @@ final class RouteExceptionTest extends TestCase
     {
         $exception = new RouteException('hello', 403);
 
-        static::assertSame('hello', $exception->getMessage());
-        static::assertSame(403, $exception->getCode());
+        self::assertSame('hello', $exception->getMessage());
+        self::assertSame(403, $exception->getCode());
 
         $exception = new RouteException('hello', 403);
 
-        static::assertSame('hello', $exception->getMessage());
-        static::assertSame(403, $exception->getCode());
+        self::assertSame('hello', $exception->getMessage());
+        self::assertSame(403, $exception->getCode());
     }
 
     public function testInvalidStatusCode() : void
     {
-        static::expectException(NanoRouterException::class);
-        static::expectExceptionMessage('invalid status code - 99');
+        self::expectException(NanoRouterException::class);
+        self::expectExceptionMessage('invalid status code - 99');
 
         new RouteException('test', 99);
     }
 
     public function testInvalidStatusCode2() : void
     {
-        static::expectException(NanoRouterException::class);
-        static::expectExceptionMessage('invalid status code - 600');
+        self::expectException(NanoRouterException::class);
+        self::expectExceptionMessage('invalid status code - 600');
 
         new RouteException('test', 600);
     }

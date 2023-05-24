@@ -19,28 +19,28 @@ final class ResponseTest extends TestCase
     {
         $response = new Response(200, 'hello');
 
-        static::assertSame(200, $response->getStatusCode());
-        static::assertSame('hello', $response->getBodyText());
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('hello', $response->getBodyText());
 
         $response->withStatus(201);
         $response->withBodyText('world');
 
-        static::assertSame(201, $response->getStatusCode());
-        static::assertSame('world', $response->getBodyText());
+        self::assertSame(201, $response->getStatusCode());
+        self::assertSame('world', $response->getBodyText());
     }
 
     public function testResponseError() : void
     {
         $response = new Response(404);
 
-        static::assertSame(404, $response->getStatusCode());
-        static::assertSame('', $response->getBodyText());
-        static::assertSame('Not Found', $response->getReasonPhrase());
+        self::assertSame(404, $response->getStatusCode());
+        self::assertSame('', $response->getBodyText());
+        self::assertSame('Not Found', $response->getReasonPhrase());
 
         $response = new Response(410, 'custom message');
 
-        static::assertSame(410, $response->getStatusCode());
-        static::assertSame('custom message', $response->getBodyText());
+        self::assertSame(410, $response->getStatusCode());
+        self::assertSame('custom message', $response->getBodyText());
     }
 
     public function testToString() : void
@@ -56,27 +56,27 @@ final class ResponseTest extends TestCase
 
         STR;
 
-        static::assertSame($expected, $result);
+        self::assertSame($expected, $result);
     }
 
     public function testHeaders() : void
     {
         $response = new Response(301, '', ['location' => 'http://localhost']);
 
-        static::assertSame(['location' => 'http://localhost'], $response->getHeaders());
+        self::assertSame(['location' => 'http://localhost'], $response->getHeaders());
 
         $response = $response->withoutHeader('location');
 
-        static::assertSame([], $response->getHeaders());
+        self::assertSame([], $response->getHeaders());
 
         $response->withHeader('content-type', 'application/json');
 
-        static::assertSame(['content-type' => 'application/json'], $response->getHeaders());
+        self::assertSame(['content-type' => 'application/json'], $response->getHeaders());
     }
 
     public function testSend() : void
     {
-        static::expectOutputString(<<<'OUTPUT'
+        self::expectOutputString(<<<'OUTPUT'
         header: content-type: application/json
         {"title": "hello world"}
         OUTPUT);
@@ -87,9 +87,9 @@ final class ResponseTest extends TestCase
 
     public function testReSend() : void
     {
-        static::expectException(NanoRouterException::class, 'Response already sent');
+        self::expectException(NanoRouterException::class, 'Response already sent');
 
-        static::expectOutputString('hello world');
+        self::expectOutputString('hello world');
 
         (new Response(200, 'hello world', []))
             ->send()

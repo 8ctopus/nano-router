@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Oct8pus\NanoRouter;
 
-use Psr\Http\Message\ResponseInterface;
 use Exception;
+use Psr\Http\Message\ResponseInterface;
 
 class NanoRouter
 {
@@ -28,7 +28,7 @@ class NanoRouter
     /**
      * Constructor
      *
-     * @param string $class ResponseInterface implementation
+     * @param string    $class            ResponseInterface implementation
      * @param ?callable $onRouteException
      * @param ?callable $onException
      */
@@ -86,78 +86,11 @@ class NanoRouter
     }
 
     /**
-     * Pre request middleware
-     *
-     * @param  string $requestPath
-     *
-     * @return ?ResponseInterface
-     *
-     * @note only first matching pre request middlware will be executed
-     */
-    protected function preMiddleware(string $requestPath) : ?ResponseInterface
-    {
-        foreach ($this->middleware as $middleware) {
-            foreach ($middleware as $regex => $route) {
-                if ($route['when'] !== 'pre') {
-                    continue;
-                }
-
-                if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
-                    // call middleware
-                    try {
-                        $response = $route['callback']();
-                    } catch (Exception $exception) {
-                        $response = $this->handleExceptions($exception);
-                    }
-
-                    if ($response instanceof ResponseInterface) {
-                        return $response;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Post request middleware
-     *
-     * @param  ResponseInterface $response
-     * @param  string $requestPath
-     *
-     * @return ?ResponseInterface
-     *
-     * @note all matching post request middleware will be executed
-     */
-    protected function postMiddleware(ResponseInterface $response, string $requestPath) : ?ResponseInterface
-    {
-        foreach ($this->middleware as $middleware) {
-            foreach ($middleware as $regex => $route) {
-                if ($route['when'] !== 'post') {
-                    continue;
-                }
-
-                if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
-                    // call middleware
-                    try {
-                        $response = $route['callback']($response);
-                    } catch (Exception $exception) {
-                        $response = $this->handleExceptions($exception);
-                    }
-                }
-            }
-        }
-
-        return isset($response) ? $response : null;
-    }
-
-    /**
      * Add route
      *
-     * @param string|array   $methods
-     * @param string   $path
-     * @param callable $callback
+     * @param array|string $methods
+     * @param string       $path
+     * @param callable     $callback
      *
      * @return self
      */
@@ -175,9 +108,9 @@ class NanoRouter
     /**
      * Add regex route
      *
-     * @param string|array   $methods
-     * @param string   $regex
-     * @param callable $callback
+     * @param array|string $methods
+     * @param string       $regex
+     * @param callable     $callback
      *
      * @return self
      *
@@ -221,7 +154,7 @@ class NanoRouter
      *
      * @param string   $method
      * @param string   $regex
-     * @param string   $when - pre or post
+     * @param string   $when     - pre or post
      * @param callable $callback
      *
      * @return self
@@ -244,31 +177,99 @@ class NanoRouter
                 'method' => $method,
                 'when' => $when,
                 'callback' => $callback,
-            ]
+            ],
         ];
 
         return $this;
     }
 
     /**
+     * Pre request middleware
+     *
+     * @param string $requestPath
+     *
+     * @return ?ResponseInterface
+     *
+     * @note only first matching pre request middlware will be executed
+     */
+    protected function preMiddleware(string $requestPath) : ?ResponseInterface
+    {
+        foreach ($this->middleware as $middleware) {
+            foreach ($middleware as $regex => $route) {
+                if ($route['when'] !== 'pre') {
+                    continue;
+                }
+
+                if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
+                    // call middleware
+                    try {
+                        $response = $route['callback']();
+                    } catch (Exception $exception) {
+                        $response = $this->handleExceptions($exception);
+                    }
+
+                    if ($response instanceof ResponseInterface) {
+                        return $response;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Post request middleware
+     *
+     * @param ResponseInterface $response
+     * @param string            $requestPath
+     *
+     * @return ?ResponseInterface
+     *
+     * @note all matching post request middleware will be executed
+     */
+    protected function postMiddleware(ResponseInterface $response, string $requestPath) : ?ResponseInterface
+    {
+        foreach ($this->middleware as $middleware) {
+            foreach ($middleware as $regex => $route) {
+                if ($route['when'] !== 'post') {
+                    continue;
+                }
+
+                if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
+                    // call middleware
+                    try {
+                        $response = $route['callback']($response);
+                    } catch (Exception $exception) {
+                        $response = $this->handleExceptions($exception);
+                    }
+                }
+            }
+        }
+
+        return isset($response) ? $response : null;
+    }
+
+    /**
      * Check if route matches
      *
      * @param string $route
-     * @param bool $regex
+     * @param bool   $regex
      * @param string $requestPath
      *
      * @return bool
      */
     private function routeMatches(string $route, bool $regex, string $requestPath) : bool
     {
-        return (!$regex && $requestPath === $route) ||
-        ($regex && preg_match($route, $requestPath, $matches) === 1);
+        return (!$regex && $requestPath === $route)
+        || ($regex && preg_match($route, $requestPath, $matches) === 1);
     }
 
     /**
      * Check if method matches
      *
-     * @param  string|array  $methods
+     * @param array|string $methods
+     *
      * @return [type]
      */
     private function methodMatches(string|array $methods) : bool
@@ -287,7 +288,7 @@ class NanoRouter
     /**
      * Handle exceptions
      *
-     * @param  Exception $exception
+     * @param Exception $exception
      *
      * @return ResponseInterface
      *

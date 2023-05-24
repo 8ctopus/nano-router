@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Demo;
 
 use Exception;
-
 // use any PSR-7 implementation
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
@@ -122,7 +121,7 @@ $response = $router->resolve();
 /**
  * Route exception handler
  *
- * @param  RouteException $exception
+ * @param RouteException $exception
  *
  * @return void
  */
@@ -134,7 +133,7 @@ function routeExceptionHandler(RouteException $exception) : void
 /**
  * Generic exception handler
  *
- * @param  Exception $exception
+ * @param Exception $exception
  *
  * @return bool if true, exception is converted in Response 500, if false exception is rethrown
  */
