@@ -56,6 +56,7 @@ class NanoRouter
         $response = $this->preMiddleware($requestPath);
 
         if ($response) {
+            // send response to post request middleware so it has a chance to process the request
             return $this->postMiddleware($response, $requestPath);
         }
 
@@ -91,7 +92,7 @@ class NanoRouter
      *
      * @return ?ResponseInterface
      *
-     * @note only first pre request middlware will be processed
+     * @note only first matching pre request middlware will be executed
      */
     protected function preMiddleware(string $requestPath) : ?ResponseInterface
     {
@@ -122,11 +123,12 @@ class NanoRouter
     /**
      * Post request middleware
      *
+     * @param  ResponseInterface $response
      * @param  string $requestPath
      *
      * @return ?ResponseInterface
      *
-     * @note all post request middleware will be processed
+     * @note all matching post request middleware will be executed
      */
     protected function postMiddleware(ResponseInterface $response, string $requestPath) : ?ResponseInterface
     {
