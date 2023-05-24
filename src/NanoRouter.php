@@ -56,7 +56,7 @@ class NanoRouter
         $response = $this->preMiddleware($requestPath);
 
         if ($response) {
-            return $response;
+            return $this->postMiddleware($response, $requestPath);
         }
 
         foreach ($this->routes as $regex => $route) {
