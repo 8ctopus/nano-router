@@ -184,7 +184,7 @@ final class NanoRouterTest extends TestCase
     {
         $router = (new NanoRouter(Response::class, self::routeExceptionHandler(...), self::exceptionHandler(...)))
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
-                throw new Exception('fatal error');
+                throw new Exception('fatal error', 500);
             });
 
         $this->mockRequest('GET', '/api/test.php');
@@ -201,7 +201,7 @@ final class NanoRouterTest extends TestCase
     {
         $router = (new NanoRouter(Response::class, self::routeExceptionHandler(...), self::exceptionHandlerThrow(...)))
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
-                throw new Exception('fatal error');
+                throw new Exception('fatal error', 500);
             });
 
         $this->mockRequest('GET', '/api/test.php');
@@ -259,7 +259,7 @@ final class NanoRouterTest extends TestCase
     {
         $router = (new NanoRouter(Response::class, self::routeExceptionHandler(...), self::exceptionHandler(...)))
             ->addMiddleware('GET', '~/api/~', 'post', function () : ?ResponseInterface {
-                throw new Exception('fatal error');
+                throw new Exception('fatal error', 500);
             });
 
         $this->mockRequest('GET', '/api/test.php');
@@ -327,18 +327,18 @@ final class NanoRouterTest extends TestCase
         echo 'route exception handler called';
     }
 
-    public static function exceptionHandler(Exception $exception) : bool
+    public static function exceptionHandler(Exception $exception) : ?ResponseInterface
     {
         $exception = $exception;
         echo 'exception handler called';
-        return true;
+        return new Response($exception->getCode());
     }
 
-    public static function exceptionHandlerThrow(Exception $exception) : bool
+    public static function exceptionHandlerThrow(Exception $exception) : ?ResponseInterface
     {
         $exception = $exception;
         echo 'exception handler called';
-        return false;
+        return null;
     }
 
     private function mockRequest($method, $uri) : void

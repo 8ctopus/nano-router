@@ -305,10 +305,12 @@ class NanoRouter
             return new $this->class($exception->getCode(), []);
         }
 
-        // exceptions return a server error response when they handler returns true
+        // exceptions can be converted to a response
         if (is_callable($this->onException)) {
-            if (call_user_func($this->onException, $exception)) {
-                return new $this->class(500, []);
+            $response = call_user_func($this->onException, $exception);
+
+            if ($response) {
+                return $response;
             }
         }
 

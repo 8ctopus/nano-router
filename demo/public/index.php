@@ -35,8 +35,8 @@ $router->addRoute('GET', '/', function () : ResponseInterface {
     <li>link to <a href="/phpinfo/">one</a> of the php.* pages</li>
     <li>This is a <a href="/not-found/">broken link</a> for testing purposes</li>
     <li><a href="/route-exception/">route exception test</a></li>
-    <li><a href="/fatal-exception-handled/">fatal exception test (handled)</a></li>
-    <li><a href="/fatal-exception-unhandled/">fatal exception test (unhandled)</a></li>
+    <li><a href="/fatal-exception-handled/">fatal exception test (handled exception = a response is returned)</a></li>
+    <li><a href="/fatal-exception-unhandled/">fatal exception test (unhandled exception)</a></li>
     </ul>
     </body>
     </html>
@@ -71,7 +71,7 @@ $router->addRoute('GET', '/route-exception/', function () : ResponseInterface {
 });
 
 $router->addRoute('GET', '/fatal-exception-handled/', function () : ResponseInterface {
-    throw new Exception('fatal error');
+    throw new Exception('fatal error', 500);
 });
 
 $router->addRoute('GET', '/fatal-exception-unhandled/', function () : ResponseInterface {
@@ -135,15 +135,15 @@ function routeExceptionHandler(RouteException $exception) : void
  *
  * @param Exception $exception
  *
- * @return bool if true, exception is converted in Response 500, if false exception is rethrown
+ * @return ?ResponseInterface if no
  */
-function exceptionHandler(Exception $exception) : bool
+function exceptionHandler(Exception $exception) : ?ResponseInterface
 {
     error_log("handled exception [{$exception->getCode()}] {$exception->getMessage()}");
 
     if (str_contains($_SERVER['REQUEST_URI'], 'unhandled')) {
-        return false;
+        return null;
     } else {
-        return true;
+        return new Response($exception->getCode());
     }
 }
