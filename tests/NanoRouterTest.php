@@ -146,6 +146,9 @@ final class NanoRouterTest extends TestCase
     {
         $router = (new NanoRouter(Response::class, self::routeExceptionHandler(...), self::exceptionHandler(...)))
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
+                return null;
+            })
+            ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
                     return new Response(401, ['WWW-Authenticate' => 'Basic']);
                 }
