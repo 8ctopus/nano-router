@@ -25,9 +25,10 @@ The demo can also be started using Docker `docker-compose up &`.
 ```apache
 RewriteEngine on
 
-# redirect all not existing files to router
+# redirect all not existing files and directories to router
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ /index.php [L]
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [END]
 ```
 
 and for nginx (untested)
@@ -94,7 +95,7 @@ There is more to it, it's just not in the readme yet, such as:
 - route exception handling
 - generic exception handling
 
-Most of it is shown in the demo
+but most of it is shown in the demo
 
 ## run tests
 
