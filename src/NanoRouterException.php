@@ -7,5 +7,4 @@ namespace Oct8pus\NanoRouter;
 use Exception;
 
 class NanoRouterException extends Exception
-{
-}
+{}
