@@ -61,6 +61,17 @@ final class NanoRouterTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
         self::assertSame('index', (string) $response->getBody());
 
+        $this->mockRequest('GET', '/?foo=bar');
+        $response = $router->resolve();
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('index', (string) $response->getBody());
+
+        $this->mockRequest('GET', '/index.php');
+        $response = $router->resolve();
+
+        self::assertSame(404, $response->getStatusCode());
+
         $this->mockRequest('HEAD', '/');
         $response = $router->resolve();
 
