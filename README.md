@@ -44,10 +44,12 @@ location / {
 ```php
 use Oct8pus\NanoRouter\NanoRouter;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 // use any PSR-7 implementation, here HttpSoft's one
 use HttpSoft\Message\Response;
 use HttpSoft\Emitter\SapiEmitter;
+use HttpSoft\Message\ServerRequestFactory;
 
 require_once 'vendor/autoload.php';
 
@@ -64,7 +66,7 @@ $router
     // add starts with route
     ->addRouteStartsWith('GET', '/test/', function () : ResponseInterface {
         $stream = new Stream();
-        $stream->write('test/*');
+        $stream->write('/test/*');
 
         return new Response(200, [], $stream);
     })

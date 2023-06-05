@@ -8,10 +8,12 @@ use Exception;
 // use any PSR-7 implementation
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
+use HttpSoft\Message\ServerRequestFactory;
 use HttpSoft\Message\Stream;
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\RouteException;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Whoops\Handler\PrettyPageHandler;
 use Whoops\Run;
 
@@ -21,7 +23,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
     ->pushHandler(new PrettyPageHandler())
     ->register();
 
-$router = new NanoRouter(Response::class);
+$router = new NanoRouter(Response::class, ServerRequestFactory::class);
 
 $router->addRoute('GET', '/', function () : ResponseInterface {
     $stream = new Stream();
@@ -59,11 +61,12 @@ $router->addRoute(['HEAD', 'GET'], '/test/', function () : ResponseInterface {
     return new Response(200, [], $stream);
 });
 
-$router->addRouteStartWith('*', '/php', function () : ResponseInterface {
+$router->addRouteStartWith('*', '/php', function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();
-    $stream->write('match starts with route');
+    $stream->write('match starts with route' . PHP_EOL);
+    $stream->write('request target - '. $request->getRequestTarget());
 
-    return new Response(200, [], $stream);
+    return new Response(200, ['content-type' => 'text/plain'], $stream);
 });
 
 $router->addRoute('GET', '/route-exception/', function () : ResponseInterface {

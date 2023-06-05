@@ -7,6 +7,7 @@ namespace Tests;
 use Exception;
 use HttpSoft\Message\Response;
 use HttpSoft\Message\Stream;
+use HttpSoft\Message\ServerRequestFactory;
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\NanoRouterException;
 use Oct8pus\NanoRouter\RouteException;
@@ -22,7 +23,7 @@ final class NanoRouterTest extends TestCase
 {
     public function testRoute() : void
     {
-        $router = new NanoRouterMock(Response::class);
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         // 404
         $this->mockRequest('GET', '/');
@@ -90,7 +91,7 @@ final class NanoRouterTest extends TestCase
 
     public function testStartsWithRoute() : void
     {
-        $router = new NanoRouterMock(Response::class);
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         // add index route
         $router->addRouteStartWith(['HEAD', 'GET'], '/hello/', function () : ResponseInterface {
@@ -137,7 +138,7 @@ final class NanoRouterTest extends TestCase
 
     public function testRegexRoute() : void
     {
-        $router = (new NanoRouterMock(Response::class))
+        $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class))
             ->addRouteRegex(['HEAD', 'GET'], '~/test(.*).php~', function () {
                 if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
                     return new Response(200);
@@ -179,7 +180,7 @@ final class NanoRouterTest extends TestCase
 
     public function testDefaultRouteExceptionHandler() : void
     {
-        $router = new NanoRouterMock(Response::class);
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         $router->addRoute('GET', '/', function () : ResponseInterface {
             throw new RouteException('test', 403);
@@ -196,7 +197,7 @@ final class NanoRouterTest extends TestCase
 
     public function testCustomRouteExceptionHandler() : void
     {
-        $router = new NanoRouterMock(Response::class, self::routeExceptionHandler(...));
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class, self::routeExceptionHandler(...));
 
         $router->addRoute('GET', '/', function () : ResponseInterface {
             throw new RouteException('test', 403);
@@ -213,7 +214,7 @@ final class NanoRouterTest extends TestCase
 
     public function testNoRouteExceptionHandler() : void
     {
-        $router = new NanoRouterMock(Response::class, false);
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class, false);
 
         $router->addRoute('GET', '/', function () : ResponseInterface {
             throw new RouteException('test', 403);
@@ -230,7 +231,7 @@ final class NanoRouterTest extends TestCase
 
     public function testDefaultExceptionHandler() : void
     {
-        $router = new NanoRouterMock(Response::class);
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         $router->addRoute('GET', '/', function () : ResponseInterface {
             throw new Exception('test', 403);
@@ -244,7 +245,7 @@ final class NanoRouterTest extends TestCase
         self::assertEmpty((string) $response->getBody());
         self::expectOutputString('');
 
-        $router = new NanoRouterMock(Response::class);
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         $router->addRoute('GET', '/', function () : ResponseInterface {
             throw new Exception('test');
@@ -260,7 +261,7 @@ final class NanoRouterTest extends TestCase
 
     public function testNoExceptionHandler() : void
     {
-        $router = new NanoRouterMock(Response::class, true, false);
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class, true, false);
 
         $router->addRoute('GET', '/', function () : ResponseInterface {
             throw new Exception('test', 403);
@@ -274,7 +275,7 @@ final class NanoRouterTest extends TestCase
 
     public function testPreMiddleware() : void
     {
-        $router = (new NanoRouterMock(Response::class))
+        $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class))
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 return null;
             })
@@ -295,7 +296,7 @@ final class NanoRouterTest extends TestCase
 
     public function testPreMiddlewareRouteException() : void
     {
-        $router = (new NanoRouterMock(Response::class, self::routeExceptionHandler(...)))
+        $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class, self::routeExceptionHandler(...)))
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 throw new RouteException('not authorized', 401);
             });
@@ -312,7 +313,7 @@ final class NanoRouterTest extends TestCase
 
     public function testPreMiddlewareHandledException() : void
     {
-        $router = (new NanoRouterMock(Response::class, true, self::exceptionHandler(...)))
+        $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class, true, self::exceptionHandler(...)))
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 throw new Exception('fatal error', 500);
             });
@@ -329,7 +330,7 @@ final class NanoRouterTest extends TestCase
 
     public function testPreMiddlewareThrownException() : void
     {
-        $router = (new NanoRouterMock(Response::class, self::routeExceptionHandler(...), self::exceptionHandlerThrow(...)))
+        $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class, self::routeExceptionHandler(...), self::exceptionHandlerThrow(...)))
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 throw new Exception('fatal error', 500);
             });
@@ -346,7 +347,7 @@ final class NanoRouterTest extends TestCase
 
     public function testPostMiddleware() : void
     {
-        $router = (new NanoRouterMock(Response::class))
+        $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class))
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 return null;
             })
@@ -370,7 +371,7 @@ final class NanoRouterTest extends TestCase
 
     public function testPostMiddlewareRouteException() : void
     {
-        $router = (new NanoRouterMock(Response::class, self::routeExceptionHandler(...)))
+        $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class, self::routeExceptionHandler(...)))
             ->addMiddleware('GET', '~/api/~', 'post', function () : ?ResponseInterface {
                 throw new RouteException('not authorized', 401);
             });
@@ -387,7 +388,7 @@ final class NanoRouterTest extends TestCase
 
     public function testPostMiddlewareException() : void
     {
-        $router = (new NanoRouterMock(Response::class, true, self::exceptionHandler(...)))
+        $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class, true, self::exceptionHandler(...)))
             ->addMiddleware('GET', '~/api/~', 'post', function () : ?ResponseInterface {
                 throw new Exception('fatal error', 500);
             });
@@ -404,7 +405,7 @@ final class NanoRouterTest extends TestCase
 
     public function testErrorHandler() : void
     {
-        $router = new NanoRouterMock(Response::class);
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         $router->addErrorHandler(404, function () : ResponseInterface {
             $stream = new Stream();
@@ -423,7 +424,7 @@ final class NanoRouterTest extends TestCase
 
     public function testRouteInvalidRegex() : void
     {
-        $router = new NanoRouterMock(Response::class);
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         self::expectException(NanoRouterException::class);
         self::expectExceptionMessage('invalid regex');
@@ -433,7 +434,7 @@ final class NanoRouterTest extends TestCase
 
     public function testMiddlewareInvalidRegex() : void
     {
-        $router = new NanoRouterMock(Response::class);
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         self::expectException(NanoRouterException::class);
         self::expectExceptionMessage('invalid regex');
@@ -443,7 +444,7 @@ final class NanoRouterTest extends TestCase
 
     public function testMiddlewareInvalidWhen() : void
     {
-        $router = new NanoRouterMock(Response::class);
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         self::expectException(NanoRouterException::class);
         self::expectExceptionMessage('invalid when clause');

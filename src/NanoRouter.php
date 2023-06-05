@@ -9,7 +9,8 @@ use Psr\Http\Message\ResponseInterface;
 
 class NanoRouter
 {
-    private string $class;
+    private string $response;
+    private string $serverRequestFactory;
 
     private array $routes;
     private array $middleware;
@@ -28,13 +29,15 @@ class NanoRouter
     /**
      * Constructor
      *
-     * @param string        $class            ResponseInterface implementation
+     * @param string        $response             ResponseInterface implementation
+     * @param string        $serverRequestFactory ServerRequestFactoryInterface implementation
      * @param bool|callable $onRouteException
      * @param bool|callable $onException
      */
-    public function __construct(string $class, bool|callable $onRouteException = true, bool|callable $onException = true)
+    public function __construct(string $response, string $serverRequestFactory, bool|callable $onRouteException = true, bool|callable $onException = true)
     {
-        $this->class = $class;
+        $this->response = $response;
+        $this->serverRequestFactory = $serverRequestFactory;
 
         $this->routes = [];
         $this->middleware = [];
@@ -78,7 +81,14 @@ class NanoRouter
                 if ($this->methodMatches($route['method'])) {
                     // call route
                     try {
-                        $response = $route['callback']();
+                        $request = (new $this->serverRequestFactory())
+                            ->createServerRequest(
+                            $_SERVER['REQUEST_METHOD'],
+                            $_SERVER['REQUEST_URI'],
+                            $_SERVER,
+                        );
+
+                        $response = $route['callback']($request);
                     } catch (Exception $exception) {
                         $response = $this->handleExceptions($exception);
                     }
@@ -355,7 +365,7 @@ class NanoRouter
                 call_user_func($this->onRouteException, $exception);
             }
 
-            return new $this->class($exception->getCode(), []);
+            return new $this->response($exception->getCode(), []);
         }
 
         // exceptions can be converted to a response, if not throw
@@ -387,7 +397,7 @@ class NanoRouter
             // call route
             return $handler['callback']($requestPath);
         } else {
-            return new $this->class($error);
+            return new $this->response($error);
         }
     }
 
@@ -423,7 +433,7 @@ class NanoRouter
         $code = $exception->getCode();
 
         if ($code >= 200 && $code < 600) {
-            return new $this->class($code);
+            return new $this->response($code);
         }
 
         return null;
