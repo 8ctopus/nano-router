@@ -10,12 +10,12 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class NanoRouter
 {
-    private string $response;
-    private string $serverRequestFactory;
+    protected string $responseClass;
+    protected string $serverRequestFactoryClass;
 
-    private array $routes;
-    private array $middleware;
-    private array $errors;
+    protected array $routes;
+    protected array $middleware;
+    protected array $errors;
 
     /**
      * @var ?callable
@@ -37,8 +37,8 @@ class NanoRouter
      */
     public function __construct(string $response, string $serverRequestFactory, bool|callable $onRouteException = true, bool|callable $onException = true)
     {
-        $this->response = $response;
-        $this->serverRequestFactory = $serverRequestFactory;
+        $this->responseClass = $response;
+        $this->serverRequestFactoryClass = $serverRequestFactory;
 
         $this->routes = [];
         $this->middleware = [];
@@ -68,7 +68,7 @@ class NanoRouter
      */
     public function resolve() : ResponseInterface
     {
-        $request = (new $this->serverRequestFactory())
+        $request = (new $this->serverRequestFactoryClass())
             ->createServerRequest(
             $_SERVER['REQUEST_METHOD'],
             $_SERVER['REQUEST_URI'],
@@ -311,7 +311,7 @@ class NanoRouter
      *
      * @return bool
      */
-    private function routeMatches(string $route, string $type, string $requestPath) : bool
+    protected function routeMatches(string $route, string $type, string $requestPath) : bool
     {
         switch ($type) {
             case 'exact':
@@ -338,7 +338,7 @@ class NanoRouter
      *
      * @return [type]
      */
-    private function methodMatches(string $method, string|array $methods) : bool
+    protected function methodMatches(string $method, string|array $methods) : bool
     {
         if ($methods === '*') {
             return true;
@@ -360,7 +360,7 @@ class NanoRouter
      *
      * @throws Exception
      */
-    private function handleExceptions(Exception $exception) : ResponseInterface
+    protected function handleExceptions(Exception $exception) : ResponseInterface
     {
         // route exceptions always return an error response
         if ($exception instanceof RouteException) {
@@ -368,7 +368,7 @@ class NanoRouter
                 call_user_func($this->onRouteException, $exception);
             }
 
-            return new $this->response($exception->getCode(), []);
+            return new $this->responseClass($exception->getCode(), []);
         }
 
         // exceptions can be converted to a response, if not throw
@@ -400,7 +400,7 @@ class NanoRouter
             // call route
             return $handler['callback']($requestPath);
         } else {
-            return new $this->response($error);
+            return new $this->responseClass($error);
         }
     }
 
@@ -436,7 +436,7 @@ class NanoRouter
         $code = $exception->getCode();
 
         if ($code >= 200 && $code < 600) {
-            return new $this->response($code);
+            return new $this->responseClass($code);
         }
 
         return null;
