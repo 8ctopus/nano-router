@@ -19,7 +19,7 @@ class NanoRouter
     protected array $routes;
 
     /**
-     * @var array<string, array{'method': string|array<string>, 'when': string, 'callback': callable}>
+     * @var array<int, array<string, array{'method': string|array<string>, 'when': string, 'callback': callable}>>
      */
     protected array $middleware;
 
