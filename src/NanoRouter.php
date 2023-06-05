@@ -320,7 +320,7 @@ class NanoRouter
             return new $this->class($exception->getCode(), []);
         }
 
-        // exceptions can be converted to a response
+        // exceptions can be converted to a response, if not throw
         if (is_callable($this->onException)) {
             $response = call_user_func($this->onException, $exception);
 
@@ -393,6 +393,8 @@ class NanoRouter
 
     protected static function errorLog(string $message) : void
     {
+        // @codeCoverageIgnoreStart
         error_log($message);
+        // @codeCoverageIgnoreEnd
     }
 }
