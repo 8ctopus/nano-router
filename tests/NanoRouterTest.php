@@ -20,11 +20,6 @@ use Psr\Http\Message\ResponseInterface;
  */
 final class NanoRouterTest extends TestCase
 {
-    protected function setUp() : void
-    {
-        parent::setUp();
-    }
-
     public function testRoute() : void
     {
         $router = new NanoRouterMock(Response::class);
