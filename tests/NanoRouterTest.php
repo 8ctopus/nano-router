@@ -281,7 +281,12 @@ final class NanoRouterTest extends TestCase
                 return null;
             })
             ->addMiddleware('GET', '~/api/~', 'pre', function (ServerRequestInterface $request) : ?ResponseInterface {
-                if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+                $server = $request->getServerParams();
+
+                $login = $server['PHP_AUTH_USER'] ?? null;
+                $password = $server['PHP_AUTH_PW'] ?? null;
+
+                if (!$login || $password) {
                     return new Response(401, ['WWW-Authenticate' => 'Basic']);
                 }
 
