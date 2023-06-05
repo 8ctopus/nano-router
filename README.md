@@ -8,7 +8,7 @@
 ![code coverage badge](https://raw.githubusercontent.com/8ctopus/nano-router/image-data/coverage.svg)
 ![lines of code](https://raw.githubusercontent.com/8ctopus/nano-router/image-data/lines.svg)
 
-An experimental and extremely simple PSR-7 router
+An experimental and extremely simple PSR-7, PSR-17 router
 
 ## demo
 
@@ -46,7 +46,7 @@ use Oct8pus\NanoRouter\NanoRouter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-// use any PSR-7 implementation, here HttpSoft's one
+// use any PSR-7, PSR-17 implementations, here HttpSoft
 use HttpSoft\Message\Response;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\ServerRequestFactory;
@@ -64,16 +64,16 @@ $router
         return new Response(200, [], $stream);
     })
     // add starts with route
-    ->addRouteStartsWith('GET', '/test/', function () : ResponseInterface {
+    ->addRouteStartsWith('GET', '/test/', function (ServerRequestInterface $request) : ResponseInterface {
         $stream = new Stream();
-        $stream->write('/test/*');
+        $stream->write('request target - '. $request->getRequestTarget());
 
         return new Response(200, [], $stream);
     })
     // add regex route
-    ->addRouteRegex('*', '~/php(.*)/~', function () : ResponseInterface {
+    ->addRouteRegex('*', '~/php(.*)/~', function (ServerRequestInterface $request) : ResponseInterface {
         $stream = new Stream();
-        $stream->write('phpinfo');
+        $stream->write('request target - '. $request->getRequestTarget());
 
         return new Response(200, [], $stream);
     })
