@@ -98,13 +98,13 @@ class NanoRouter
                     break;
                 } else {
                     // potential response if no other route matches
-                    $response = $this->error(405, $path);
+                    $response = $this->handleError(405, $path);
                 }
             }
         }
 
         if (!isset($response)) {
-            $response = $this->error(404, $path);
+            $response = $this->handleError(404, $path);
         }
 
         return $this->postMiddleware($response, $request);
@@ -385,14 +385,14 @@ class NanoRouter
     }
 
     /**
-     * Deal with error
+     * Handle error
      *
      * @param int    $error
      * @param string $requestPath
      *
      * @return ResponseInterface
      */
-    private function error(int $error, string $requestPath) : ResponseInterface
+    private function handleError(int $error, string $requestPath) : ResponseInterface
     {
         $handler = array_key_exists($error, $this->errors) ? $this->errors[$error] : null;
 
