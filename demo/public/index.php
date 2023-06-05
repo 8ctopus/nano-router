@@ -25,8 +25,9 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 $router = new NanoRouter(Response::class, ServerRequestFactory::class);
 
-$router->addRoute('GET', '/', function () : ResponseInterface {
+$router->addRoute('GET', '/', function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();
+
     $stream->write(<<<'BODY'
     <html>
     <body>
@@ -36,6 +37,7 @@ $router->addRoute('GET', '/', function () : ResponseInterface {
     <li>link to the <a href="/test/">test page</a></li>
     <li>link to <a href="/phpinfo/">one</a> of the php* pages</li>
     <li>This is a <a href="/not-found/">broken link</a> for testing purposes</li>
+    <li><a href="/admin/test/">route requires http auth (111/111)</a></li>
     <li><a href="/route-exception/">route exception test</a></li>
     <li><a href="/fatal-exception-handled/">fatal exception test (handled exception = a response is returned)</a></li>
     <li><a href="/fatal-exception-unhandled/">fatal exception test (unhandled exception)</a></li>
@@ -47,12 +49,13 @@ $router->addRoute('GET', '/', function () : ResponseInterface {
     return new Response(200, [], $stream);
 });
 
-$router->addRoute(['HEAD', 'GET'], '/test/', function () : ResponseInterface {
+$router->addRoute(['HEAD', 'GET'], '/test/', function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();
-    $stream->write(<<<'BODY'
+
+    $stream->write(<<<BODY
     <html>
     <body>
-    <h1>You're on test page</h1>
+    <h1>You're on page {$request->getRequestTarget()}</h1>
     <p>Here's a link to <a href="/">return to the index</a>!</p>
     </body>
     </html>
@@ -64,29 +67,37 @@ $router->addRoute(['HEAD', 'GET'], '/test/', function () : ResponseInterface {
 $router->addRouteStartWith('*', '/php', function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();
     $stream->write('match starts with route' . PHP_EOL);
-    $stream->write('request target - '. $request->getRequestTarget());
+    $stream->write('request target - ' . $request->getRequestTarget());
 
     return new Response(200, ['content-type' => 'text/plain'], $stream);
 });
 
-$router->addRoute('GET', '/route-exception/', function () : ResponseInterface {
+$router->addRoute('GET', '/admin/test/', function (ServerRequestInterface $request) : ResponseInterface {
+    $stream = new Stream();
+    $stream->write('You\'re logged in' . PHP_EOL);
+
+    return new Response(200, ['content-type' => 'text/plain'], $stream);
+});
+
+$router->addRoute('GET', '/route-exception/', function (ServerRequestInterface $request) : ResponseInterface {
     throw new RouteException('not authorized', 403);
 });
 
-$router->addRoute('GET', '/fatal-exception-handled/', function () : ResponseInterface {
+$router->addRoute('GET', '/fatal-exception-handled/', function (ServerRequestInterface $request) : ResponseInterface {
     throw new Exception('fatal error', 500);
 });
 
-$router->addRoute('GET', '/fatal-exception-unhandled/', function () : ResponseInterface {
+$router->addRoute('GET', '/fatal-exception-unhandled/', function (ServerRequestInterface $request) : ResponseInterface {
     throw new Exception('fatal error');
 });
 
-$router->addErrorHandler(404, function () : ResponseInterface {
+$router->addErrorHandler(404, function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();
-    $stream->write(<<<'BODY'
+    $stream->write(<<<BODY
     <html>
     <body>
     <h1>Sorry we lost that page</h1>
+    <h2>{$request->getRequestTarget()}</h2>
     </body>
     </html>
     BODY);
@@ -98,17 +109,22 @@ $router->addErrorHandler(405, function () : ResponseInterface {
     return new Response(405);
 });
 
-$router->addMiddleware('*', '~(.*)~', 'post', function (ResponseInterface $response) : ResponseInterface {
+$router->addMiddleware('*', '~(.*)~', 'post', function (ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface {
     return $response->withHeader('X-Powered-By', '8ctopus');
 });
 
-$router->addMiddleware('*', '~(.*)~', 'pre', function () : ?ResponseInterface {
-    error_log('middleware intercepted - ' . $_SERVER['REQUEST_URI']);
+$router->addMiddleware('*', '~(.*)~', 'pre', function (ServerRequestInterface $request) : ?ResponseInterface {
+    error_log('middleware intercepted - ' . $request->getRequestTarget());
     return null;
 });
 
-$router->addMiddleware('*', '~/api/~', 'pre', function () : ?ResponseInterface {
-    if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+$router->addMiddleware('*', '~/admin/~', 'pre', function (ServerRequestInterface $request) : ?ResponseInterface {
+    $server = $request->getServerParams();
+
+    $login = $server['PHP_AUTH_USER'] ?? null;
+    $password = $server['PHP_AUTH_PW'] ?? null;
+
+    if (!($login === '111' && $password === '111')) {
         return new Response(401, ['WWW-Authenticate' => 'Basic']);
     }
 

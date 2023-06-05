@@ -10,12 +10,23 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class NanoRouter
 {
-    private string $response;
-    private string $serverRequestFactory;
+    protected string $responseClass;
+    protected string $serverRequestFactoryClass;
 
-    private array $routes;
-    private array $middleware;
-    private array $errors;
+    /**
+     * @var array<string, array{'type': string, 'method': string|array<string>, 'callback': callable}>
+     */
+    protected array $routes;
+
+    /**
+     * @var array<int, array<string, array{'method': string|array<string>, 'when': string, 'callback': callable}>>
+     */
+    protected array $middleware;
+
+    /**
+     * @var array<int, callable>
+     */
+    protected array $errors;
 
     /**
      * @var ?callable
@@ -37,8 +48,8 @@ class NanoRouter
      */
     public function __construct(string $response, string $serverRequestFactory, bool|callable $onRouteException = true, bool|callable $onException = true)
     {
-        $this->response = $response;
-        $this->serverRequestFactory = $serverRequestFactory;
+        $this->responseClass = $response;
+        $this->serverRequestFactoryClass = $serverRequestFactory;
 
         $this->routes = [];
         $this->middleware = [];
@@ -68,12 +79,12 @@ class NanoRouter
      */
     public function resolve() : ResponseInterface
     {
-        $request = (new $this->serverRequestFactory())
+        $request = (new $this->serverRequestFactoryClass())
             ->createServerRequest(
-            $_SERVER['REQUEST_METHOD'],
-            $_SERVER['REQUEST_URI'],
-            $_SERVER,
-        );
+                $_SERVER['REQUEST_METHOD'],
+                $_SERVER['REQUEST_URI'],
+                $_SERVER,
+            );
 
         $response = $this->preMiddleware($request);
 
@@ -98,13 +109,13 @@ class NanoRouter
                     break;
                 } else {
                     // potential response if no other route matches
-                    $response = $this->error(405, $path);
+                    $response = $this->handleError(405, $request);
                 }
             }
         }
 
         if (!isset($response)) {
-            $response = $this->error(404, $path);
+            $response = $this->handleError(404, $request);
         }
 
         return $this->postMiddleware($response, $request);
@@ -113,7 +124,7 @@ class NanoRouter
     /**
      * Add route
      *
-     * @param array|string $methods
+     * @param array<string>|string $methods
      * @param string       $path
      * @param callable     $callback
      *
@@ -133,7 +144,7 @@ class NanoRouter
     /**
      * Add starts with route
      *
-     * @param array|string $methods
+     * @param array<string>|string $methods
      * @param string       $path
      * @param callable     $callback
      *
@@ -153,7 +164,7 @@ class NanoRouter
     /**
      * Add regex route
      *
-     * @param array|string $methods
+     * @param array<string>|string $methods
      * @param string       $regex
      * @param callable     $callback
      *
@@ -187,9 +198,7 @@ class NanoRouter
      */
     public function addErrorHandler(int $error, callable $handler) : self
     {
-        $this->errors[$error] = [
-            'callback' => $handler,
-        ];
+        $this->errors[$error] = $handler;
 
         return $this;
     }
@@ -248,7 +257,7 @@ class NanoRouter
                 if ($this->routeMatches($regex, 'regex', $request->getUri()->getPath()) && $this->methodMatches($request->getMethod(), $route['method'])) {
                     // call middleware
                     try {
-                        $response = $route['callback']();
+                        $response = $route['callback']($request);
                     } catch (Exception $exception) {
                         $response = $this->handleExceptions($exception);
                     }
@@ -266,14 +275,14 @@ class NanoRouter
     /**
      * Post request middleware
      *
-     * @param ResponseInterface $response
-     * @param ServerRequestInterface            $request
+     * @param ResponseInterface      $response
+     * @param ServerRequestInterface $request
      *
-     * @return ?ResponseInterface
+     * @return ResponseInterface
      *
      * @note all matching post request middleware will be executed
      */
-    protected function postMiddleware(ResponseInterface $response, ServerRequestInterface $request) : ?ResponseInterface
+    protected function postMiddleware(ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface
     {
         foreach ($this->middleware as $middleware) {
             foreach ($middleware as $regex => $route) {
@@ -284,7 +293,7 @@ class NanoRouter
                 if ($this->routeMatches($regex, 'regex', $request->getUri()->getPath()) && $this->methodMatches($request->getMethod(), $route['method'])) {
                     // call middleware
                     try {
-                        $response = $route['callback']($response);
+                        $response = $route['callback']($response, $request);
                     } catch (Exception $exception) {
                         $response = $this->handleExceptions($exception);
                     }
@@ -292,7 +301,7 @@ class NanoRouter
             }
         }
 
-        return isset($response) ? $response : null;
+        return $response;
     }
 
     protected static function errorLog(string $message) : void
@@ -311,7 +320,7 @@ class NanoRouter
      *
      * @return bool
      */
-    private function routeMatches(string $route, string $type, string $requestPath) : bool
+    protected function routeMatches(string $route, string $type, string $requestPath) : bool
     {
         switch ($type) {
             case 'exact':
@@ -321,7 +330,7 @@ class NanoRouter
                 return str_starts_with($requestPath, $route);
 
             case 'regex':
-                return preg_match($route, $requestPath, $matches) === 1;
+                return preg_match($route, $requestPath) === 1;
 
             default:
                 // @codeCoverageIgnoreStart
@@ -334,11 +343,11 @@ class NanoRouter
      * Check if method matches
      *
      * @param string       $method
-     * @param array|string $methods
+     * @param array<string>|string $methods
      *
-     * @return [type]
+     * @return bool
      */
-    private function methodMatches(string $method, string|array $methods) : bool
+    protected function methodMatches(string $method, string|array $methods) : bool
     {
         if ($methods === '*') {
             return true;
@@ -360,7 +369,7 @@ class NanoRouter
      *
      * @throws Exception
      */
-    private function handleExceptions(Exception $exception) : ResponseInterface
+    protected function handleExceptions(Exception $exception) : ResponseInterface
     {
         // route exceptions always return an error response
         if ($exception instanceof RouteException) {
@@ -368,7 +377,7 @@ class NanoRouter
                 call_user_func($this->onRouteException, $exception);
             }
 
-            return new $this->response($exception->getCode(), []);
+            return new $this->responseClass($exception->getCode());
         }
 
         // exceptions can be converted to a response, if not throw
@@ -382,26 +391,6 @@ class NanoRouter
 
         // otherwise the exception is rethrown
         throw $exception;
-    }
-
-    /**
-     * Deal with error
-     *
-     * @param int    $error
-     * @param string $requestPath
-     *
-     * @return ResponseInterface
-     */
-    private function error(int $error, string $requestPath) : ResponseInterface
-    {
-        $handler = array_key_exists($error, $this->errors) ? $this->errors[$error] : null;
-
-        if ($handler) {
-            // call route
-            return $handler['callback']($requestPath);
-        } else {
-            return new $this->response($error);
-        }
     }
 
     /**
@@ -436,9 +425,29 @@ class NanoRouter
         $code = $exception->getCode();
 
         if ($code >= 200 && $code < 600) {
-            return new $this->response($code);
+            return new $this->responseClass($code);
         }
 
         return null;
+    }
+
+    /**
+     * Handle error
+     *
+     * @param int                    $error
+     * @param ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     */
+    private function handleError(int $error, ServerRequestInterface $request) : ResponseInterface
+    {
+        $handler = array_key_exists($error, $this->errors) ? $this->errors[$error] : null;
+
+        if ($handler) {
+            // call error handler
+            return call_user_func($handler, $request);
+        } else {
+            return new $this->responseClass($error);
+        }
     }
 }

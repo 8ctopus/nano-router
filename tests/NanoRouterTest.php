@@ -6,13 +6,14 @@ namespace Tests;
 
 use Exception;
 use HttpSoft\Message\Response;
-use HttpSoft\Message\Stream;
 use HttpSoft\Message\ServerRequestFactory;
+use HttpSoft\Message\Stream;
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\NanoRouterException;
 use Oct8pus\NanoRouter\RouteException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @internal
@@ -276,11 +277,16 @@ final class NanoRouterTest extends TestCase
     public function testPreMiddleware() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class))
-            ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
+            ->addMiddleware('GET', '~/api/~', 'pre', function (ServerRequestInterface $request) : ?ResponseInterface {
                 return null;
             })
-            ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
-                if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+            ->addMiddleware('GET', '~/api/~', 'pre', function (ServerRequestInterface $request) : ?ResponseInterface {
+                $server = $request->getServerParams();
+
+                $login = $server['PHP_AUTH_USER'] ?? null;
+                $password = $server['PHP_AUTH_PW'] ?? null;
+
+                if (!$login || $password) {
                     return new Response(401, ['WWW-Authenticate' => 'Basic']);
                 }
 
@@ -351,10 +357,10 @@ final class NanoRouterTest extends TestCase
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 return null;
             })
-            ->addMiddleware('GET', '~(.*)~', 'post', function (ResponseInterface $response) : ResponseInterface {
+            ->addMiddleware('GET', '~(.*)~', 'post', function (ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface {
                 return $response->withHeader('X-Test', 'test');
             })
-            ->addMiddleware('GET', '~~', 'post', function (ResponseInterface $response) : ResponseInterface {
+            ->addMiddleware('GET', '~~', 'post', function (ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface {
                 return $response->withHeader('X-Powered-By', '8ctopus');
             });
 
@@ -407,9 +413,9 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
-        $router->addErrorHandler(404, function () : ResponseInterface {
+        $router->addErrorHandler(404, function (ServerRequestInterface $request) : ResponseInterface {
             $stream = new Stream();
-            $stream->write('This page does not exist on the server');
+            $stream->write('This page does not exist on the server - ' . $request->getRequestTarget());
             return new Response(404, [], $stream);
         });
 
@@ -419,7 +425,7 @@ final class NanoRouterTest extends TestCase
 
         self::assertSame(404, $response->getStatusCode());
         self::assertSame('Not Found', $response->getReasonPhrase());
-        self::assertSame('This page does not exist on the server', (string) $response->getBody());
+        self::assertSame('This page does not exist on the server - /test.php', (string) $response->getBody());
     }
 
     public function testRouteInvalidRegex() : void
