@@ -321,7 +321,7 @@ class NanoRouter
                 return str_starts_with($requestPath, $route);
 
             case 'regex':
-                return preg_match($route, $requestPath, $matches) === 1;
+                return preg_match($route, $requestPath) === 1;
 
             default:
                 // @codeCoverageIgnoreStart
