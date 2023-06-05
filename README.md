@@ -50,10 +50,11 @@ use Psr\Http\Message\ServerRequestInterface;
 
 // use any PSR-7, PSR-17 implementations, here HttpSoft
 use HttpSoft\Message\Response;
+use HttpSoft\Message\Stream;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\ServerRequestFactory;
 
-require_once 'vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 $router = new NanoRouter(Response::class, ServerRequestFactory::class);
 
