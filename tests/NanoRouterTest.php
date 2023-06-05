@@ -13,6 +13,7 @@ use Oct8pus\NanoRouter\NanoRouterException;
 use Oct8pus\NanoRouter\RouteException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @internal
@@ -276,10 +277,10 @@ final class NanoRouterTest extends TestCase
     public function testPreMiddleware() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class))
-            ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
+            ->addMiddleware('GET', '~/api/~', 'pre', function (ServerRequestInterface $request) : ?ResponseInterface {
                 return null;
             })
-            ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
+            ->addMiddleware('GET', '~/api/~', 'pre', function (ServerRequestInterface $request) : ?ResponseInterface {
                 if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
                     return new Response(401, ['WWW-Authenticate' => 'Basic']);
                 }
@@ -351,10 +352,10 @@ final class NanoRouterTest extends TestCase
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 return null;
             })
-            ->addMiddleware('GET', '~(.*)~', 'post', function (ResponseInterface $response) : ResponseInterface {
+            ->addMiddleware('GET', '~(.*)~', 'post', function (ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface {
                 return $response->withHeader('X-Test', 'test');
             })
-            ->addMiddleware('GET', '~~', 'post', function (ResponseInterface $response) : ResponseInterface {
+            ->addMiddleware('GET', '~~', 'post', function (ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface {
                 return $response->withHeader('X-Powered-By', '8ctopus');
             });
 

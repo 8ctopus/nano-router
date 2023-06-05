@@ -57,7 +57,7 @@ $router = new NanoRouter(Response::class);
 
 $router
     // add simple route
-    ->addRoute('GET', '/test.php', function () : ResponseInterface {
+    ->addRoute('GET', '/test.php', function (ServerRequestInterface $request) : ResponseInterface {
         $stream = new Stream();
         $stream->write('test.php');
 
@@ -83,7 +83,7 @@ $router
 
         return new Response(404, [], $stream);
     })
-    ->addMiddleware('*', '~(.*)~', 'post', function (ResponseInterface $response) : ResponseInterface {
+    ->addMiddleware('*', '~(.*)~', 'post', function (ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface {
         return $response->withHeader('X-Powered-By', '8ctopus');
     });
 
