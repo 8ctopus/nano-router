@@ -33,9 +33,9 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('GET', '/');
         $response = $router->resolve();
 
-        static::assertSame(404, $response->getStatusCode());
-        static::assertEmpty((string) $response->getBody());
-        static::assertSame('Not Found', $response->getReasonPhrase());
+        self::assertSame(404, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
+        self::assertSame('Not Found', $response->getReasonPhrase());
 
         // add index route
         $router->addRoute(['HEAD', 'GET'], '/', function () : ResponseInterface {
@@ -58,39 +58,39 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('GET', '/');
         $response = $router->resolve();
 
-        static::assertSame(200, $response->getStatusCode());
-        static::assertSame('index', (string) $response->getBody());
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('index', (string) $response->getBody());
 
         $this->mockRequest('GET', '/?foo=bar');
         $response = $router->resolve();
 
-        static::assertSame(200, $response->getStatusCode());
-        static::assertSame('index', (string) $response->getBody());
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('index', (string) $response->getBody());
 
         $this->mockRequest('GET', '/index.php');
         $response = $router->resolve();
 
-        static::assertSame(404, $response->getStatusCode());
+        self::assertSame(404, $response->getStatusCode());
 
         $this->mockRequest('HEAD', '/');
         $response = $router->resolve();
 
-        static::assertSame(200, $response->getStatusCode());
-        static::assertEmpty((string) $response->getBody());
+        self::assertSame(200, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
 
         $this->mockRequest('GET', '/hello/');
         $response = $router->resolve();
 
-        static::assertSame(200, $response->getStatusCode());
-        static::assertSame('hello', (string) $response->getBody());
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('hello', (string) $response->getBody());
 
         // method not allowed
         $this->mockRequest('POST', '/');
         $response = $router->resolve();
 
-        static::assertSame(405, $response->getStatusCode());
-        static::assertEmpty((string) $response->getBody());
-        static::assertSame('Method Not Allowed', $response->getReasonPhrase());
+        self::assertSame(405, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
+        self::assertSame('Method Not Allowed', $response->getReasonPhrase());
     }
 
     public function testRegexRoute() : void
@@ -109,30 +109,30 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('GET', '/test.php');
         $response = $router->resolve();
 
-        static::assertSame(200, $response->getStatusCode());
-        static::assertSame('test regex', (string) $response->getBody());
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('test regex', (string) $response->getBody());
 
         $this->mockRequest('HEAD', '/test.php');
         $response = $router->resolve();
 
-        static::assertSame(200, $response->getStatusCode());
-        static::assertEmpty((string) $response->getBody());
+        self::assertSame(200, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
 
         $this->mockRequest('GET', '/test2.php');
         $response = $router->resolve();
 
-        static::assertSame(200, $response->getStatusCode());
-        static::assertSame('test regex', (string) $response->getBody());
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('test regex', (string) $response->getBody());
 
         $this->mockRequest('GET', '/tes.php');
         $response = $router->resolve();
 
-        static::assertEquals(new Response(404), $response);
+        self::assertEquals(new Response(404), $response);
 
         $this->mockRequest('POST', '/test.php');
         $response = $router->resolve();
 
-        static::assertSame(405, $response->getStatusCode());
+        self::assertSame(405, $response->getStatusCode());
     }
 
     public function testDefaultRouteExceptionHandler() : void
@@ -147,14 +147,14 @@ final class NanoRouterTest extends TestCase
 
         $response = $router->resolve();
 
-        static::assertSame(403, $response->getStatusCode());
-        static::assertEmpty((string) $response->getBody());
-        static::expectOutputString('Tests\NanoRouterTest - FAILED - 403 test');
+        self::assertSame(403, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
+        self::expectOutputString('Tests\NanoRouterTest - FAILED - 403 test');
     }
 
     public function testCustomRouteExceptionHandler() : void
     {
-        $router = new NanoRouterMock(Response::class, static::routeExceptionHandler(...));
+        $router = new NanoRouterMock(Response::class, self::routeExceptionHandler(...));
 
         $router->addRoute('GET', '/', function () : ResponseInterface {
             throw new RouteException('test', 403);
@@ -164,9 +164,9 @@ final class NanoRouterTest extends TestCase
 
         $response = $router->resolve();
 
-        static::assertSame(403, $response->getStatusCode());
-        static::assertEmpty((string) $response->getBody());
-        static::expectOutputString('route exception handler called');
+        self::assertSame(403, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
+        self::expectOutputString('route exception handler called');
     }
 
     public function testNoRouteExceptionHandler() : void
@@ -181,9 +181,9 @@ final class NanoRouterTest extends TestCase
 
         $response = $router->resolve();
 
-        static::assertSame(403, $response->getStatusCode());
-        static::assertEmpty((string) $response->getBody());
-        static::expectOutputString('');
+        self::assertSame(403, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
+        self::expectOutputString('');
     }
 
     public function testDefaultExceptionHandler() : void
@@ -198,9 +198,9 @@ final class NanoRouterTest extends TestCase
 
         $response = $router->resolve();
 
-        static::assertSame(403, $response->getStatusCode());
-        static::assertEmpty((string) $response->getBody());
-        static::expectOutputString('');
+        self::assertSame(403, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
+        self::expectOutputString('');
 
         $router = new NanoRouterMock(Response::class);
 
@@ -210,8 +210,8 @@ final class NanoRouterTest extends TestCase
 
         $this->mockRequest('GET', '/');
 
-        static::expectException(Exception::class);
-        static::expectExceptionMessage('test');
+        self::expectException(Exception::class);
+        self::expectExceptionMessage('test');
 
         $router->resolve();
     }
@@ -224,8 +224,8 @@ final class NanoRouterTest extends TestCase
             throw new Exception('test', 403);
         });
 
-        static::expectException(Exception::class);
-        static::expectExceptionMessage('test');
+        self::expectException(Exception::class);
+        self::expectExceptionMessage('test');
 
         $router->resolve();
     }
@@ -247,57 +247,57 @@ final class NanoRouterTest extends TestCase
         $this->mockRequest('GET', '/api/test.php');
         $response = $router->resolve();
 
-        static::assertSame(401, $response->getStatusCode());
-        static::assertTrue($response->hasHeader('WWW-Authenticate'));
+        self::assertSame(401, $response->getStatusCode());
+        self::assertTrue($response->hasHeader('WWW-Authenticate'));
     }
 
     public function testPreMiddlewareRouteException() : void
     {
-        $router = (new NanoRouterMock(Response::class, static::routeExceptionHandler(...)))
+        $router = (new NanoRouterMock(Response::class, self::routeExceptionHandler(...)))
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 throw new RouteException('not authorized', 401);
             });
 
         $this->mockRequest('GET', '/api/test.php');
 
-        static::expectOutputString('route exception handler called');
+        self::expectOutputString('route exception handler called');
 
         $response = $router->resolve();
 
-        static::assertSame(401, $response->getStatusCode());
-        static::assertEmpty((string) $response->getBody());
+        self::assertSame(401, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
     }
 
     public function testPreMiddlewareHandledException() : void
     {
-        $router = (new NanoRouterMock(Response::class, true, static::exceptionHandler(...)))
+        $router = (new NanoRouterMock(Response::class, true, self::exceptionHandler(...)))
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 throw new Exception('fatal error', 500);
             });
 
         $this->mockRequest('GET', '/api/test.php');
 
-        static::expectOutputString('exception handler called');
+        self::expectOutputString('exception handler called');
 
         $response = $router->resolve();
 
-        static::assertSame(500, $response->getStatusCode());
-        static::assertEmpty((string) $response->getBody());
+        self::assertSame(500, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
     }
 
     public function testPreMiddlewareThrownException() : void
     {
-        $router = (new NanoRouterMock(Response::class, static::routeExceptionHandler(...), static::exceptionHandlerThrow(...)))
+        $router = (new NanoRouterMock(Response::class, self::routeExceptionHandler(...), self::exceptionHandlerThrow(...)))
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 throw new Exception('fatal error', 500);
             });
 
         $this->mockRequest('GET', '/api/test.php');
 
-        static::expectOutputString('exception handler called');
+        self::expectOutputString('exception handler called');
 
-        static::expectException(Exception::class);
-        static::expectExceptionMessage('fatal error');
+        self::expectException(Exception::class);
+        self::expectExceptionMessage('fatal error');
 
         $router->resolve();
     }
@@ -317,47 +317,47 @@ final class NanoRouterTest extends TestCase
 
         $this->mockRequest('GET', '/test.php');
 
-        static::expectOutputString('');
+        self::expectOutputString('');
 
         $response = $router->resolve();
 
-        static::assertSame(404, $response->getStatusCode());
-        static::assertTrue($response->hasHeader('X-Test'));
-        static::assertSame('8ctopus', $response->getHeaderLine('X-Powered-By'));
+        self::assertSame(404, $response->getStatusCode());
+        self::assertTrue($response->hasHeader('X-Test'));
+        self::assertSame('8ctopus', $response->getHeaderLine('X-Powered-By'));
     }
 
     public function testPostMiddlewareRouteException() : void
     {
-        $router = (new NanoRouterMock(Response::class, static::routeExceptionHandler(...)))
+        $router = (new NanoRouterMock(Response::class, self::routeExceptionHandler(...)))
             ->addMiddleware('GET', '~/api/~', 'post', function () : ?ResponseInterface {
                 throw new RouteException('not authorized', 401);
             });
 
         $this->mockRequest('GET', '/api/test.php');
 
-        static::expectOutputString('route exception handler called');
+        self::expectOutputString('route exception handler called');
 
         $response = $router->resolve();
 
-        static::assertSame(401, $response->getStatusCode());
-        static::assertEmpty((string) $response->getBody());
+        self::assertSame(401, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
     }
 
     public function testPostMiddlewareException() : void
     {
-        $router = (new NanoRouterMock(Response::class, true, static::exceptionHandler(...)))
+        $router = (new NanoRouterMock(Response::class, true, self::exceptionHandler(...)))
             ->addMiddleware('GET', '~/api/~', 'post', function () : ?ResponseInterface {
                 throw new Exception('fatal error', 500);
             });
 
         $this->mockRequest('GET', '/api/test.php');
 
-        static::expectOutputString('exception handler called');
+        self::expectOutputString('exception handler called');
 
         $response = $router->resolve();
 
-        static::assertSame(500, $response->getStatusCode());
-        static::assertEmpty((string) $response->getBody());
+        self::assertSame(500, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
     }
 
     public function testErrorHandler() : void
@@ -374,17 +374,17 @@ final class NanoRouterTest extends TestCase
 
         $response = $router->resolve();
 
-        static::assertSame(404, $response->getStatusCode());
-        static::assertSame('Not Found', $response->getReasonPhrase());
-        static::assertSame('This page does not exist on the server', (string) $response->getBody());
+        self::assertSame(404, $response->getStatusCode());
+        self::assertSame('Not Found', $response->getReasonPhrase());
+        self::assertSame('This page does not exist on the server', (string) $response->getBody());
     }
 
     public function testRouteInvalidRegex() : void
     {
         $router = new NanoRouterMock(Response::class);
 
-        static::expectException(NanoRouterException::class);
-        static::expectExceptionMessage('invalid regex');
+        self::expectException(NanoRouterException::class);
+        self::expectExceptionMessage('invalid regex');
 
         $router->addRouteRegex('GET', '~/test(.*)\.php', function () : void {});
     }
@@ -393,8 +393,8 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouterMock(Response::class);
 
-        static::expectException(NanoRouterException::class);
-        static::expectExceptionMessage('invalid regex');
+        self::expectException(NanoRouterException::class);
+        self::expectExceptionMessage('invalid regex');
 
         $router->addMiddleware('GET', '~/test(.*)\.php', 'post', function () : void {});
     }
@@ -403,8 +403,8 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouterMock(Response::class);
 
-        static::expectException(NanoRouterException::class);
-        static::expectExceptionMessage('invalid when clause');
+        self::expectException(NanoRouterException::class);
+        self::expectExceptionMessage('invalid when clause');
 
         $router->addMiddleware('GET', '~/test(.*)\.php~', 'after', function () : void {});
     }
