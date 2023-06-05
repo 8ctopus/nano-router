@@ -57,7 +57,14 @@ $router
     // add simple route
     ->addRoute('GET', '/test.php', function () : ResponseInterface {
         $stream = new Stream();
-        $stream->write('test');
+        $stream->write('test.php');
+
+        return new Response(200, [], $stream);
+    })
+    // add starts with route
+    ->addRouteStartsWith('GET', '/test/', function () : ResponseInterface {
+        $stream = new Stream();
+        $stream->write('test/*');
 
         return new Response(200, [], $stream);
     })

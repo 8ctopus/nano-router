@@ -32,7 +32,7 @@ $router->addRoute('GET', '/', function () : ResponseInterface {
     <p>You're on the index page. Here's a list of links: </p>
     <ul>
     <li>link to the <a href="/test/">test page</a></li>
-    <li>link to <a href="/phpinfo/">one</a> of the php.* pages</li>
+    <li>link to <a href="/phpinfo/">one</a> of the php* pages</li>
     <li>This is a <a href="/not-found/">broken link</a> for testing purposes</li>
     <li><a href="/route-exception/">route exception test</a></li>
     <li><a href="/fatal-exception-handled/">fatal exception test (handled exception = a response is returned)</a></li>
@@ -59,9 +59,9 @@ $router->addRoute(['HEAD', 'GET'], '/test/', function () : ResponseInterface {
     return new Response(200, [], $stream);
 });
 
-$router->addRouteRegex('*', '~^/php(.*)/~', function () : ResponseInterface {
+$router->addRouteStartWith('*', '/php', function () : ResponseInterface {
     $stream = new Stream();
-    $stream->write('match regex route');
+    $stream->write('match starts with route');
 
     return new Response(200, [], $stream);
 });
