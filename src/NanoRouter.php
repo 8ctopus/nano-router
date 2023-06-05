@@ -10,6 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 class NanoRouter
 {
     private string $class;
+    private static string $staticClass;
 
     private array $routes;
     private array $middleware;
@@ -28,20 +29,34 @@ class NanoRouter
     /**
      * Constructor
      *
-     * @param string    $class            ResponseInterface implementation
-     * @param ?callable $onRouteException
-     * @param ?callable $onException
+     * @param string        $class            ResponseInterface implementation
+     * @param bool|callable $onRouteException
+     * @param bool|callable $onException
      */
-    public function __construct(string $class, ?callable $onRouteException, ?callable $onException)
+    public function __construct(string $class, bool|callable $onRouteException = true, bool|callable $onException = true)
     {
         $this->class = $class;
+        static::$staticClass = $class;
 
         $this->routes = [];
         $this->middleware = [];
         $this->errors = [];
 
-        $this->onRouteException = $onRouteException;
-        $this->onException = $onException;
+        if (is_callable($onRouteException)) {
+            $this->onRouteException = $onRouteException;
+        } elseif ($onRouteException === false) {
+            $this->onRouteException = null;
+        } else {
+            $this->onRouteException = self::routeExceptionHandler(...);
+        }
+
+        if (is_callable($onException)) {
+            $this->onException = $onException;
+        } elseif ($onException === false) {
+            $this->onException = null;
+        } else {
+            $this->onException = self::exceptionHandler(...);
+        }
     }
 
     /**
@@ -61,7 +76,7 @@ class NanoRouter
         }
 
         foreach ($this->routes as $regex => $route) {
-            if ($this->routeMatches($regex, $route['regex'], $requestPath)) {
+            if ($this->routeMatches($regex, $route['type'], $requestPath)) {
                 if ($this->methodMatches($route['method'])) {
                     // call route
                     try {
@@ -97,7 +112,27 @@ class NanoRouter
     public function addRoute(string|array $methods, string $path, callable $callback) : self
     {
         $this->routes[$path] = [
-            'regex' => false,
+            'type' => 'exact',
+            'method' => $methods,
+            'callback' => $callback,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Add starts with route
+     *
+     * @param array|string $methods
+     * @param string       $path
+     * @param callable     $callback
+     *
+     * @return self
+     */
+    public function addRouteStartWith(string|array $methods, string $path, callable $callback) : self
+    {
+        $this->routes[$path] = [
+            'type' => 'starts',
             'method' => $methods,
             'callback' => $callback,
         ];
@@ -124,7 +159,7 @@ class NanoRouter
         }
 
         $this->routes[$regex] = [
-            'regex' => true,
+            'type' => 'regex',
             'method' => $methods,
             'callback' => $callback,
         ];
@@ -184,6 +219,44 @@ class NanoRouter
     }
 
     /**
+     * Handle route exceptions
+     *
+     * @param RouteException $exception
+     *
+     * @return void
+     */
+    public static function routeExceptionHandler(RouteException $exception) : void
+    {
+        $trace = $exception->getTrace();
+
+        $where = '';
+
+        if (count($trace)) {
+            $where = array_key_exists('class', $trace[0]) ? $trace[0]['class'] : $trace[0]['function'];
+        }
+
+        static::errorLog("{$where} - FAILED - {$exception->getCode()} {$exception->getMessage()}");
+    }
+
+    /**
+     * Handle exceptions
+     *
+     * @param Exception $exception
+     *
+     * @return ?ResponseInterface
+     */
+    public static function exceptionHandler(Exception $exception) : ?ResponseInterface
+    {
+        $code = $exception->getCode();
+
+        if ($code >= 200 && $code < 600) {
+            return new static::$staticClass($code);
+        }
+
+        return null;
+    }
+
+    /**
      * Pre request middleware
      *
      * @param string $requestPath
@@ -200,7 +273,7 @@ class NanoRouter
                     continue;
                 }
 
-                if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
+                if ($this->routeMatches($regex, 'regex', $requestPath) && $this->methodMatches($route['method'])) {
                     // call middleware
                     try {
                         $response = $route['callback']();
@@ -236,7 +309,7 @@ class NanoRouter
                     continue;
                 }
 
-                if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
+                if ($this->routeMatches($regex, 'regex', $requestPath) && $this->methodMatches($route['method'])) {
                     // call middleware
                     try {
                         $response = $route['callback']($response);
@@ -250,19 +323,39 @@ class NanoRouter
         return isset($response) ? $response : null;
     }
 
+    protected static function errorLog(string $message) : void
+    {
+        // @codeCoverageIgnoreStart
+        error_log($message);
+        // @codeCoverageIgnoreEnd
+    }
+
     /**
      * Check if route matches
      *
      * @param string $route
-     * @param bool   $regex
+     * @param string $type
      * @param string $requestPath
      *
      * @return bool
      */
-    private function routeMatches(string $route, bool $regex, string $requestPath) : bool
+    private function routeMatches(string $route, string $type, string $requestPath) : bool
     {
-        return (!$regex && $requestPath === $route)
-        || ($regex && preg_match($route, $requestPath, $matches) === 1);
+        switch ($type) {
+            case 'exact':
+                return $requestPath === $route;
+
+            case 'starts':
+                return str_starts_with($requestPath, $route);
+
+            case 'regex':
+                return preg_match($route, $requestPath, $matches) === 1;
+
+            default:
+                // @codeCoverageIgnoreStart
+                throw new NanoRouterException('invalid route type');
+                // @codeCoverageIgnoreEnd
+        }
     }
 
     /**
@@ -305,10 +398,12 @@ class NanoRouter
             return new $this->class($exception->getCode(), []);
         }
 
-        // exceptions return a server error response when they handler returns true
+        // exceptions can be converted to a response, if not throw
         if (is_callable($this->onException)) {
-            if (call_user_func($this->onException, $exception)) {
-                return new $this->class(500, []);
+            $response = call_user_func($this->onException, $exception);
+
+            if ($response) {
+                return $response;
             }
         }
 

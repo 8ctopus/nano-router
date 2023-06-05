@@ -22,7 +22,8 @@
         "phpstan/phpstan": "^1.9",
         "phpmd/phpmd": "^2.13",
         "httpsoft/http-message": "^1.1",
-        "httpsoft/http-emitter": "^1.0"
+        "httpsoft/http-emitter": "^1.0",
+        "8ctopus/nano-timer": "^1.0"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,

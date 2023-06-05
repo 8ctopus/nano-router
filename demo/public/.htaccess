@@ -1,7 +1,6 @@
 RewriteEngine on
 
-# redirect all not existing files and directories to index
+# redirect all not existing files and directories to router
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-
-RewriteRule ^ /index.php [L]
+RewriteRule ^ index.php [END]

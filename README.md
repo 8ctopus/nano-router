@@ -25,9 +25,10 @@ The demo can also be started using Docker `docker-compose up &`.
 ```apache
 RewriteEngine on
 
-# redirect all not existing files to router
+# redirect all not existing files and directories to router
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ /index.php [L]
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [END]
 ```
 
 and for nginx (untested)
@@ -50,13 +51,20 @@ use HttpSoft\Emitter\SapiEmitter;
 
 require_once 'vendor/autoload.php';
 
-$router = new NanoRouter(Response::class, null, null);
+$router = new NanoRouter(Response::class);
 
 $router
     // add simple route
     ->addRoute('GET', '/test.php', function () : ResponseInterface {
         $stream = new Stream();
-        $stream->write('test');
+        $stream->write('test.php');
+
+        return new Response(200, [], $stream);
+    })
+    // add starts with route
+    ->addRouteStartsWith('GET', '/test/', function () : ResponseInterface {
+        $stream = new Stream();
+        $stream->write('test/*');
 
         return new Response(200, [], $stream);
     })
@@ -77,7 +85,7 @@ $router
         return $response->withHeader('X-Powered-By', '8ctopus');
     });
 
-// resolve request
+// resolve request into a response
 $response = $router->resolve();
 
 // send response to client
@@ -91,10 +99,9 @@ There is more to it, it's just not in the readme yet, such as:
 
 - multiple route methods
 - pre and post middleware
-- route exception handling
-- generic exception handling
+- route exception and generic exception handling
 
-Most of it is shown in the demo
+but most of it can be experimented with in the demo
 
 ## run tests
 

@@ -21,7 +21,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
     ->pushHandler(new PrettyPageHandler())
     ->register();
 
-$router = new NanoRouter(Response::class, routeExceptionHandler(...), exceptionHandler(...));
+$router = new NanoRouter(Response::class);
 
 $router->addRoute('GET', '/', function () : ResponseInterface {
     $stream = new Stream();
@@ -32,11 +32,11 @@ $router->addRoute('GET', '/', function () : ResponseInterface {
     <p>You're on the index page. Here's a list of links: </p>
     <ul>
     <li>link to the <a href="/test/">test page</a></li>
-    <li>link to <a href="/phpinfo/">one</a> of the php.* pages</li>
+    <li>link to <a href="/phpinfo/">one</a> of the php* pages</li>
     <li>This is a <a href="/not-found/">broken link</a> for testing purposes</li>
     <li><a href="/route-exception/">route exception test</a></li>
-    <li><a href="/fatal-exception-handled/">fatal exception test (handled)</a></li>
-    <li><a href="/fatal-exception-unhandled/">fatal exception test (unhandled)</a></li>
+    <li><a href="/fatal-exception-handled/">fatal exception test (handled exception = a response is returned)</a></li>
+    <li><a href="/fatal-exception-unhandled/">fatal exception test (unhandled exception)</a></li>
     </ul>
     </body>
     </html>
@@ -59,9 +59,9 @@ $router->addRoute(['HEAD', 'GET'], '/test/', function () : ResponseInterface {
     return new Response(200, [], $stream);
 });
 
-$router->addRouteRegex('*', '~^/php(.*)/~', function () : ResponseInterface {
+$router->addRouteStartWith('*', '/php', function () : ResponseInterface {
     $stream = new Stream();
-    $stream->write('match regex route');
+    $stream->write('match starts with route');
 
     return new Response(200, [], $stream);
 });
@@ -71,7 +71,7 @@ $router->addRoute('GET', '/route-exception/', function () : ResponseInterface {
 });
 
 $router->addRoute('GET', '/fatal-exception-handled/', function () : ResponseInterface {
-    throw new Exception('fatal error');
+    throw new Exception('fatal error', 500);
 });
 
 $router->addRoute('GET', '/fatal-exception-unhandled/', function () : ResponseInterface {
@@ -112,38 +112,7 @@ $router->addMiddleware('*', '~/api/~', 'pre', function () : ?ResponseInterface {
     return null;
 });
 
-// resolve route
 $response = $router->resolve();
 
 (new SapiEmitter())
     ->emit($response);
-
-/**
- * Route exception handler
- *
- * @param RouteException $exception
- *
- * @return void
- */
-function routeExceptionHandler(RouteException $exception) : void
-{
-    error_log("handled route exception [{$exception->getCode()}] {$exception->getMessage()}");
-}
-
-/**
- * Generic exception handler
- *
- * @param Exception $exception
- *
- * @return bool if true, exception is converted in Response 500, if false exception is rethrown
- */
-function exceptionHandler(Exception $exception) : bool
-{
-    error_log("handled exception [{$exception->getCode()}] {$exception->getMessage()}");
-
-    if (str_contains($_SERVER['REQUEST_URI'], 'unhandled')) {
-        return false;
-    } else {
-        return true;
-    }
-}
