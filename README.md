@@ -55,7 +55,7 @@ use HttpSoft\Message\ServerRequestFactory;
 
 require_once 'vendor/autoload.php';
 
-$router = new NanoRouter(Response::class);
+$router = new NanoRouter(Response::class, ServerRequestFactory::class);
 
 $router
     // add simple route
