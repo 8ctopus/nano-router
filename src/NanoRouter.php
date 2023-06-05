@@ -6,6 +6,7 @@ namespace Oct8pus\NanoRouter;
 
 use Exception;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class NanoRouter
 {
@@ -67,27 +68,28 @@ class NanoRouter
      */
     public function resolve() : ResponseInterface
     {
-        $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $request = (new $this->serverRequestFactory())
+            ->createServerRequest(
+            $_SERVER['REQUEST_METHOD'],
+            $_SERVER['REQUEST_URI'],
+            $_SERVER,
+        );
 
-        $response = $this->preMiddleware($requestPath);
+        $response = $this->preMiddleware($request);
 
         if ($response) {
             // send response to post request middleware so it has a chance to process the request
-            return $this->postMiddleware($response, $requestPath);
+            return $this->postMiddleware($response, $request);
         }
 
+        $path = $request->getRequestTarget();
+        $method = $request->getMethod();
+
         foreach ($this->routes as $regex => $route) {
-            if ($this->routeMatches($regex, $route['type'], $requestPath)) {
-                if ($this->methodMatches($route['method'])) {
+            if ($this->routeMatches($regex, $route['type'], $path)) {
+                if ($this->methodMatches($method, $route['method'])) {
                     // call route
                     try {
-                        $request = (new $this->serverRequestFactory())
-                            ->createServerRequest(
-                            $_SERVER['REQUEST_METHOD'],
-                            $_SERVER['REQUEST_URI'],
-                            $_SERVER,
-                        );
-
                         $response = $route['callback']($request);
                     } catch (Exception $exception) {
                         $response = $this->handleExceptions($exception);
@@ -96,16 +98,16 @@ class NanoRouter
                     break;
                 } else {
                     // potential response if no other route matches
-                    $response = $this->error(405, $requestPath);
+                    $response = $this->error(405, $path);
                 }
             }
         }
 
         if (!isset($response)) {
-            $response = $this->error(404, $requestPath);
+            $response = $this->error(404, $path);
         }
 
-        return $this->postMiddleware($response, $requestPath);
+        return $this->postMiddleware($response, $request);
     }
 
     /**
@@ -229,13 +231,13 @@ class NanoRouter
     /**
      * Pre request middleware
      *
-     * @param string $requestPath
+     * @param ServerRequestInterface $request
      *
      * @return ?ResponseInterface
      *
      * @note only first matching pre request middlware will be executed
      */
-    protected function preMiddleware(string $requestPath) : ?ResponseInterface
+    protected function preMiddleware(ServerRequestInterface $request) : ?ResponseInterface
     {
         foreach ($this->middleware as $middleware) {
             foreach ($middleware as $regex => $route) {
@@ -243,7 +245,7 @@ class NanoRouter
                     continue;
                 }
 
-                if ($this->routeMatches($regex, 'regex', $requestPath) && $this->methodMatches($route['method'])) {
+                if ($this->routeMatches($regex, 'regex', $request->getRequestTarget()) && $this->methodMatches($request->getMethod(), $route['method'])) {
                     // call middleware
                     try {
                         $response = $route['callback']();
@@ -265,13 +267,13 @@ class NanoRouter
      * Post request middleware
      *
      * @param ResponseInterface $response
-     * @param string            $requestPath
+     * @param ServerRequestInterface            $request
      *
      * @return ?ResponseInterface
      *
      * @note all matching post request middleware will be executed
      */
-    protected function postMiddleware(ResponseInterface $response, string $requestPath) : ?ResponseInterface
+    protected function postMiddleware(ResponseInterface $response, ServerRequestInterface $request) : ?ResponseInterface
     {
         foreach ($this->middleware as $middleware) {
             foreach ($middleware as $regex => $route) {
@@ -279,7 +281,7 @@ class NanoRouter
                     continue;
                 }
 
-                if ($this->routeMatches($regex, 'regex', $requestPath) && $this->methodMatches($route['method'])) {
+                if ($this->routeMatches($regex, 'regex', $request->getRequestTarget()) && $this->methodMatches($request->getMethod(), $route['method'])) {
                     // call middleware
                     try {
                         $response = $route['callback']($response);
@@ -331,11 +333,12 @@ class NanoRouter
     /**
      * Check if method matches
      *
+     * @param string       $method
      * @param array|string $methods
      *
      * @return [type]
      */
-    private function methodMatches(string|array $methods) : bool
+    private function methodMatches(string $method, string|array $methods) : bool
     {
         if ($methods === '*') {
             return true;
@@ -345,7 +348,7 @@ class NanoRouter
             $methods = [$methods];
         }
 
-        return in_array($_SERVER['REQUEST_METHOD'], $methods, true);
+        return in_array($method, $methods, true);
     }
 
     /**
