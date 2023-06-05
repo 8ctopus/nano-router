@@ -58,7 +58,7 @@ final class NanoRouterTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
         self::assertSame('index', (string) $response->getBody());
 
-        $this->mockRequest('GET', '/?foo=bar');
+        $this->mockRequest('GET', '/', '?foo=bar');
         $response = $router->resolve();
 
         self::assertSame(200, $response->getStatusCode());
@@ -478,10 +478,14 @@ final class NanoRouterTest extends TestCase
         return null;
     }
 
-    private function mockRequest($method, $uri) : void
+    private function mockRequest(string $method, string $uri, string $query = '') : void
     {
+        $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
+        $_SERVER['REQUEST_SCHEME'] = 'http';
+        $_SERVER['HTTP_HOST'] = 'localhost';
         $_SERVER['REQUEST_METHOD'] = $method;
         $_SERVER['REQUEST_URI'] = $uri;
+        $_SERVER['QUERY_STRING'] = $query;
     }
 }
 
