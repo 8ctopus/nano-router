@@ -77,9 +77,9 @@ $router
 
         return new Response(200, [], $stream);
     })
-    ->addErrorHandler(404, function (string $requestPath) : ResponseInterface {
+    ->addErrorHandler(404, function (ServerRequestInterface $request) : ResponseInterface {
         $stream = new Stream();
-        $stream->write("page not found {$requestPath}");
+        $stream->write('page not found - ' . $request->getRequestTarget());
 
         return new Response(404, [], $stream);
     })

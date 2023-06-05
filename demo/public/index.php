@@ -25,8 +25,9 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 $router = new NanoRouter(Response::class, ServerRequestFactory::class);
 
-$router->addRoute('GET', '/', function () : ResponseInterface {
+$router->addRoute('GET', '/', function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();
+
     $stream->write(<<<'BODY'
     <html>
     <body>
@@ -47,8 +48,9 @@ $router->addRoute('GET', '/', function () : ResponseInterface {
     return new Response(200, [], $stream);
 });
 
-$router->addRoute(['HEAD', 'GET'], '/test/', function () : ResponseInterface {
+$router->addRoute(['HEAD', 'GET'], '/test/', function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();
+
     $stream->write(<<<'BODY'
     <html>
     <body>
@@ -69,24 +71,25 @@ $router->addRouteStartWith('*', '/php', function (ServerRequestInterface $reques
     return new Response(200, ['content-type' => 'text/plain'], $stream);
 });
 
-$router->addRoute('GET', '/route-exception/', function () : ResponseInterface {
+$router->addRoute('GET', '/route-exception/', function (ServerRequestInterface $request) : ResponseInterface {
     throw new RouteException('not authorized', 403);
 });
 
-$router->addRoute('GET', '/fatal-exception-handled/', function () : ResponseInterface {
+$router->addRoute('GET', '/fatal-exception-handled/', function (ServerRequestInterface $request) : ResponseInterface {
     throw new Exception('fatal error', 500);
 });
 
-$router->addRoute('GET', '/fatal-exception-unhandled/', function () : ResponseInterface {
+$router->addRoute('GET', '/fatal-exception-unhandled/', function (ServerRequestInterface $request) : ResponseInterface {
     throw new Exception('fatal error');
 });
 
-$router->addErrorHandler(404, function () : ResponseInterface {
+$router->addErrorHandler(404, function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();
-    $stream->write(<<<'BODY'
+    $stream->write(<<<BODY
     <html>
     <body>
     <h1>Sorry we lost that page</h1>
+    <h2>{$request->getRequestTarget()}</h2>
     </body>
     </html>
     BODY);

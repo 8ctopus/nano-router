@@ -408,9 +408,9 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
-        $router->addErrorHandler(404, function () : ResponseInterface {
+        $router->addErrorHandler(404, function (ServerRequestInterface $request) : ResponseInterface {
             $stream = new Stream();
-            $stream->write('This page does not exist on the server');
+            $stream->write('This page does not exist on the server - ' . $request->getRequestTarget());
             return new Response(404, [], $stream);
         });
 
@@ -420,7 +420,7 @@ final class NanoRouterTest extends TestCase
 
         self::assertSame(404, $response->getStatusCode());
         self::assertSame('Not Found', $response->getReasonPhrase());
-        self::assertSame('This page does not exist on the server', (string) $response->getBody());
+        self::assertSame('This page does not exist on the server - /test.php', (string) $response->getBody());
     }
 
     public function testRouteInvalidRegex() : void
