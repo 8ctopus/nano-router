@@ -20,6 +20,8 @@ The demo can also be started using Docker `docker-compose up &`.
 
 - `composer require 8ctopus/nano-router`
 
+- if you don't have any preference for the PSR-7 implementation, install [HttpSoft](https://github.com/httpsoft) `composer require httpsoft/http-message httpsoft/http-emitter`
+
 - redirect all traffic (except existing files) to the router in `.htaccess` for those using Apache
 
 ```apache
