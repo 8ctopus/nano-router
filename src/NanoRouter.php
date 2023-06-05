@@ -82,7 +82,7 @@ class NanoRouter
             return $this->postMiddleware($response, $request);
         }
 
-        $path = $request->getRequestTarget();
+        $path = $request->getUri()->getPath();
         $method = $request->getMethod();
 
         foreach ($this->routes as $regex => $route) {
@@ -245,7 +245,7 @@ class NanoRouter
                     continue;
                 }
 
-                if ($this->routeMatches($regex, 'regex', $request->getRequestTarget()) && $this->methodMatches($request->getMethod(), $route['method'])) {
+                if ($this->routeMatches($regex, 'regex', $request->getUri()->getPath()) && $this->methodMatches($request->getMethod(), $route['method'])) {
                     // call middleware
                     try {
                         $response = $route['callback']();
@@ -281,7 +281,7 @@ class NanoRouter
                     continue;
                 }
 
-                if ($this->routeMatches($regex, 'regex', $request->getRequestTarget()) && $this->methodMatches($request->getMethod(), $route['method'])) {
+                if ($this->routeMatches($regex, 'regex', $request->getUri()->getPath()) && $this->methodMatches($request->getMethod(), $route['method'])) {
                     // call middleware
                     try {
                         $response = $route['callback']($response);
