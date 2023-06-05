@@ -10,7 +10,6 @@ use Psr\Http\Message\ResponseInterface;
 class NanoRouter
 {
     private string $class;
-    private static string $staticClass;
 
     private array $routes;
     private array $middleware;
@@ -36,7 +35,6 @@ class NanoRouter
     public function __construct(string $class, bool|callable $onRouteException = true, bool|callable $onException = true)
     {
         $this->class = $class;
-        static::$staticClass = $class;
 
         $this->routes = [];
         $this->middleware = [];
@@ -219,44 +217,6 @@ class NanoRouter
     }
 
     /**
-     * Handle route exceptions
-     *
-     * @param RouteException $exception
-     *
-     * @return void
-     */
-    public static function routeExceptionHandler(RouteException $exception) : void
-    {
-        $trace = $exception->getTrace();
-
-        $where = '';
-
-        if (count($trace)) {
-            $where = array_key_exists('class', $trace[0]) ? $trace[0]['class'] : $trace[0]['function'];
-        }
-
-        static::errorLog("{$where} - FAILED - {$exception->getCode()} {$exception->getMessage()}");
-    }
-
-    /**
-     * Handle exceptions
-     *
-     * @param Exception $exception
-     *
-     * @return ?ResponseInterface
-     */
-    public static function exceptionHandler(Exception $exception) : ?ResponseInterface
-    {
-        $code = $exception->getCode();
-
-        if ($code >= 200 && $code < 600) {
-            return new static::$staticClass($code);
-        }
-
-        return null;
-    }
-
-    /**
      * Pre request middleware
      *
      * @param string $requestPath
@@ -429,5 +389,43 @@ class NanoRouter
         } else {
             return new $this->class($error);
         }
+    }
+
+    /**
+     * Handle route exceptions
+     *
+     * @param RouteException $exception
+     *
+     * @return void
+     */
+    protected function routeExceptionHandler(RouteException $exception) : void
+    {
+        $trace = $exception->getTrace();
+
+        $where = '';
+
+        if (count($trace)) {
+            $where = array_key_exists('class', $trace[0]) ? $trace[0]['class'] : $trace[0]['function'];
+        }
+
+        static::errorLog("{$where} - FAILED - {$exception->getCode()} {$exception->getMessage()}");
+    }
+
+    /**
+     * Handle exceptions
+     *
+     * @param Exception $exception
+     *
+     * @return ?ResponseInterface
+     */
+    protected function exceptionHandler(Exception $exception) : ?ResponseInterface
+    {
+        $code = $exception->getCode();
+
+        if ($code >= 200 && $code < 600) {
+            return new $this->class($code);
+        }
+
+        return null;
     }
 }
