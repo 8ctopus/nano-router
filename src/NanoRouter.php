@@ -13,8 +13,19 @@ class NanoRouter
     protected string $responseClass;
     protected string $serverRequestFactoryClass;
 
+    /**
+     * @var array<string, array{'type': string, 'method': string|array<string>, 'callback': callable}>
+     */
     protected array $routes;
+
+    /**
+     * @var array<string, array{'method': string|array<string>, 'when': string, 'callback': callable}>
+     */
     protected array $middleware;
+
+    /**
+     * @var array<int, callable>
+     */
     protected array $errors;
 
     /**
@@ -113,7 +124,7 @@ class NanoRouter
     /**
      * Add route
      *
-     * @param array|string $methods
+     * @param array<string>|string $methods
      * @param string       $path
      * @param callable     $callback
      *
@@ -133,7 +144,7 @@ class NanoRouter
     /**
      * Add starts with route
      *
-     * @param array|string $methods
+     * @param array<string>|string $methods
      * @param string       $path
      * @param callable     $callback
      *
@@ -153,7 +164,7 @@ class NanoRouter
     /**
      * Add regex route
      *
-     * @param array|string $methods
+     * @param array<string>|string $methods
      * @param string       $regex
      * @param callable     $callback
      *
@@ -187,9 +198,7 @@ class NanoRouter
      */
     public function addErrorHandler(int $error, callable $handler) : self
     {
-        $this->errors[$error] = [
-            'callback' => $handler,
-        ];
+        $this->errors[$error] = $handler;
 
         return $this;
     }
@@ -269,11 +278,11 @@ class NanoRouter
      * @param ResponseInterface      $response
      * @param ServerRequestInterface $request
      *
-     * @return ?ResponseInterface
+     * @return ResponseInterface
      *
      * @note all matching post request middleware will be executed
      */
-    protected function postMiddleware(ResponseInterface $response, ServerRequestInterface $request) : ?ResponseInterface
+    protected function postMiddleware(ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface
     {
         foreach ($this->middleware as $middleware) {
             foreach ($middleware as $regex => $route) {
@@ -292,7 +301,7 @@ class NanoRouter
             }
         }
 
-        return isset($response) ? $response : null;
+        return $response;
     }
 
     protected static function errorLog(string $message) : void
@@ -334,9 +343,9 @@ class NanoRouter
      * Check if method matches
      *
      * @param string       $method
-     * @param array|string $methods
+     * @param array<string>|string $methods
      *
-     * @return [type]
+     * @return bool
      */
     protected function methodMatches(string $method, string|array $methods) : bool
     {
@@ -368,7 +377,7 @@ class NanoRouter
                 call_user_func($this->onRouteException, $exception);
             }
 
-            return new $this->responseClass($exception->getCode(), []);
+            return new $this->responseClass($exception->getCode());
         }
 
         // exceptions can be converted to a response, if not throw
@@ -436,7 +445,7 @@ class NanoRouter
 
         if ($handler) {
             // call error handler
-            return $handler['callback']($request);
+            return call_user_func($handler, $request);
         } else {
             return new $this->responseClass($error);
         }
