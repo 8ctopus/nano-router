@@ -8,7 +8,7 @@
 ![code coverage badge](https://raw.githubusercontent.com/8ctopus/nano-router/image-data/coverage.svg)
 ![lines of code](https://raw.githubusercontent.com/8ctopus/nano-router/image-data/lines.svg)
 
-An experimental and extremely simple PSR-7, PSR-17 router
+An experimental PSR-7, PSR-17 router
 
 ## demo
 
