@@ -28,7 +28,7 @@ final class PerformanceTest extends TestCase
             'POST',
             'DELETE',
             'PUT',
-            'PATCH'
+            'PATCH',
         ];
 
         $count = count($methods);
@@ -40,7 +40,7 @@ final class PerformanceTest extends TestCase
         for ($i = 0; $i < 500; ++$i) {
             $url = '/' . bin2hex(random_bytes(2));
 
-            $router->addRoute($methods[rand(0, $count -1)], $url, function () : ResponseInterface {
+            $router->addRoute($methods[rand(0, $count - 1)], $url, function () : ResponseInterface {
                 return new Response(200);
             });
         }
@@ -51,7 +51,7 @@ final class PerformanceTest extends TestCase
         for ($i = 0; $i < 500; ++$i) {
             $url = '/' . bin2hex(random_bytes(2));
 
-            $router->addRouteStartWith($methods[rand(0, $count -1)], $url, function () : ResponseInterface {
+            $router->addRouteStartWith($methods[rand(0, $count - 1)], $url, function () : ResponseInterface {
                 return new Response(200);
             });
         }
@@ -62,7 +62,7 @@ final class PerformanceTest extends TestCase
         for ($i = 0; $i < 500; ++$i) {
             $url = '~^/' . bin2hex(random_bytes(2)) . '.*~';
 
-            $router->addRouteRegex($methods[rand(0, $count -1)], $url, function () : ResponseInterface {
+            $router->addRouteRegex($methods[rand(0, $count - 1)], $url, function () : ResponseInterface {
                 return new Response(200);
             });
         }
@@ -72,7 +72,7 @@ final class PerformanceTest extends TestCase
         $found = 0;
 
         for ($i = 0; $i < 3000; ++$i) {
-            $this->mockRequest($methods[rand(0, $count -1)], '/' . bin2hex(random_bytes(2)));
+            $this->mockRequest($methods[rand(0, $count - 1)], '/' . bin2hex(random_bytes(2)));
             $response = $router->resolve();
 
             if ($response->getStatusCode() === 200) {

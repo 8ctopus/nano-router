@@ -6,8 +6,8 @@ namespace Tests;
 
 use Exception;
 use HttpSoft\Message\Response;
-use HttpSoft\Message\Stream;
 use HttpSoft\Message\ServerRequestFactory;
+use HttpSoft\Message\Stream;
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\NanoRouterException;
 use Oct8pus\NanoRouter\RouteException;

@@ -70,10 +70,10 @@ class NanoRouter
     {
         $request = (new $this->serverRequestFactoryClass())
             ->createServerRequest(
-            $_SERVER['REQUEST_METHOD'],
-            $_SERVER['REQUEST_URI'],
-            $_SERVER,
-        );
+                $_SERVER['REQUEST_METHOD'],
+                $_SERVER['REQUEST_URI'],
+                $_SERVER,
+            );
 
         $response = $this->preMiddleware($request);
 
@@ -266,8 +266,8 @@ class NanoRouter
     /**
      * Post request middleware
      *
-     * @param ResponseInterface $response
-     * @param ServerRequestInterface            $request
+     * @param ResponseInterface      $response
+     * @param ServerRequestInterface $request
      *
      * @return ?ResponseInterface
      *
@@ -385,26 +385,6 @@ class NanoRouter
     }
 
     /**
-     * Handle error
-     *
-     * @param int    $error
-     * @param ServerRequestInterface $request
-     *
-     * @return ResponseInterface
-     */
-    private function handleError(int $error, ServerRequestInterface $request) : ResponseInterface
-    {
-        $handler = array_key_exists($error, $this->errors) ? $this->errors[$error] : null;
-
-        if ($handler) {
-            // call error handler
-            return $handler['callback']($request);
-        } else {
-            return new $this->responseClass($error);
-        }
-    }
-
-    /**
      * Handle route exceptions
      *
      * @param RouteException $exception
@@ -440,5 +420,25 @@ class NanoRouter
         }
 
         return null;
+    }
+
+    /**
+     * Handle error
+     *
+     * @param int                    $error
+     * @param ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     */
+    private function handleError(int $error, ServerRequestInterface $request) : ResponseInterface
+    {
+        $handler = array_key_exists($error, $this->errors) ? $this->errors[$error] : null;
+
+        if ($handler) {
+            // call error handler
+            return $handler['callback']($request);
+        } else {
+            return new $this->responseClass($error);
+        }
     }
 }
