@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests;
 
 use HttpSoft\Message\Response;
+use HttpSoft\Message\ServerRequestFactory;
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoTimer\NanoTimer;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +20,7 @@ final class PerformanceTest extends TestCase
 {
     public function testRoute() : void
     {
-        $router = new NanoRouter(Response::class);
+        $router = new NanoRouter(Response::class, ServerRequestFactory::class);
 
         $methods = [
             'HEAD',

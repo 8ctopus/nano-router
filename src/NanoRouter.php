@@ -6,11 +6,12 @@ namespace Oct8pus\NanoRouter;
 
 use Exception;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class NanoRouter
 {
-    private string $class;
-    private static string $staticClass;
+    private string $response;
+    private string $serverRequestFactory;
 
     private array $routes;
     private array $middleware;
@@ -29,14 +30,15 @@ class NanoRouter
     /**
      * Constructor
      *
-     * @param string        $class            ResponseInterface implementation
+     * @param string        $response             ResponseInterface implementation
+     * @param string        $serverRequestFactory ServerRequestFactoryInterface implementation
      * @param bool|callable $onRouteException
      * @param bool|callable $onException
      */
-    public function __construct(string $class, bool|callable $onRouteException = true, bool|callable $onException = true)
+    public function __construct(string $response, string $serverRequestFactory, bool|callable $onRouteException = true, bool|callable $onException = true)
     {
-        $this->class = $class;
-        static::$staticClass = $class;
+        $this->response = $response;
+        $this->serverRequestFactory = $serverRequestFactory;
 
         $this->routes = [];
         $this->middleware = [];
@@ -66,38 +68,46 @@ class NanoRouter
      */
     public function resolve() : ResponseInterface
     {
-        $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $request = (new $this->serverRequestFactory())
+            ->createServerRequest(
+            $_SERVER['REQUEST_METHOD'],
+            $_SERVER['REQUEST_URI'],
+            $_SERVER,
+        );
 
-        $response = $this->preMiddleware($requestPath);
+        $response = $this->preMiddleware($request);
 
         if ($response) {
             // send response to post request middleware so it has a chance to process the request
-            return $this->postMiddleware($response, $requestPath);
+            return $this->postMiddleware($response, $request);
         }
 
+        $path = $request->getUri()->getPath();
+        $method = $request->getMethod();
+
         foreach ($this->routes as $regex => $route) {
-            if ($this->routeMatches($regex, $route['type'], $requestPath)) {
-                if ($this->methodMatches($route['method'])) {
+            if ($this->routeMatches($regex, $route['type'], $path)) {
+                if ($this->methodMatches($method, $route['method'])) {
                     // call route
                     try {
-                        $response = $route['callback']();
+                        $response = $route['callback']($request);
                     } catch (Exception $exception) {
                         $response = $this->handleExceptions($exception);
                     }
 
                     break;
                 } else {
-                    $response = $this->error(405, $requestPath);
-                    break;
+                    // potential response if no other route matches
+                    $response = $this->error(405, $path);
                 }
             }
         }
 
         if (!isset($response)) {
-            $response = $this->error(404, $requestPath);
+            $response = $this->error(404, $path);
         }
 
-        return $this->postMiddleware($response, $requestPath);
+        return $this->postMiddleware($response, $request);
     }
 
     /**
@@ -219,53 +229,15 @@ class NanoRouter
     }
 
     /**
-     * Handle route exceptions
-     *
-     * @param RouteException $exception
-     *
-     * @return void
-     */
-    public static function routeExceptionHandler(RouteException $exception) : void
-    {
-        $trace = $exception->getTrace();
-
-        $where = '';
-
-        if (count($trace)) {
-            $where = array_key_exists('class', $trace[0]) ? $trace[0]['class'] : $trace[0]['function'];
-        }
-
-        static::errorLog("{$where} - FAILED - {$exception->getCode()} {$exception->getMessage()}");
-    }
-
-    /**
-     * Handle exceptions
-     *
-     * @param Exception $exception
-     *
-     * @return ?ResponseInterface
-     */
-    public static function exceptionHandler(Exception $exception) : ?ResponseInterface
-    {
-        $code = $exception->getCode();
-
-        if ($code >= 200 && $code < 600) {
-            return new static::$staticClass($code);
-        }
-
-        return null;
-    }
-
-    /**
      * Pre request middleware
      *
-     * @param string $requestPath
+     * @param ServerRequestInterface $request
      *
      * @return ?ResponseInterface
      *
      * @note only first matching pre request middlware will be executed
      */
-    protected function preMiddleware(string $requestPath) : ?ResponseInterface
+    protected function preMiddleware(ServerRequestInterface $request) : ?ResponseInterface
     {
         foreach ($this->middleware as $middleware) {
             foreach ($middleware as $regex => $route) {
@@ -273,7 +245,7 @@ class NanoRouter
                     continue;
                 }
 
-                if ($this->routeMatches($regex, 'regex', $requestPath) && $this->methodMatches($route['method'])) {
+                if ($this->routeMatches($regex, 'regex', $request->getUri()->getPath()) && $this->methodMatches($request->getMethod(), $route['method'])) {
                     // call middleware
                     try {
                         $response = $route['callback']();
@@ -295,13 +267,13 @@ class NanoRouter
      * Post request middleware
      *
      * @param ResponseInterface $response
-     * @param string            $requestPath
+     * @param ServerRequestInterface            $request
      *
      * @return ?ResponseInterface
      *
      * @note all matching post request middleware will be executed
      */
-    protected function postMiddleware(ResponseInterface $response, string $requestPath) : ?ResponseInterface
+    protected function postMiddleware(ResponseInterface $response, ServerRequestInterface $request) : ?ResponseInterface
     {
         foreach ($this->middleware as $middleware) {
             foreach ($middleware as $regex => $route) {
@@ -309,7 +281,7 @@ class NanoRouter
                     continue;
                 }
 
-                if ($this->routeMatches($regex, 'regex', $requestPath) && $this->methodMatches($route['method'])) {
+                if ($this->routeMatches($regex, 'regex', $request->getUri()->getPath()) && $this->methodMatches($request->getMethod(), $route['method'])) {
                     // call middleware
                     try {
                         $response = $route['callback']($response);
@@ -361,11 +333,12 @@ class NanoRouter
     /**
      * Check if method matches
      *
+     * @param string       $method
      * @param array|string $methods
      *
      * @return [type]
      */
-    private function methodMatches(string|array $methods) : bool
+    private function methodMatches(string $method, string|array $methods) : bool
     {
         if ($methods === '*') {
             return true;
@@ -375,7 +348,7 @@ class NanoRouter
             $methods = [$methods];
         }
 
-        return in_array($_SERVER['REQUEST_METHOD'], $methods, true);
+        return in_array($method, $methods, true);
     }
 
     /**
@@ -395,7 +368,7 @@ class NanoRouter
                 call_user_func($this->onRouteException, $exception);
             }
 
-            return new $this->class($exception->getCode(), []);
+            return new $this->response($exception->getCode(), []);
         }
 
         // exceptions can be converted to a response, if not throw
@@ -427,7 +400,45 @@ class NanoRouter
             // call route
             return $handler['callback']($requestPath);
         } else {
-            return new $this->class($error);
+            return new $this->response($error);
         }
+    }
+
+    /**
+     * Handle route exceptions
+     *
+     * @param RouteException $exception
+     *
+     * @return void
+     */
+    protected function routeExceptionHandler(RouteException $exception) : void
+    {
+        $trace = $exception->getTrace();
+
+        $where = '';
+
+        if (count($trace)) {
+            $where = array_key_exists('class', $trace[0]) ? $trace[0]['class'] : $trace[0]['function'];
+        }
+
+        static::errorLog("{$where} - FAILED - {$exception->getCode()} {$exception->getMessage()}");
+    }
+
+    /**
+     * Handle exceptions
+     *
+     * @param Exception $exception
+     *
+     * @return ?ResponseInterface
+     */
+    protected function exceptionHandler(Exception $exception) : ?ResponseInterface
+    {
+        $code = $exception->getCode();
+
+        if ($code >= 200 && $code < 600) {
+            return new $this->response($code);
+        }
+
+        return null;
     }
 }
