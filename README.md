@@ -51,7 +51,7 @@ use HttpSoft\Emitter\SapiEmitter;
 
 require_once 'vendor/autoload.php';
 
-$router = new NanoRouter(Response::class, null, null);
+$router = new NanoRouter(Response::class);
 
 $router
     // add simple route
@@ -78,7 +78,7 @@ $router
         return $response->withHeader('X-Powered-By', '8ctopus');
     });
 
-// resolve request
+// resolve request into a response
 $response = $router->resolve();
 
 // send response to client
@@ -92,10 +92,9 @@ There is more to it, it's just not in the readme yet, such as:
 
 - multiple route methods
 - pre and post middleware
-- route exception handling
-- generic exception handling
+- route exception and generic exception handling
 
-but most of it is shown in the demo
+but most of it can be experimented with in the demo
 
 ## run tests
 
