@@ -85,8 +85,8 @@ class NanoRouter
 
                     break;
                 } else {
+                    // potential response if no other route matches
                     $response = $this->error(405, $requestPath);
-                    break;
                 }
             }
         }
