@@ -21,7 +21,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
     ->pushHandler(new PrettyPageHandler())
     ->register();
 
-$router = new NanoRouter(Response::class, routeExceptionHandler(...), exceptionHandler(...));
+$router = new NanoRouter(Response::class);
 
 $router->addRoute('GET', '/', function () : ResponseInterface {
     $stream = new Stream();
@@ -112,38 +112,7 @@ $router->addMiddleware('*', '~/api/~', 'pre', function () : ?ResponseInterface {
     return null;
 });
 
-// resolve route
 $response = $router->resolve();
 
 (new SapiEmitter())
     ->emit($response);
-
-/**
- * Route exception handler
- *
- * @param RouteException $exception
- *
- * @return void
- */
-function routeExceptionHandler(RouteException $exception) : void
-{
-    error_log("handled route exception [{$exception->getCode()}] {$exception->getMessage()}");
-}
-
-/**
- * Generic exception handler
- *
- * @param Exception $exception
- *
- * @return ?ResponseInterface if no
- */
-function exceptionHandler(Exception $exception) : ?ResponseInterface
-{
-    error_log("handled exception [{$exception->getCode()}] {$exception->getMessage()}");
-
-    if (str_contains($_SERVER['REQUEST_URI'], 'unhandled')) {
-        return null;
-    } else {
-        return new Response($exception->getCode());
-    }
-}
