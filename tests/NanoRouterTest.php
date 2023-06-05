@@ -88,6 +88,53 @@ final class NanoRouterTest extends TestCase
         self::assertSame('Method Not Allowed', $response->getReasonPhrase());
     }
 
+    public function testStartsWithRoute() : void
+    {
+        $router = new NanoRouterMock(Response::class);
+
+        // add index route
+        $router->addRouteStartWith(['HEAD', 'GET'], '/hello/', function () : ResponseInterface {
+            if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
+                return new Response(200);
+            }
+
+            $stream = new Stream();
+            $stream->write('hello');
+            return new Response(200, [], $stream);
+        });
+
+        $this->mockRequest('HEAD', '/');
+        $response = $router->resolve();
+
+        self::assertSame(404, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
+        self::assertSame('Not Found', $response->getReasonPhrase());
+
+        $this->mockRequest('GET', '/hello/');
+        $response = $router->resolve();
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('hello', (string) $response->getBody());
+
+        $this->mockRequest('GET', '/hello/test');
+        $response = $router->resolve();
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('hello', (string) $response->getBody());
+
+        $this->mockRequest('GET', '/hello/test/');
+        $response = $router->resolve();
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('hello', (string) $response->getBody());
+
+        $this->mockRequest('GET', '/hello/test/test/');
+        $response = $router->resolve();
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('hello', (string) $response->getBody());
+    }
+
     public function testRegexRoute() : void
     {
         $router = (new NanoRouterMock(Response::class))

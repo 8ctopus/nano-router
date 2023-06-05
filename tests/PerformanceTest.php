@@ -44,7 +44,18 @@ final class PerformanceTest extends TestCase
             });
         }
 
-        $timer->measure('add 500 random non-regex routes');
+        $timer->measure('add 500 random exact routes');
+
+        // add random regex routes
+        for ($i = 0; $i < 500; ++$i) {
+            $url = '/' . bin2hex(random_bytes(2));
+
+            $router->addRouteStartWith($methods[rand(0, $count -1)], $url, function () : ResponseInterface {
+                return new Response(200);
+            });
+        }
+
+        $timer->measure('add 500 random starts with routes');
 
         // add random regex routes
         for ($i = 0; $i < 500; ++$i) {

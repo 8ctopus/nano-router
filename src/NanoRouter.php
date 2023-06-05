@@ -76,7 +76,7 @@ class NanoRouter
         }
 
         foreach ($this->routes as $regex => $route) {
-            if ($this->routeMatches($regex, $route['regex'], $requestPath)) {
+            if ($this->routeMatches($regex, $route['type'], $requestPath)) {
                 if ($this->methodMatches($route['method'])) {
                     // call route
                     try {
@@ -112,7 +112,27 @@ class NanoRouter
     public function addRoute(string|array $methods, string $path, callable $callback) : self
     {
         $this->routes[$path] = [
-            'regex' => false,
+            'type' => 'exact',
+            'method' => $methods,
+            'callback' => $callback,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Add starts with route
+     *
+     * @param array|string $methods
+     * @param string       $path
+     * @param callable     $callback
+     *
+     * @return self
+     */
+    public function addRouteStartWith(string|array $methods, string $path, callable $callback) : self
+    {
+        $this->routes[$path] = [
+            'type' => 'starts',
             'method' => $methods,
             'callback' => $callback,
         ];
@@ -139,7 +159,7 @@ class NanoRouter
         }
 
         $this->routes[$regex] = [
-            'regex' => true,
+            'type' => 'regex',
             'method' => $methods,
             'callback' => $callback,
         ];
@@ -253,7 +273,7 @@ class NanoRouter
                     continue;
                 }
 
-                if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
+                if ($this->routeMatches($regex, 'regex', $requestPath) && $this->methodMatches($route['method'])) {
                     // call middleware
                     try {
                         $response = $route['callback']();
@@ -289,7 +309,7 @@ class NanoRouter
                     continue;
                 }
 
-                if ($this->routeMatches($regex, true, $requestPath) && $this->methodMatches($route['method'])) {
+                if ($this->routeMatches($regex, 'regex', $requestPath) && $this->methodMatches($route['method'])) {
                     // call middleware
                     try {
                         $response = $route['callback']($response);
@@ -314,15 +334,28 @@ class NanoRouter
      * Check if route matches
      *
      * @param string $route
-     * @param bool   $regex
+     * @param string $type
      * @param string $requestPath
      *
      * @return bool
      */
-    private function routeMatches(string $route, bool $regex, string $requestPath) : bool
+    private function routeMatches(string $route, string $type, string $requestPath) : bool
     {
-        return (!$regex && $requestPath === $route)
-        || ($regex && preg_match($route, $requestPath, $matches) === 1);
+        switch ($type) {
+            case 'exact':
+                return $requestPath === $route;
+
+            case 'starts':
+                return str_starts_with($requestPath, $route);
+
+            case 'regex':
+                return preg_match($route, $requestPath, $matches) === 1;
+
+            default:
+                // @codeCoverageIgnoreStart
+                throw new NanoRouterException('invalid route type');
+                // @codeCoverageIgnoreEnd
+        }
     }
 
     /**
