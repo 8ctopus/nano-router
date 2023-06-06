@@ -51,7 +51,7 @@ final class PerformanceTest extends TestCase
         for ($i = 0; $i < 500; ++$i) {
             $url = '/' . bin2hex(random_bytes(2));
 
-            $router->addRouteStartWith($methods[rand(0, $count - 1)], $url, function () : ResponseInterface {
+            $router->addRouteStartsWith($methods[rand(0, $count - 1)], $url, function () : ResponseInterface {
                 return new Response(200);
             });
         }

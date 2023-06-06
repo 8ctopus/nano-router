@@ -65,7 +65,7 @@ $router->addRoute(['HEAD', 'GET'], '/test/', function (ServerRequestInterface $r
     return new Response(200, [], $stream);
 });
 
-$router->addRouteStartWith('*', '/php', function (ServerRequestInterface $request) : ResponseInterface {
+$router->addRouteStartsWith('*', '/php', function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();
     $stream->write('match starts with route' . PHP_EOL);
     $stream->write('request target - ' . $request->getRequestTarget());

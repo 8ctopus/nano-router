@@ -145,7 +145,7 @@ class NanoRouter
      *
      * @return self
      */
-    public function addRouteStartWith(string|array $methods, string $path, callable $callback) : self
+    public function addRouteStartsWith(string|array $methods, string $path, callable $callback) : self
     {
         $this->routes[$path] = [
             'type' => 'starts',
