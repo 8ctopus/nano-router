@@ -14,12 +14,12 @@ class NanoRouter
     protected string $serverRequestFactoryClass;
 
     /**
-     * @var array<string, array{'type': string, 'method': string|array<string>, 'callback': callable}>
+     * @var array<string, array{'type': string, 'method': array<string>|string, 'callback': callable}>
      */
     protected array $routes;
 
     /**
-     * @var array<int, array<string, array{'method': string|array<string>, 'when': string, 'callback': callable}>>
+     * @var array<int, array<string, array{'method': array<string>|string, 'when': string, 'callback': callable}>>
      */
     protected array $middleware;
 
@@ -75,19 +75,12 @@ class NanoRouter
     /**
      * Resolve route
      *
+     * @param ServerRequestInterface $request
+     *
      * @return ResponseInterface
      */
-    public function resolve() : ResponseInterface
+    public function resolve(ServerRequestInterface $request) : ResponseInterface
     {
-        $uri = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . $_SERVER['QUERY_STRING'];
-
-        $request = (new $this->serverRequestFactoryClass())
-            ->createServerRequest(
-                $_SERVER['REQUEST_METHOD'],
-                $uri,
-                $_SERVER,
-            );
-
         $response = $this->preMiddleware($request);
 
         if ($response) {
@@ -127,8 +120,8 @@ class NanoRouter
      * Add route
      *
      * @param array<string>|string $methods
-     * @param string       $path
-     * @param callable     $callback
+     * @param string               $path
+     * @param callable             $callback
      *
      * @return self
      */
@@ -147,12 +140,12 @@ class NanoRouter
      * Add starts with route
      *
      * @param array<string>|string $methods
-     * @param string       $path
-     * @param callable     $callback
+     * @param string               $path
+     * @param callable             $callback
      *
      * @return self
      */
-    public function addRouteStartWith(string|array $methods, string $path, callable $callback) : self
+    public function addRouteStartsWith(string|array $methods, string $path, callable $callback) : self
     {
         $this->routes[$path] = [
             'type' => 'starts',
@@ -167,8 +160,8 @@ class NanoRouter
      * Add regex route
      *
      * @param array<string>|string $methods
-     * @param string       $regex
-     * @param callable     $callback
+     * @param string               $regex
+     * @param callable             $callback
      *
      * @return self
      *
@@ -344,7 +337,7 @@ class NanoRouter
     /**
      * Check if method matches
      *
-     * @param string       $method
+     * @param string               $method
      * @param array<string>|string $methods
      *
      * @return bool

@@ -10,6 +10,32 @@
 
 An experimental PSR-7, PSR-17 router
 
+## introduction for beginners
+
+The purpose of a router is to match a user request to a request handler, the later will return a response that will be sent back to the user.
+
+[PSR-7](https://www.php-fig.org/psr/psr-7/) defines the request and response interfaces, while [PSR-17](https://www.php-fig.org/psr/psr-17/) defines the factories for creating them. In other words, factories are used to create the request and response objects from the user request and the request handler response.
+
+Here's some pseudocode that explains the concept:
+
+```php
+$router = new Router();
+
+$router->addRoute('GET', '/test.php', function (ServerRequestInterface $request) : ResponseInterface {
+    return new Response(200, ['content-type' => 'text/plain'], 'You\'ve reached page /test.php');
+})
+
+// create user request from globals
+$request = ServerRequestCreator::createFromGlobals($_SERVER, $_FILES, $_COOKIE, $_GET, $_POST);
+
+// router finds a handler for the request
+$response = $router->resolve($request);
+
+// send response to client (echoes internally)
+(new SapiEmitter())
+    ->emit($response);
+```
+
 ## demo
 
 To view the demo, run `php -S localhost:80 demo/public/index.php -t demo/public/` and open your browser at `http://localhost`.
@@ -49,10 +75,11 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 // use any PSR-7, PSR-17 implementations, here HttpSoft
-use HttpSoft\Message\Response;
-use HttpSoft\Message\Stream;
 use HttpSoft\Emitter\SapiEmitter;
+use HttpSoft\Message\Response;
 use HttpSoft\Message\ServerRequestFactory;
+use HttpSoft\Message\Stream;
+use HttpSoft\ServerRequest\ServerRequestCreator;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -90,8 +117,11 @@ $router
         return $response->withHeader('X-Powered-By', '8ctopus');
     });
 
+// create request from globals
+$request = ServerRequestCreator::createFromGlobals($_SERVER, $_FILES, $_COOKIE, $_GET, $_POST);
+
 // resolve request into a response
-$response = $router->resolve();
+$response = $router->resolve($request);
 
 // send response to client
 (new SapiEmitter())

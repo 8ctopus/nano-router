@@ -8,8 +8,8 @@ use HttpSoft\Message\Response;
 use HttpSoft\Message\ServerRequestFactory;
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoTimer\NanoTimer;
-use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
+use Tests\TestCase;
 
 /**
  * @internal
@@ -51,7 +51,7 @@ final class PerformanceTest extends TestCase
         for ($i = 0; $i < 500; ++$i) {
             $url = '/' . bin2hex(random_bytes(2));
 
-            $router->addRouteStartWith($methods[rand(0, $count - 1)], $url, function () : ResponseInterface {
+            $router->addRouteStartsWith($methods[rand(0, $count - 1)], $url, function () : ResponseInterface {
                 return new Response(200);
             });
         }
@@ -72,8 +72,8 @@ final class PerformanceTest extends TestCase
         $found = 0;
 
         for ($i = 0; $i < 3000; ++$i) {
-            $this->mockRequest($methods[rand(0, $count - 1)], '/' . bin2hex(random_bytes(2)));
-            $response = $router->resolve();
+            $request = $this->mockRequest($methods[rand(0, $count - 1)], '/' . bin2hex(random_bytes(2)));
+            $response = $router->resolve($request);
 
             if ($response->getStatusCode() === 200) {
                 ++$found;
@@ -86,11 +86,5 @@ final class PerformanceTest extends TestCase
         echo PHP_EOL . "found {$found} routes";
 
         self::assertTrue(true);
-    }
-
-    private function mockRequest($method, $uri) : void
-    {
-        $_SERVER['REQUEST_METHOD'] = $method;
-        $_SERVER['REQUEST_URI'] = $uri;
     }
 }
