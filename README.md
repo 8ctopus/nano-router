@@ -49,10 +49,11 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 // use any PSR-7, PSR-17 implementations, here HttpSoft
-use HttpSoft\Message\Response;
-use HttpSoft\Message\Stream;
 use HttpSoft\Emitter\SapiEmitter;
+use HttpSoft\Message\Response;
 use HttpSoft\Message\ServerRequestFactory;
+use HttpSoft\Message\Stream;
+use HttpSoft\ServerRequest\ServerRequestCreator;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -89,6 +90,9 @@ $router
     ->addMiddleware('*', '~(.*)~', 'post', function (ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface {
         return $response->withHeader('X-Powered-By', '8ctopus');
     });
+
+// create request from globals
+$request = ServerRequestCreator::createFromGlobals($_SERVER, $_FILES, $_COOKIE, $_GET, $_POST);
 
 // resolve request into a response
 $response = $router->resolve();
