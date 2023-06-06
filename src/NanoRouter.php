@@ -14,12 +14,12 @@ class NanoRouter
     protected string $serverRequestFactoryClass;
 
     /**
-     * @var array<string, array{'type': string, 'method': string|array<string>, 'callback': callable}>
+     * @var array<string, array{'type': string, 'method': array<string>|string, 'callback': callable}>
      */
     protected array $routes;
 
     /**
-     * @var array<int, array<string, array{'method': string|array<string>, 'when': string, 'callback': callable}>>
+     * @var array<int, array<string, array{'method': array<string>|string, 'when': string, 'callback': callable}>>
      */
     protected array $middleware;
 
@@ -75,7 +75,7 @@ class NanoRouter
     /**
      * Resolve route
      *
-     * @param ServerRequestInterface  $request
+     * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
      */
@@ -120,8 +120,8 @@ class NanoRouter
      * Add route
      *
      * @param array<string>|string $methods
-     * @param string       $path
-     * @param callable     $callback
+     * @param string               $path
+     * @param callable             $callback
      *
      * @return self
      */
@@ -140,8 +140,8 @@ class NanoRouter
      * Add starts with route
      *
      * @param array<string>|string $methods
-     * @param string       $path
-     * @param callable     $callback
+     * @param string               $path
+     * @param callable             $callback
      *
      * @return self
      */
@@ -160,8 +160,8 @@ class NanoRouter
      * Add regex route
      *
      * @param array<string>|string $methods
-     * @param string       $regex
-     * @param callable     $callback
+     * @param string               $regex
+     * @param callable             $callback
      *
      * @return self
      *
@@ -337,7 +337,7 @@ class NanoRouter
     /**
      * Check if method matches
      *
-     * @param string       $method
+     * @param string               $method
      * @param array<string>|string $methods
      *
      * @return bool
