@@ -10,6 +10,7 @@ use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
 use HttpSoft\Message\ServerRequestFactory;
 use HttpSoft\Message\Stream;
+use HttpSoft\ServerRequest\ServerRequestCreator;
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\RouteException;
 use Psr\Http\Message\ResponseInterface;
@@ -131,7 +132,9 @@ $router->addMiddleware('*', '~/admin/~', 'pre', function (ServerRequestInterface
     return null;
 });
 
-$response = $router->resolve();
+$request = ServerRequestCreator::createFromGlobals($_SERVER, $_FILES, $_COOKIE, $_GET, $_POST);
+
+$response = $router->resolve($request);
 
 (new SapiEmitter())
     ->emit($response);

@@ -23,6 +23,7 @@
         "phpmd/phpmd": "^2.13",
         "httpsoft/http-message": "^1.1",
         "httpsoft/http-emitter": "^1.0",
+        "httpsoft/http-server-request": "^1.0",
         "8ctopus/nano-timer": "^1.0"
     },
     "minimum-stability": "stable",
@@ -30,6 +31,11 @@
     "autoload": {
         "psr-4": {
             "Oct8pus\\NanoRouter\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests"
         }
     },
     "scripts": {

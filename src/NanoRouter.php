@@ -75,19 +75,12 @@ class NanoRouter
     /**
      * Resolve route
      *
+     * @param ServerRequestInterface  $request
+     *
      * @return ResponseInterface
      */
-    public function resolve() : ResponseInterface
+    public function resolve(ServerRequestInterface $request) : ResponseInterface
     {
-        $uri = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . $_SERVER['QUERY_STRING'];
-
-        $request = (new $this->serverRequestFactoryClass())
-            ->createServerRequest(
-                $_SERVER['REQUEST_METHOD'],
-                $uri,
-                $_SERVER,
-            );
-
         $response = $this->preMiddleware($request);
 
         if ($response) {
