@@ -201,7 +201,7 @@ class NanoRouter
     /**
      * Add middleware
      *
-     * @param string   $method
+     * @param string|array   $methods
      * @param string   $regex
      * @param string   $when     - pre or post
      * @param callable $callback
@@ -210,7 +210,7 @@ class NanoRouter
      *
      * @throws NanoRouterException if regex is invalid
      */
-    public function addMiddleware(string $method, string $regex, string $when, callable $callback) : self
+    public function addMiddleware(string|array $methods, string $regex, string $when, callable $callback) : self
     {
         // validate regex
         if (!is_int(@preg_match($regex, ''))) {
@@ -223,7 +223,7 @@ class NanoRouter
 
         $this->middleware[] = [
             $regex => [
-                'method' => $method,
+                'method' => $methods,
                 'when' => $when,
                 'callback' => $callback,
             ],
