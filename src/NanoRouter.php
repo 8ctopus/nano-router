@@ -125,7 +125,7 @@ class NanoRouter
      *
      * @return self
      */
-    public function addRoute(string|array $methods, string $path, callable $callback) : self
+    public function addRoute(array|string $methods, string $path, callable $callback) : self
     {
         $this->routes[$path] = [
             'type' => 'exact',
@@ -145,7 +145,7 @@ class NanoRouter
      *
      * @return self
      */
-    public function addRouteStartsWith(string|array $methods, string $path, callable $callback) : self
+    public function addRouteStartsWith(array|string $methods, string $path, callable $callback) : self
     {
         $this->routes[$path] = [
             'type' => 'starts',
@@ -167,7 +167,7 @@ class NanoRouter
      *
      * @throws NanoRouterException if regex is invalid
      */
-    public function addRouteRegex(string|array $methods, string $regex, callable $callback) : self
+    public function addRouteRegex(array|string $methods, string $regex, callable $callback) : self
     {
         // validate regex
         if (!is_int(@preg_match($regex, ''))) {
@@ -201,16 +201,16 @@ class NanoRouter
     /**
      * Add middleware
      *
-     * @param string|array   $methods
-     * @param string   $regex
-     * @param string   $when     - pre or post
-     * @param callable $callback
+     * @param array|string $methods
+     * @param string       $regex
+     * @param string       $when     - pre or post
+     * @param callable     $callback
      *
      * @return self
      *
      * @throws NanoRouterException if regex is invalid
      */
-    public function addMiddleware(string|array $methods, string $regex, string $when, callable $callback) : self
+    public function addMiddleware(array|string $methods, string $regex, string $when, callable $callback) : self
     {
         // validate regex
         if (!is_int(@preg_match($regex, ''))) {
@@ -342,7 +342,7 @@ class NanoRouter
      *
      * @return bool
      */
-    protected function methodMatches(string $method, string|array $methods) : bool
+    protected function methodMatches(string $method, array|string $methods) : bool
     {
         if ($methods === '*') {
             return true;
