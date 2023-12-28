@@ -145,3 +145,16 @@ but most of it can be experimented with in the demo
 ## clean code
 
     composer fix(-risky)
+
+## todos
+
+- add to readme - very fast - can handle 200 requests per second on a aws ec2 instance
+- add to readme legend example?
+- create route class instead of array? impact on performance?
+- add alias routes
+- add basePath
+- class wrapper for subroutes
+- should pre middleware only work on valid requests? now not valid routes are still going through the middleware probably we need both
+- check psr-15 middleware
+- add starts with middleware
+- how to easily route inside class?
