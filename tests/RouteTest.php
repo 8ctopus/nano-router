@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use HttpSoft\Message\Response;
 use Oct8pus\NanoRouter\NanoRouterException;
 use Oct8pus\NanoRouter\Route;
 use Oct8pus\NanoRouter\RouteType;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * @internal
@@ -51,6 +53,14 @@ final class RouteTest extends TestCase
         self::assertFalse($route->methodMatches('DELETE'));
         self::assertFalse($route->methodMatches('OPTIONS'));
 
+        $route = new Route(RouteType::Exact, ['GET', 'POST'], '/test/', static function () : void {});
+
+        self::assertTrue($route->methodMatches('GET'));
+        self::assertTrue($route->methodMatches('POST'));
+        self::assertFalse($route->methodMatches('PUT'));
+        self::assertFalse($route->methodMatches('DELETE'));
+        self::assertFalse($route->methodMatches('OPTIONS'));
+
         $route = new Route(RouteType::Exact, '*', '/test/', static function () : void {});
 
         self::assertTrue($route->methodMatches('GET'));
@@ -67,6 +77,17 @@ final class RouteTest extends TestCase
         self::assertTrue($route->matches('GET', '/test/'));
         self::assertFalse($route->matches('POST', '/test/'));
         self::assertFalse($route->matches('GET', '/test2/'));
+    }
+
+    public function testCall() : void
+    {
+        $route = new Route(RouteType::Exact, 'GET', '/test/', static function () : ResponseInterface {
+            return new Response(200);
+        });
+
+        $request = $this->mockRequest('GET', '/test/');
+
+        self::assertEquals(new Response(200), $route->call($request));
     }
 
     public function testInvalidRegex() : void

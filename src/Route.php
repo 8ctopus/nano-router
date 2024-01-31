@@ -69,7 +69,9 @@ class Route
                 return preg_match($this->path, $path) === 1;
 
             default:
+                // @codeCoverageIgnoreStart
                 throw new NanoRouterException("Unknown route type - {$this->type}");
+                // @codeCoverageIgnoreEnd
         }
     }
 
