@@ -31,7 +31,11 @@ $router->addRoute('GET', '/', function (ServerRequestInterface $request) : Respo
 
     $stream->write(<<<'BODY'
     <html>
+    <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" crossorigin="anonymous" integrity="0269018275915a04492010a90829b0b9cfe66ce59358a7a99055e29a8d6742a9">
+    </head>
     <body>
+    <div class="container">
     <h1>Hello World!</h1>
     <p>You're on the index page. Here's a list of links: </p>
     <ul>
@@ -43,6 +47,7 @@ $router->addRoute('GET', '/', function (ServerRequestInterface $request) : Respo
     <li><a href="/fatal-exception-handled/">fatal exception test (handled exception = a response is returned)</a></li>
     <li><a href="/fatal-exception-unhandled/">fatal exception test (unhandled exception)</a></li>
     </ul>
+    </div>
     </body>
     </html>
     BODY);

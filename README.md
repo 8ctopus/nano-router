@@ -38,7 +38,7 @@ $response = $router->resolve($request);
 
 ## demo
 
-To view the demo, run `php -S localhost:80 demo/public/index.php -t demo/public/` and open your browser at `http://localhost`.
+To play with the demo, run `php -S localhost:80 demo/public/index.php -t demo/public/` and open your browser at `http://localhost`.
 
 The demo can also be started using Docker `docker-compose up &`.
 
