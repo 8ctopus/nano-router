@@ -5,39 +5,42 @@ declare(strict_types=1);
 namespace Oct8pus\NanoRouter;
 
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
-class Route
+class Middleware
 {
-    private readonly RouteType $type;
+    public readonly string $when;
     private readonly array|string $methods;
-    private readonly string $path;
+    private readonly string $regex;
     private $callback;
 
     /**
      * Constructor
      *
-     * @param RouteType $type
+     * @param string    $when
      * @param string    $methods
-     * @param string    $path
+     * @param string    $regex
      * @param callable  $callback
      *
      * @throws NanoRouterException
      */
-    public function __construct(RouteType $type, array|string $methods, string $path, callable $callback)
+    public function __construct(string $when, array|string $methods, string $regex, callable $callback)
     {
-        if ($type === RouteType::Regex && !is_int(@preg_match($path, ''))) {
-            throw new NanoRouterException("invalid regex - {$path}");
+        if (!in_array($when, ['pre', 'post'], true)) {
+            throw new NanoRouterException('invalid when clause');
         }
 
-        $this->type = $type;
+        if (!is_int(@preg_match($regex, ''))) {
+            throw new NanoRouterException("invalid regex - {$regex}");
+        }
+
+        $this->when = $when;
         $this->methods = $methods;
-        $this->path = $path;
+        $this->regex = $regex;
         $this->callback = $callback;
     }
 
     /**
-     * Check if route matches
+     * Check if matches
      *
      * @param  string $method
      * @param  string $path
@@ -58,19 +61,7 @@ class Route
      */
     public function pathMatches(string $path) : bool
     {
-        switch ($this->type) {
-            case RouteType::Exact:
-                return $this->path === $path;
-
-            case RouteType::StartsWith:
-                return str_starts_with($path, $this->path);
-
-            case RouteType::Regex:
-                return preg_match($this->path, $path) === 1;
-
-            default:
-                throw new NanoRouterException("Unknown route type - {$this->type}");
-        }
+        return preg_match($this->regex, $path) === 1;
     }
 
     /**
@@ -93,8 +84,15 @@ class Route
         return $method === $this->methods;
     }
 
-    public function call(ServerRequestInterface $request) : ResponseInterface
+    /**
+     * Call
+     *
+     * @param  [type]            $args
+     *
+     * @return ?ResponseInterface
+     */
+    public function call(...$args) : ?ResponseInterface
     {
-        return call_user_func($this->callback, $request);
+        return call_user_func($this->callback, ...$args);
     }
 }

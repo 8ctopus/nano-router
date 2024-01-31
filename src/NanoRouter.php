@@ -19,7 +19,7 @@ class NanoRouter
     protected array $routes;
 
     /**
-     * @var array<int, array<string, array{'method': array<string>|string, 'when': string, 'callback': callable}>>
+     * @var array<Middleware>
      */
     protected array $middleware;
 
@@ -244,6 +244,9 @@ class NanoRouter
      */
     public function addMiddleware(array|string $methods, string $regex, string $when, callable $callback) : self
     {
+        $this->middleware[] = new Middleware($when, $methods, $regex, $callback);
+
+        /*
         // validate regex
         if (!is_int(@preg_match($regex, ''))) {
             throw new NanoRouterException('invalid regex');
@@ -260,6 +263,7 @@ class NanoRouter
                 'callback' => $callback,
             ],
         ];
+        */
 
         return $this;
     }
@@ -276,6 +280,24 @@ class NanoRouter
     protected function preMiddleware(ServerRequestInterface $request) : ?ResponseInterface
     {
         foreach ($this->middleware as $middleware) {
+            if ($middleware->when !== 'pre') {
+                continue;
+            }
+
+            if ($middleware->pathMatches($request->getUri()->getPath()) && $middleware->methodMatches($request->getMethod())) {
+                // call middleware
+                try {
+                    $response = $middleware->call($request);
+                } catch (Exception $exception) {
+                    $response = $this->handleExceptions($exception);
+                }
+
+                if ($response instanceof ResponseInterface) {
+                    return $response;
+                }
+            }
+
+            /*
             foreach ($middleware as $regex => $route) {
                 if ($route['when'] !== 'pre') {
                     continue;
@@ -294,6 +316,7 @@ class NanoRouter
                     }
                 }
             }
+            */
         }
 
         return null;
@@ -312,6 +335,20 @@ class NanoRouter
     protected function postMiddleware(ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface
     {
         foreach ($this->middleware as $middleware) {
+            if ($middleware->when !== 'post') {
+                continue;
+            }
+
+            if ($middleware->pathMatches($request->getUri()->getPath()) && $middleware->methodMatches($request->getMethod())) {
+                // call middleware
+                try {
+                    $response = $middleware->call($response, $request);
+                } catch (Exception $exception) {
+                    $response = $this->handleExceptions($exception);
+                }
+            }
+
+            /*
             foreach ($middleware as $regex => $route) {
                 if ($route['when'] !== 'post') {
                     continue;
@@ -326,6 +363,7 @@ class NanoRouter
                     }
                 }
             }
+            */
         }
 
         return $response;
@@ -347,6 +385,7 @@ class NanoRouter
      *
      * @return bool
      */
+    /*
     protected function routeMatches(string $route, string $type, string $requestPath) : bool
     {
         switch ($type) {
@@ -364,6 +403,7 @@ class NanoRouter
                 // @codeCoverageIgnoreEnd
         }
     }
+    */
 
     /**
      * Check if method matches
@@ -373,6 +413,7 @@ class NanoRouter
      *
      * @return bool
      */
+    /*
     protected function methodMatches(string $method, array|string $methods) : bool
     {
         if ($methods === '*') {
@@ -385,6 +426,7 @@ class NanoRouter
 
         return in_array($method, $methods, true);
     }
+    */
 
     /**
      * Handle exceptions

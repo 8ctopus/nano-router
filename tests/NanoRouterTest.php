@@ -425,7 +425,7 @@ final class NanoRouterTest extends TestCase
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         self::expectException(NanoRouterException::class);
-        self::expectExceptionMessage('invalid regex');
+        self::expectExceptionMessage('invalid regex - ~/test(.*)\.php');
 
         $router->addMiddleware('GET', '~/test(.*)\.php', 'post', static function () : void {});
     }
