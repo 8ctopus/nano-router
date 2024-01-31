@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use HttpSoft\Message\Response;
 use Oct8pus\NanoRouter\Middleware;
 use Oct8pus\NanoRouter\NanoRouterException;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @internal
@@ -59,19 +62,47 @@ final class MiddlewareTest extends TestCase
         self::assertFalse($middleware->matches('GET', '/test2/'));
     }
 
-    public function testMiddlewareInvalidRegex() : void
+    public function testCall() : void
     {
-        self::expectException(NanoRouterException::class);
-        self::expectExceptionMessage('invalid regex - ~/test(.*)\.php');
+        $middleware = new Middleware('pre', 'GET', '~/test/~', static function (ServerRequestInterface $request) : ?ResponseInterface {
+            $request = $request;
+            return new Response(200);
+        });
 
-        new Middleware('post', 'GET', '~/test(.*)\.php', static function () : void {});
+        $request = $this->mockRequest('GET', '/test/');
+
+        self::assertEquals(new Response(200), $middleware->call($request));
+
+        $middleware = new Middleware('post', 'GET', '~/test/~', static function (ServerRequestInterface $request, ResponseInterface $response) : ?ResponseInterface {
+            switch ($request->getUri()->getPath()) {
+                case '/test/':
+                    return $response;
+
+                default:
+                    return new Response(404);
+            }
+            return $response;
+        });
+
+        self::assertEquals(new Response(405), $middleware->call($request, new Response(405)));
+
+        $request = $this->mockRequest('GET', '/test/2');
+        self::assertEquals(new Response(404), $middleware->call($request, new Response(405)));
     }
 
-    public function testMiddlewareInvalidWhen() : void
+    public function testInvalidWhen() : void
     {
         self::expectException(NanoRouterException::class);
         self::expectExceptionMessage('invalid when clause');
 
         new Middleware('after', 'GET', '~/test(.*)\.php~', static function () : void {});
+    }
+
+    public function testInvalidRegex() : void
+    {
+        self::expectException(NanoRouterException::class);
+        self::expectExceptionMessage('invalid regex - ~/test(.*)\.php');
+
+        new Middleware('post', 'GET', '~/test(.*)\.php', static function () : void {});
     }
 }
