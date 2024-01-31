@@ -9,7 +9,6 @@ use HttpSoft\Message\ServerRequestFactory;
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoTimer\NanoTimer;
 use Psr\Http\Message\ResponseInterface;
-use Tests\TestCase;
 
 /**
  * @internal
@@ -40,7 +39,7 @@ final class PerformanceTest extends TestCase
         for ($i = 0; $i < 500; ++$i) {
             $url = '/' . bin2hex(random_bytes(2));
 
-            $router->addRoute($methods[rand(0, $count - 1)], $url, function () : ResponseInterface {
+            $router->addRoute($methods[rand(0, $count - 1)], $url, static function () : ResponseInterface {
                 return new Response(200);
             });
         }
@@ -51,7 +50,7 @@ final class PerformanceTest extends TestCase
         for ($i = 0; $i < 500; ++$i) {
             $url = '/' . bin2hex(random_bytes(2));
 
-            $router->addRouteStartsWith($methods[rand(0, $count - 1)], $url, function () : ResponseInterface {
+            $router->addRouteStartsWith($methods[rand(0, $count - 1)], $url, static function () : ResponseInterface {
                 return new Response(200);
             });
         }
@@ -62,7 +61,7 @@ final class PerformanceTest extends TestCase
         for ($i = 0; $i < 500; ++$i) {
             $url = '~^/' . bin2hex(random_bytes(2)) . '.*~';
 
-            $router->addRouteRegex($methods[rand(0, $count - 1)], $url, function () : ResponseInterface {
+            $router->addRouteRegex($methods[rand(0, $count - 1)], $url, static function () : ResponseInterface {
                 return new Response(200);
             });
         }
