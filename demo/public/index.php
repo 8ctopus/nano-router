@@ -80,7 +80,7 @@ $router->addRouteStartsWith('*', '/php', function (ServerRequestInterface $reque
 
 $router->addRoute('GET', '/admin/test/', function () : ResponseInterface {
     $stream = new Stream();
-    $stream->write('You\'re logged in' . PHP_EOL);
+    $stream->write('You\'re logged in');
 
     return new Response(200, ['content-type' => 'text/plain'], $stream);
 });
