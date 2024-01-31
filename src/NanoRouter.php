@@ -14,7 +14,7 @@ class NanoRouter
     protected string $serverRequestFactoryClass;
 
     /**
-     * @var array<string, array{'type': string, 'method': array<string>|string, 'callback': callable}>
+     * @var array<Route>
      */
     protected array $routes;
 
@@ -91,6 +91,25 @@ class NanoRouter
         $path = $request->getUri()->getPath();
         $method = $request->getMethod();
 
+        foreach ($this->routes as $route) {
+            if ($route->pathMatches($path)) {
+                if ($route->methodMatches($method)) {
+                    // call route
+                    try {
+                        $response = $route->call($request);
+                    } catch (Exception $exception) {
+                        $response = $this->handleExceptions($exception);
+                    }
+
+                    break;
+                } else {
+                    // potential response if no other route matches
+                    $response = $this->handleError(405, $request);
+                }
+            }
+        }
+
+        /*
         foreach ($this->routes as $regex => $route) {
             if ($this->routeMatches($regex, $route['type'], $path)) {
                 if ($this->methodMatches($method, $route['method'])) {
@@ -108,6 +127,7 @@ class NanoRouter
                 }
             }
         }
+        */
 
         if (!isset($response)) {
             $response = $this->handleError(404, $request);
@@ -127,11 +147,15 @@ class NanoRouter
      */
     public function addRoute(array|string $methods, string $path, callable $callback) : self
     {
+        $this->routes[] = new Route(RouteType::Exact, $methods, $path, $callback);
+
+        /*
         $this->routes[$path] = [
             'type' => 'exact',
             'method' => $methods,
             'callback' => $callback,
         ];
+        */
 
         return $this;
     }
@@ -147,11 +171,15 @@ class NanoRouter
      */
     public function addRouteStartsWith(array|string $methods, string $path, callable $callback) : self
     {
+        $this->routes[] = new Route(RouteType::StartsWith, $methods, $path, $callback);
+
+        /*
         $this->routes[$path] = [
             'type' => 'starts',
             'method' => $methods,
             'callback' => $callback,
         ];
+        */
 
         return $this;
     }
@@ -169,6 +197,9 @@ class NanoRouter
      */
     public function addRouteRegex(array|string $methods, string $regex, callable $callback) : self
     {
+        $this->routes[] = new Route(RouteType::Regex, $methods, $regex, $callback);
+
+        /*
         // validate regex
         if (!is_int(@preg_match($regex, ''))) {
             throw new NanoRouterException('invalid regex');
@@ -179,6 +210,7 @@ class NanoRouter
             'method' => $methods,
             'callback' => $callback,
         ];
+        */
 
         return $this;
     }
@@ -323,7 +355,6 @@ class NanoRouter
 
             case 'starts':
                 return str_starts_with($requestPath, $route);
-
             case 'regex':
                 return preg_match($route, $requestPath) === 1;
 
