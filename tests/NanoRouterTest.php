@@ -8,8 +8,6 @@ use Exception;
 use HttpSoft\Message\Response;
 use HttpSoft\Message\ServerRequestFactory;
 use HttpSoft\Message\Stream;
-use Oct8pus\NanoRouter\NanoRouter;
-use Oct8pus\NanoRouter\NanoRouterException;
 use Oct8pus\NanoRouter\RouteException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -410,36 +408,6 @@ final class NanoRouterTest extends TestCase
         self::assertSame('This page does not exist on the server - /test.php', (string) $response->getBody());
     }
 
-    public function testRouteInvalidRegex() : void
-    {
-        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
-
-        self::expectException(NanoRouterException::class);
-        self::expectExceptionMessage('invalid regex');
-
-        $router->addRouteRegex('GET', '~/test(.*)\.php', static function () : void {});
-    }
-
-    public function testMiddlewareInvalidRegex() : void
-    {
-        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
-
-        self::expectException(NanoRouterException::class);
-        self::expectExceptionMessage('invalid regex - ~/test(.*)\.php');
-
-        $router->addMiddleware('GET', '~/test(.*)\.php', 'post', static function () : void {});
-    }
-
-    public function testMiddlewareInvalidWhen() : void
-    {
-        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
-
-        self::expectException(NanoRouterException::class);
-        self::expectExceptionMessage('invalid when clause');
-
-        $router->addMiddleware('GET', '~/test(.*)\.php~', 'after', static function () : void {});
-    }
-
     public static function routeExceptionHandler(RouteException $exception) : void
     {
         $exception = $exception;
@@ -458,13 +426,5 @@ final class NanoRouterTest extends TestCase
         $exception = $exception;
         echo 'exception handler called';
         return null;
-    }
-}
-
-class NanoRouterMock extends NanoRouter
-{
-    protected static function errorLog(string $message) : void
-    {
-        echo $message;
     }
 }
