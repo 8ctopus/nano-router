@@ -109,26 +109,6 @@ class NanoRouter
             }
         }
 
-        /*
-        foreach ($this->routes as $regex => $route) {
-            if ($this->routeMatches($regex, $route['type'], $path)) {
-                if ($this->methodMatches($method, $route['method'])) {
-                    // call route
-                    try {
-                        $response = $route['callback']($request);
-                    } catch (Exception $exception) {
-                        $response = $this->handleExceptions($exception);
-                    }
-
-                    break;
-                } else {
-                    // potential response if no other route matches
-                    $response = $this->handleError(405, $request);
-                }
-            }
-        }
-        */
-
         if (!isset($response)) {
             $response = $this->handleError(404, $request);
         }
@@ -148,15 +128,6 @@ class NanoRouter
     public function addRoute(array|string $methods, string $path, callable $callback) : self
     {
         $this->routes[] = new Route(RouteType::Exact, $methods, $path, $callback);
-
-        /*
-        $this->routes[$path] = [
-            'type' => 'exact',
-            'method' => $methods,
-            'callback' => $callback,
-        ];
-        */
-
         return $this;
     }
 
@@ -172,15 +143,6 @@ class NanoRouter
     public function addRouteStartsWith(array|string $methods, string $path, callable $callback) : self
     {
         $this->routes[] = new Route(RouteType::StartsWith, $methods, $path, $callback);
-
-        /*
-        $this->routes[$path] = [
-            'type' => 'starts',
-            'method' => $methods,
-            'callback' => $callback,
-        ];
-        */
-
         return $this;
     }
 
@@ -198,20 +160,6 @@ class NanoRouter
     public function addRouteRegex(array|string $methods, string $regex, callable $callback) : self
     {
         $this->routes[] = new Route(RouteType::Regex, $methods, $regex, $callback);
-
-        /*
-        // validate regex
-        if (!is_int(@preg_match($regex, ''))) {
-            throw new NanoRouterException('invalid regex');
-        }
-
-        $this->routes[$regex] = [
-            'type' => 'regex',
-            'method' => $methods,
-            'callback' => $callback,
-        ];
-        */
-
         return $this;
     }
 
@@ -226,7 +174,6 @@ class NanoRouter
     public function addErrorHandler(int $error, callable $handler) : self
     {
         $this->errors[$error] = $handler;
-
         return $this;
     }
 
@@ -245,26 +192,6 @@ class NanoRouter
     public function addMiddleware(array|string $methods, string $regex, string $when, callable $callback) : self
     {
         $this->middleware[] = new Middleware($when, $methods, $regex, $callback);
-
-        /*
-        // validate regex
-        if (!is_int(@preg_match($regex, ''))) {
-            throw new NanoRouterException('invalid regex');
-        }
-
-        if (!in_array($when, ['pre', 'post'], true)) {
-            throw new NanoRouterException('invalid when clause');
-        }
-
-        $this->middleware[] = [
-            $regex => [
-                'method' => $methods,
-                'when' => $when,
-                'callback' => $callback,
-            ],
-        ];
-        */
-
         return $this;
     }
 
@@ -296,27 +223,6 @@ class NanoRouter
                     return $response;
                 }
             }
-
-            /*
-            foreach ($middleware as $regex => $route) {
-                if ($route['when'] !== 'pre') {
-                    continue;
-                }
-
-                if ($this->routeMatches($regex, 'regex', $request->getUri()->getPath()) && $this->methodMatches($request->getMethod(), $route['method'])) {
-                    // call middleware
-                    try {
-                        $response = $route['callback']($request);
-                    } catch (Exception $exception) {
-                        $response = $this->handleExceptions($exception);
-                    }
-
-                    if ($response instanceof ResponseInterface) {
-                        return $response;
-                    }
-                }
-            }
-            */
         }
 
         return null;
@@ -347,23 +253,6 @@ class NanoRouter
                     $response = $this->handleExceptions($exception);
                 }
             }
-
-            /*
-            foreach ($middleware as $regex => $route) {
-                if ($route['when'] !== 'post') {
-                    continue;
-                }
-
-                if ($this->routeMatches($regex, 'regex', $request->getUri()->getPath()) && $this->methodMatches($request->getMethod(), $route['method'])) {
-                    // call middleware
-                    try {
-                        $response = $route['callback']($response, $request);
-                    } catch (Exception $exception) {
-                        $response = $this->handleExceptions($exception);
-                    }
-                }
-            }
-            */
         }
 
         return $response;
@@ -375,58 +264,6 @@ class NanoRouter
         error_log($message);
         // @codeCoverageIgnoreEnd
     }
-
-    /**
-     * Check if route matches
-     *
-     * @param string $route
-     * @param string $type
-     * @param string $requestPath
-     *
-     * @return bool
-     */
-    /*
-    protected function routeMatches(string $route, string $type, string $requestPath) : bool
-    {
-        switch ($type) {
-            case 'exact':
-                return $requestPath === $route;
-
-            case 'starts':
-                return str_starts_with($requestPath, $route);
-            case 'regex':
-                return preg_match($route, $requestPath) === 1;
-
-            default:
-                // @codeCoverageIgnoreStart
-                throw new NanoRouterException('invalid route type');
-                // @codeCoverageIgnoreEnd
-        }
-    }
-    */
-
-    /**
-     * Check if method matches
-     *
-     * @param string               $method
-     * @param array<string>|string $methods
-     *
-     * @return bool
-     */
-    /*
-    protected function methodMatches(string $method, array|string $methods) : bool
-    {
-        if ($methods === '*') {
-            return true;
-        }
-
-        if (is_string($methods)) {
-            $methods = [$methods];
-        }
-
-        return in_array($method, $methods, true);
-    }
-    */
 
     /**
      * Handle exceptions
