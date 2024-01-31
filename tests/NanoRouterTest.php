@@ -273,7 +273,7 @@ final class NanoRouterTest extends TestCase
     public function testPreMiddleware() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class))
-            ->addMiddleware('GET', '~/api/~', 'pre', function (ServerRequestInterface $request) : ?ResponseInterface {
+            ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 return null;
             })
             ->addMiddleware('GET', '~/api/~', 'pre', function (ServerRequestInterface $request) : ?ResponseInterface {
@@ -347,10 +347,10 @@ final class NanoRouterTest extends TestCase
             ->addMiddleware('GET', '~/api/~', 'pre', function () : ?ResponseInterface {
                 return null;
             })
-            ->addMiddleware('GET', '~(.*)~', 'post', function (ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface {
+            ->addMiddleware('GET', '~(.*)~', 'post', function (ResponseInterface $response) : ResponseInterface {
                 return $response->withHeader('X-Test', 'test');
             })
-            ->addMiddleware('GET', '~~', 'post', function (ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface {
+            ->addMiddleware('GET', '~~', 'post', function (ResponseInterface $response) : ResponseInterface {
                 return $response->withHeader('X-Powered-By', '8ctopus');
             });
 
