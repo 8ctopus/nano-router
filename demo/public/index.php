@@ -26,7 +26,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 $router = new NanoRouter(Response::class, ServerRequestFactory::class);
 
-$router->addRoute('GET', '/', function (ServerRequestInterface $request) : ResponseInterface {
+$router->addRoute('GET', '/', function () : ResponseInterface {
     $stream = new Stream();
 
     $stream->write(<<<'BODY'
@@ -78,22 +78,22 @@ $router->addRouteStartsWith('*', '/php', function (ServerRequestInterface $reque
     return new Response(200, ['content-type' => 'text/plain'], $stream);
 });
 
-$router->addRoute('GET', '/admin/test/', function (ServerRequestInterface $request) : ResponseInterface {
+$router->addRoute('GET', '/admin/test/', function () : ResponseInterface {
     $stream = new Stream();
     $stream->write('You\'re logged in' . PHP_EOL);
 
     return new Response(200, ['content-type' => 'text/plain'], $stream);
 });
 
-$router->addRoute('GET', '/route-exception/', function (ServerRequestInterface $request) : ResponseInterface {
+$router->addRoute('GET', '/route-exception/', function () : ResponseInterface {
     throw new RouteException('not authorized', 403);
 });
 
-$router->addRoute('GET', '/fatal-exception-handled/', function (ServerRequestInterface $request) : ResponseInterface {
+$router->addRoute('GET', '/fatal-exception-handled/', function () : ResponseInterface {
     throw new Exception('fatal error', 500);
 });
 
-$router->addRoute('GET', '/fatal-exception-unhandled/', function (ServerRequestInterface $request) : ResponseInterface {
+$router->addRoute('GET', '/fatal-exception-unhandled/', function () : ResponseInterface {
     throw new Exception('fatal error');
 });
 
@@ -115,7 +115,7 @@ $router->addErrorHandler(405, function () : ResponseInterface {
     return new Response(405);
 });
 
-$router->addMiddleware('*', '~(.*)~', 'post', function (ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface {
+$router->addMiddleware('*', '~(.*)~', 'post', function (ResponseInterface $response) : ResponseInterface {
     return $response->withHeader('X-Powered-By', '8ctopus');
 });
 
