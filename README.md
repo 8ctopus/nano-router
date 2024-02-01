@@ -46,9 +46,8 @@ $response = $router->resolve($request);
 
 ## demo
 
-To play with the demo, run `php -S localhost:80 demo/public/index.php -t demo/public/` and open your browser at `http://localhost`.
-
-The demo can also be started using Docker `docker-compose up &`.
+To play with the demo, clone the repo, run `php -S localhost:80 demo/public/index.php -t demo/public/` and open your browser at `http://localhost`.
+Alternatively you can run the demo within a Docker container `docker-compose up &`.
 
 ## install
 

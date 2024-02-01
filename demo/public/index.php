@@ -35,8 +35,7 @@ $router->addRoute('GET', '/', static function () : ResponseInterface {
     <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" crossorigin="anonymous" integrity="0269018275915a04492010a90829b0b9cfe66ce59358a7a99055e29a8d6742a9">
     </head>
-    <body>
-    <div class="container">
+    <body class="container">
     <h1>Hello World!</h1>
     <p>You're on the index page. Here's a list of links: </p>
     <ul>
@@ -48,7 +47,6 @@ $router->addRoute('GET', '/', static function () : ResponseInterface {
     <li><a href="/fatal-exception-handled/">fatal exception test (handled exception = a response is returned)</a></li>
     <li><a href="/fatal-exception-unhandled/">fatal exception test (unhandled exception)</a></li>
     </ul>
-    </div>
     </body>
     </html>
     BODY);
@@ -61,7 +59,10 @@ $router->addRoute(['HEAD', 'GET'], '/test/', static function (ServerRequestInter
 
     $stream->write(<<<BODY
     <html>
-    <body>
+    <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" crossorigin="anonymous" integrity="0269018275915a04492010a90829b0b9cfe66ce59358a7a99055e29a8d6742a9">
+    </head>
+    <body class="container">
     <h1>You're on page {$request->getRequestTarget()}</h1>
     <p>Here's a link to <a href="/">return to the index</a>!</p>
     </body>
@@ -102,7 +103,10 @@ $router->addErrorHandler(404, static function (ServerRequestInterface $request) 
     $stream = new Stream();
     $stream->write(<<<BODY
     <html>
-    <body>
+    <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" crossorigin="anonymous" integrity="0269018275915a04492010a90829b0b9cfe66ce59358a7a99055e29a8d6742a9">
+    </head>
+    <body class="container">
     <h1>Sorry we lost that page</h1>
     <h2>{$request->getRequestTarget()}</h2>
     </body>
