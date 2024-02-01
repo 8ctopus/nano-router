@@ -79,7 +79,7 @@ class Middleware
     /**
      * Call middleware
      *
-     * @param ...$args
+     * @param ...$args - for pre only ServerRequestInterface - for post Response and ServerRequestInterface
      *
      * @return ?ResponseInterface
      */
