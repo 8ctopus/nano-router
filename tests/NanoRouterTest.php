@@ -20,17 +20,21 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 final class NanoRouterTest extends TestCase
 {
-    public function testRoute() : void
+    public function test404Route() : void
     {
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
-        // 404
         $request = $this->mockRequest('GET', '/');
         $response = $router->resolve($request);
 
         self::assertSame(404, $response->getStatusCode());
         self::assertEmpty((string) $response->getBody());
         self::assertSame('Not Found', $response->getReasonPhrase());
+    }
+
+    public function testExactRoutes() : void
+    {
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         // add index route
         $router->addRoute(['HEAD', 'GET'], '/', static function () : ResponseInterface {
