@@ -182,16 +182,16 @@ class NanoRouter
      *
      * @param array|string $methods
      * @param string       $regex
-     * @param string       $when     - pre or post
+     * @param MiddlewareType $type
      * @param callable     $callback
      *
      * @return self
      *
      * @throws NanoRouterException if regex is invalid
      */
-    public function addMiddleware(array|string $methods, string $regex, string $when, callable $callback) : self
+    public function addMiddleware(array|string $methods, string $regex, MiddlewareType $type, callable $callback) : self
     {
-        $this->middleware[] = new Middleware($when, $methods, $regex, $callback);
+        $this->middleware[] = new Middleware($type, $methods, $regex, $callback);
         return $this;
     }
 
@@ -207,7 +207,7 @@ class NanoRouter
     protected function preMiddleware(ServerRequestInterface $request) : ?ResponseInterface
     {
         foreach ($this->middleware as $middleware) {
-            if ($middleware->when !== 'pre') {
+            if ($middleware->type() !== MiddlewareType::Pre) {
                 continue;
             }
 
@@ -241,7 +241,7 @@ class NanoRouter
     protected function postMiddleware(ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface
     {
         foreach ($this->middleware as $middleware) {
-            if ($middleware->when !== 'post') {
+            if ($middleware->type() !== MiddlewareType::Post) {
                 continue;
             }
 

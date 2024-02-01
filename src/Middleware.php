@@ -8,7 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 
 class Middleware
 {
-    private readonly string $when;
+    private readonly MiddlewareType $type;
     private readonly array $methods;
     private readonly string $regex;
     private $callback;
@@ -16,24 +16,20 @@ class Middleware
     /**
      * Constructor
      *
-     * @param string   $when
+     * @param MiddlewareType   $type
      * @param string|array   $method
      * @param string   $regex
      * @param callable $callback
      *
      * @throws NanoRouterException
      */
-    public function __construct(string $when, string|array $method, string $regex, callable $callback)
+    public function __construct(MiddlewareType $type, string|array $method, string $regex, callable $callback)
     {
-        if (!in_array($when, ['pre', 'post'], true)) {
-            throw new NanoRouterException('invalid when clause');
-        }
-
         if (!is_int(@preg_match($regex, ''))) {
             throw new NanoRouterException("invalid regex - {$regex}");
         }
 
-        $this->when = $when;
+        $this->type = $type;
         $this->methods = !is_array($method) ? [$method] : $method;
         $this->regex = $regex;
         $this->callback = $callback;
@@ -90,5 +86,10 @@ class Middleware
     public function call(...$args) : ?ResponseInterface
     {
         return call_user_func($this->callback, ...$args);
+    }
+
+    public function type() : MiddlewareType
+    {
+        return $this->type;
     }
 }

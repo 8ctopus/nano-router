@@ -8,6 +8,7 @@ use Exception;
 use HttpSoft\Message\Response;
 use HttpSoft\Message\ServerRequestFactory;
 use HttpSoft\Message\Stream;
+use Oct8pus\NanoRouter\MiddlewareType;
 use Oct8pus\NanoRouter\RouteException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -270,10 +271,10 @@ final class NanoRouterTest extends TestCase
     public function testPreMiddleware() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class))
-            ->addMiddleware('GET', '~/api/~', 'pre', static function () : ?ResponseInterface {
+            ->addMiddleware('GET', '~/api/~', MiddlewareType::Pre, static function () : ?ResponseInterface {
                 return null;
             })
-            ->addMiddleware('GET', '~/api/~', 'pre', static function (ServerRequestInterface $request) : ?ResponseInterface {
+            ->addMiddleware('GET', '~/api/~', MiddlewareType::Pre, static function (ServerRequestInterface $request) : ?ResponseInterface {
                 $server = $request->getServerParams();
 
                 $login = $server['PHP_AUTH_USER'] ?? null;
@@ -296,7 +297,7 @@ final class NanoRouterTest extends TestCase
     public function testPreMiddlewareRouteException() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class, self::routeExceptionHandler(...)))
-            ->addMiddleware('GET', '~/api/~', 'pre', static function () : ?ResponseInterface {
+            ->addMiddleware('GET', '~/api/~', MiddlewareType::Pre, static function () : ?ResponseInterface {
                 throw new RouteException('not authorized', 401);
             });
 
@@ -311,7 +312,7 @@ final class NanoRouterTest extends TestCase
     public function testPreMiddlewareHandledException() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class, true, self::exceptionHandler(...)))
-            ->addMiddleware('GET', '~/api/~', 'pre', static function () : ?ResponseInterface {
+            ->addMiddleware('GET', '~/api/~', MiddlewareType::Pre, static function () : ?ResponseInterface {
                 throw new Exception('fatal error', 500);
             });
 
@@ -326,7 +327,7 @@ final class NanoRouterTest extends TestCase
     public function testPreMiddlewareThrownException() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class, self::routeExceptionHandler(...), self::exceptionHandlerThrow(...)))
-            ->addMiddleware('GET', '~/api/~', 'pre', static function () : ?ResponseInterface {
+            ->addMiddleware('GET', '~/api/~', MiddlewareType::Pre, static function () : ?ResponseInterface {
                 throw new Exception('fatal error', 500);
             });
 
@@ -341,13 +342,13 @@ final class NanoRouterTest extends TestCase
     public function testPostMiddleware() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class))
-            ->addMiddleware('GET', '~/api/~', 'pre', static function () : ?ResponseInterface {
+            ->addMiddleware('GET', '~/api/~', MiddlewareType::Pre, static function () : ?ResponseInterface {
                 return null;
             })
-            ->addMiddleware('GET', '~(.*)~', 'post', static function (ResponseInterface $response) : ResponseInterface {
+            ->addMiddleware('GET', '~(.*)~', MiddlewareType::Post, static function (ResponseInterface $response) : ResponseInterface {
                 return $response->withHeader('X-Test', 'test');
             })
-            ->addMiddleware('GET', '~~', 'post', static function (ResponseInterface $response) : ResponseInterface {
+            ->addMiddleware('GET', '~~', MiddlewareType::Post, static function (ResponseInterface $response) : ResponseInterface {
                 return $response->withHeader('X-Powered-By', '8ctopus');
             });
 
@@ -363,7 +364,7 @@ final class NanoRouterTest extends TestCase
     public function testPostMiddlewareRouteException() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class, self::routeExceptionHandler(...)))
-            ->addMiddleware('GET', '~/api/~', 'post', static function () : ?ResponseInterface {
+            ->addMiddleware('GET', '~/api/~', MiddlewareType::Post, static function () : ?ResponseInterface {
                 throw new RouteException('not authorized', 401);
             });
 
@@ -378,7 +379,7 @@ final class NanoRouterTest extends TestCase
     public function testPostMiddlewareException() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class, true, self::exceptionHandler(...)))
-            ->addMiddleware('GET', '~/api/~', 'post', static function () : ?ResponseInterface {
+            ->addMiddleware('GET', '~/api/~', MiddlewareType::Post, static function () : ?ResponseInterface {
                 throw new Exception('fatal error', 500);
             });
 

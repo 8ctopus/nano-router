@@ -6,6 +6,7 @@ namespace Tests;
 
 use HttpSoft\Message\Response;
 use Oct8pus\NanoRouter\Middleware;
+use Oct8pus\NanoRouter\MiddlewareType;
 use Oct8pus\NanoRouter\NanoRouterException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -19,7 +20,7 @@ final class MiddlewareTest extends TestCase
 {
     public function testPathMatches() : void
     {
-        $middleware = new Middleware('pre', 'GET', '~/test(.*)\.php~', static function () : void {});
+        $middleware = new Middleware(MiddlewareType::Pre, 'GET', '~/test(.*)\.php~', static function () : void {});
 
         self::assertTrue($middleware->pathMatches('/test.php'));
         self::assertTrue($middleware->pathMatches('/test2.php'));
@@ -28,7 +29,7 @@ final class MiddlewareTest extends TestCase
 
     public function testMethodMatches() : void
     {
-        $middleware = new Middleware('pre', 'GET', '~/test/~', static function () : void {});
+        $middleware = new Middleware(MiddlewareType::Pre, 'GET', '~/test/~', static function () : void {});
 
         self::assertTrue($middleware->methodMatches('GET'));
         self::assertFalse($middleware->methodMatches('POST'));
@@ -36,7 +37,7 @@ final class MiddlewareTest extends TestCase
         self::assertFalse($middleware->methodMatches('DELETE'));
         self::assertFalse($middleware->methodMatches('OPTIONS'));
 
-        $middleware = new Middleware('pre', ['GET', 'POST'], '~/test/~', static function () : void {});
+        $middleware = new Middleware(MiddlewareType::Pre, ['GET', 'POST'], '~/test/~', static function () : void {});
 
         self::assertTrue($middleware->methodMatches('GET'));
         self::assertTrue($middleware->methodMatches('POST'));
@@ -44,7 +45,7 @@ final class MiddlewareTest extends TestCase
         self::assertFalse($middleware->methodMatches('DELETE'));
         self::assertFalse($middleware->methodMatches('OPTIONS'));
 
-        $middleware = new Middleware('pre', '*', '~/test/~', static function () : void {});
+        $middleware = new Middleware(MiddlewareType::Pre, '*', '~/test/~', static function () : void {});
 
         self::assertTrue($middleware->methodMatches('GET'));
         self::assertTrue($middleware->methodMatches('POST'));
@@ -55,7 +56,7 @@ final class MiddlewareTest extends TestCase
 
     public function testMatches() : void
     {
-        $middleware = new Middleware('pre', 'GET', '~/test/~', static function () : void {});
+        $middleware = new Middleware(MiddlewareType::Pre, 'GET', '~/test/~', static function () : void {});
 
         self::assertTrue($middleware->matches('GET', '/test/'));
         self::assertFalse($middleware->matches('POST', '/test/'));
@@ -64,7 +65,7 @@ final class MiddlewareTest extends TestCase
 
     public function testCall() : void
     {
-        $middleware = new Middleware('pre', 'GET', '~/test/~', static function (ServerRequestInterface $request) : ?ResponseInterface {
+        $middleware = new Middleware(MiddlewareType::Pre, 'GET', '~/test/~', static function (ServerRequestInterface $request) : ?ResponseInterface {
             $request = $request;
             return new Response(200);
         });
@@ -73,7 +74,7 @@ final class MiddlewareTest extends TestCase
 
         self::assertEquals(new Response(200), $middleware->call($request));
 
-        $middleware = new Middleware('post', 'GET', '~/test/~', static function (ServerRequestInterface $request, ResponseInterface $response) : ?ResponseInterface {
+        $middleware = new Middleware(MiddlewareType::Post, 'GET', '~/test/~', static function (ServerRequestInterface $request, ResponseInterface $response) : ?ResponseInterface {
             switch ($request->getUri()->getPath()) {
                 case '/test/':
                     return $response;
@@ -90,19 +91,11 @@ final class MiddlewareTest extends TestCase
         self::assertEquals(new Response(404), $middleware->call($request, new Response(405)));
     }
 
-    public function testInvalidWhen() : void
-    {
-        self::expectException(NanoRouterException::class);
-        self::expectExceptionMessage('invalid when clause');
-
-        new Middleware('after', 'GET', '~/test(.*)\.php~', static function () : void {});
-    }
-
     public function testInvalidRegex() : void
     {
         self::expectException(NanoRouterException::class);
         self::expectExceptionMessage('invalid regex - ~/test(.*)\.php');
 
-        new Middleware('post', 'GET', '~/test(.*)\.php', static function () : void {});
+        new Middleware(MiddlewareType::Post, 'GET', '~/test(.*)\.php', static function () : void {});
     }
 }

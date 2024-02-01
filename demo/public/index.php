@@ -11,6 +11,7 @@ use HttpSoft\Message\Response;
 use HttpSoft\Message\ServerRequestFactory;
 use HttpSoft\Message\Stream;
 use HttpSoft\ServerRequest\ServerRequestCreator;
+use Oct8pus\NanoRouter\MiddlewareType;
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\RouteException;
 use Psr\Http\Message\ResponseInterface;
@@ -115,16 +116,16 @@ $router->addErrorHandler(405, static function () : ResponseInterface {
     return new Response(405);
 });
 
-$router->addMiddleware('*', '~(.*)~', 'post', static function (ResponseInterface $response) : ResponseInterface {
+$router->addMiddleware('*', '~(.*)~', MiddlewareType::Post, static function (ResponseInterface $response) : ResponseInterface {
     return $response->withHeader('X-Powered-By', '8ctopus');
 });
 
-$router->addMiddleware('*', '~(.*)~', 'pre', static function (ServerRequestInterface $request) : ?ResponseInterface {
+$router->addMiddleware('*', '~(.*)~', MiddlewareType::Pre, static function (ServerRequestInterface $request) : ?ResponseInterface {
     error_log('middleware intercepted - ' . $request->getRequestTarget());
     return null;
 });
 
-$router->addMiddleware('*', '~/admin/~', 'pre', static function (ServerRequestInterface $request) : ?ResponseInterface {
+$router->addMiddleware('*', '~/admin/~', MiddlewareType::Pre, static function (ServerRequestInterface $request) : ?ResponseInterface {
     $server = $request->getServerParams();
 
     $login = $server['PHP_AUTH_USER'] ?? null;
