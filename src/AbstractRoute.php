@@ -1,0 +1,50 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Oct8pus\NanoRouter;
+
+abstract class AbstractRoute
+{
+    protected array $methods;
+    protected string $path;
+    protected $callback;
+
+    /**
+     * Check if matches
+     *
+     * @param string $method
+     * @param string $path
+     *
+     * @return bool
+     */
+    public function matches(string $method, string $path) : bool
+    {
+        return $this->pathMatches($path) && $this->methodMatches($method);
+    }
+
+    /**
+     * Check if path matches
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
+    abstract public function pathMatches(string $path) : bool;
+
+    /**
+     * Check if method matches
+     *
+     * @param string $method
+     *
+     * @return bool
+     */
+    public function methodMatches(string $method) : bool
+    {
+        if ($this->methods[0] === '*') {
+            return true;
+        }
+
+        return in_array($method, $this->methods, true);
+    }
+}
