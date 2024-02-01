@@ -181,6 +181,29 @@ final class NanoRouterTest extends TestCase
         self::assertSame(405, $response->getStatusCode());
     }
 
+    public function test2RoutesSamePath() : void
+    {
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
+
+        $router->addRoute('GET', '/test/', static function () : ResponseInterface {
+            return new Response(200);
+        });
+
+        $router->addRoute('POST', '/test/', static function () : ResponseInterface {
+            return new Response(201);
+        });
+
+        $request = $this->mockRequest('GET', '/test/');
+        $response = $router->resolve($request);
+
+        self::assertSame(200, $response->getStatusCode());
+
+        $request = $this->mockRequest('POST', '/test/');
+        $response = $router->resolve($request);
+
+        self::assertSame(201, $response->getStatusCode());
+    }
+
     public function testDefaultRouteExceptionHandler() : void
     {
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
