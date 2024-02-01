@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Oct8pus\NanoRouter;
 
-use Oct8pus\NanoRouter\AbstractRoute;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -15,10 +14,10 @@ class Middleware extends AbstractRoute
     /**
      * Constructor
      *
-     * @param MiddlewareType $type
-     * @param array<string>|string   $method
-     * @param string         $pathRegex
-     * @param callable       $callback
+     * @param MiddlewareType       $type
+     * @param array<string>|string $method
+     * @param string               $pathRegex
+     * @param callable             $callback
      *
      * @throws NanoRouterException
      */
@@ -61,8 +60,8 @@ class Middleware extends AbstractRoute
     /**
      * Call post middleware
      *
-     * @param  ResponseInterface      $response
-     * @param  ServerRequestInterface $request
+     * @param ResponseInterface      $response
+     * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
      */

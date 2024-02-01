@@ -180,10 +180,10 @@ class NanoRouter
     /**
      * Add middleware
      *
-     * @param array<string>|string   $methods
-     * @param string         $regex
-     * @param MiddlewareType $type
-     * @param callable       $callback
+     * @param array<string>|string $methods
+     * @param string               $regex
+     * @param MiddlewareType       $type
+     * @param callable             $callback
      *
      * @return self
      *
