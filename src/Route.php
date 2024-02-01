@@ -7,12 +7,9 @@ namespace Oct8pus\NanoRouter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class Route
+class Route extends AbstractRoute
 {
     private readonly RouteType $type;
-    private readonly array $methods;
-    private readonly string $path;
-    private $callback;
 
     /**
      * Constructor
@@ -34,19 +31,6 @@ class Route
         $this->methods = !is_array($method) ? [$method] : $method;
         $this->path = $path;
         $this->callback = $callback;
-    }
-
-    /**
-     * Check if route matches
-     *
-     * @param string $method
-     * @param string $path
-     *
-     * @return bool
-     */
-    public function matches(string $method, string $path) : bool
-    {
-        return $this->pathMatches($path) && $this->methodMatches($method);
     }
 
     /**
@@ -75,22 +59,6 @@ class Route
                 throw new NanoRouterException("Unknown route type - {$this->type}");
                 // @codeCoverageIgnoreEnd
         }
-    }
-
-    /**
-     * Check if method matches
-     *
-     * @param string $method
-     *
-     * @return bool
-     */
-    public function methodMatches(string $method) : bool
-    {
-        if ($this->methods[0] === '*') {
-            return true;
-        }
-
-        return in_array($method, $this->methods, true);
     }
 
     /**

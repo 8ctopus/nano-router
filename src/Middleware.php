@@ -6,12 +6,9 @@ namespace Oct8pus\NanoRouter;
 
 use Psr\Http\Message\ResponseInterface;
 
-class Middleware
+class Middleware extends AbstractRoute
 {
     private readonly MiddlewareType $type;
-    private readonly array $methods;
-    private readonly string $regex;
-    private $callback;
 
     /**
      * Constructor
@@ -31,21 +28,8 @@ class Middleware
 
         $this->type = $type;
         $this->methods = !is_array($method) ? [$method] : $method;
-        $this->regex = $pathRegex;
+        $this->path = $pathRegex;
         $this->callback = $callback;
-    }
-
-    /**
-     * Check if matches
-     *
-     * @param string $method
-     * @param string $path
-     *
-     * @return bool
-     */
-    public function matches(string $method, string $path) : bool
-    {
-        return $this->pathMatches($path) && $this->methodMatches($method);
     }
 
     /**
@@ -57,23 +41,7 @@ class Middleware
      */
     public function pathMatches(string $path) : bool
     {
-        return preg_match($this->regex, $path) === 1;
-    }
-
-    /**
-     * Check if method matches
-     *
-     * @param string $method
-     *
-     * @return bool
-     */
-    public function methodMatches(string $method) : bool
-    {
-        if ($this->methods[0] === '*') {
-            return true;
-        }
-
-        return in_array($method, $this->methods, true);
+        return preg_match($this->path, $path) === 1;
     }
 
     /**
