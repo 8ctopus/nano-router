@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Oct8pus\NanoRouter;
 
+use Oct8pus\NanoRouter\AbstractRoute;
 use Psr\Http\Message\ResponseInterface;
 
 class Middleware extends AbstractRoute
