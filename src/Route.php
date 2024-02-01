@@ -17,14 +17,14 @@ class Route
     /**
      * Constructor
      *
-     * @param RouteType $type
-     * @param string|array    $method
-     * @param string    $path
-     * @param callable  $callback
+     * @param RouteType    $type
+     * @param array|string $method
+     * @param string       $path
+     * @param callable     $callback
      *
      * @throws NanoRouterException
      */
-    public function __construct(RouteType $type, string|array $method, string $path, callable $callback)
+    public function __construct(RouteType $type, array|string $method, string $path, callable $callback)
     {
         if ($type === RouteType::Regex && !is_int(@preg_match($path, ''))) {
             throw new NanoRouterException("invalid regex - {$path}");

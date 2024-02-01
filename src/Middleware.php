@@ -16,14 +16,14 @@ class Middleware
     /**
      * Constructor
      *
-     * @param MiddlewareType   $type
-     * @param string|array   $method
-     * @param string   $regex
-     * @param callable $callback
+     * @param MiddlewareType $type
+     * @param array|string   $method
+     * @param string         $regex
+     * @param callable       $callback
      *
      * @throws NanoRouterException
      */
-    public function __construct(MiddlewareType $type, string|array $method, string $regex, callable $callback)
+    public function __construct(MiddlewareType $type, array|string $method, string $regex, callable $callback)
     {
         if (!is_int(@preg_match($regex, ''))) {
             throw new NanoRouterException("invalid regex - {$regex}");
