@@ -18,20 +18,20 @@ class Middleware
      *
      * @param MiddlewareType $type
      * @param array|string   $method
-     * @param string         $regex
+     * @param string         $pathRegex
      * @param callable       $callback
      *
      * @throws NanoRouterException
      */
-    public function __construct(MiddlewareType $type, array|string $method, string $regex, callable $callback)
+    public function __construct(MiddlewareType $type, array|string $method, string $pathRegex, callable $callback)
     {
-        if (!is_int(@preg_match($regex, ''))) {
-            throw new NanoRouterException("invalid regex - {$regex}");
+        if (!is_int(@preg_match($pathRegex, ''))) {
+            throw new NanoRouterException("invalid regex - {$pathRegex}");
         }
 
         $this->type = $type;
         $this->methods = !is_array($method) ? [$method] : $method;
-        $this->regex = $regex;
+        $this->regex = $pathRegex;
         $this->callback = $callback;
     }
 
@@ -79,7 +79,7 @@ class Middleware
     /**
      * Call middleware
      *
-     * @param $args
+     * @param ...$args
      *
      * @return ?ResponseInterface
      */
