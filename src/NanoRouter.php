@@ -11,7 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 class NanoRouter
 {
     protected string $responseClass;
-    protected string $serverRequestFactoryClass;
+    protected string $srFactoryClass;
 
     /**
      * @var array<Route>
@@ -49,7 +49,7 @@ class NanoRouter
     public function __construct(string $response, string $serverRequestFactory, bool|callable $onRouteException = true, bool|callable $onException = true)
     {
         $this->responseClass = $response;
-        $this->serverRequestFactoryClass = $serverRequestFactory;
+        $this->srFactoryClass = $serverRequestFactory;
 
         $this->routes = [];
         $this->middleware = [];
@@ -180,7 +180,7 @@ class NanoRouter
     /**
      * Add middleware
      *
-     * @param array|string   $methods
+     * @param array<string>|string   $methods
      * @param string         $regex
      * @param MiddlewareType $type
      * @param callable       $callback
@@ -214,7 +214,7 @@ class NanoRouter
             if ($middleware->pathMatches($request->getUri()->getPath()) && $middleware->methodMatches($request->getMethod())) {
                 // call middleware
                 try {
-                    $response = $middleware->call($request);
+                    $response = $middleware->callPre($request);
                 } catch (Exception $exception) {
                     $response = $this->handleExceptions($exception);
                 }
@@ -248,7 +248,7 @@ class NanoRouter
             if ($middleware->pathMatches($request->getUri()->getPath()) && $middleware->methodMatches($request->getMethod())) {
                 // call middleware
                 try {
-                    $response = $middleware->call($response, $request);
+                    $response = $middleware->callPost($response, $request);
                 } catch (Exception $exception) {
                     $response = $this->handleExceptions($exception);
                 }

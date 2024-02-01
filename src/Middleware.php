@@ -6,6 +6,7 @@ namespace Oct8pus\NanoRouter;
 
 use Oct8pus\NanoRouter\AbstractRoute;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class Middleware extends AbstractRoute
 {
@@ -15,7 +16,7 @@ class Middleware extends AbstractRoute
      * Constructor
      *
      * @param MiddlewareType $type
-     * @param array|string   $method
+     * @param array<string>|string   $method
      * @param string         $pathRegex
      * @param callable       $callback
      *
@@ -48,13 +49,26 @@ class Middleware extends AbstractRoute
     /**
      * Call middleware
      *
-     * @param ...$args - for pre only ServerRequestInterface - for post Response and ServerRequestInterface
+     * @param ServerRequestInterface $request
      *
      * @return ?ResponseInterface
      */
-    public function call(...$args) : ?ResponseInterface
+    public function callPre(ServerRequestInterface $request) : ?ResponseInterface
     {
-        return call_user_func($this->callback, ...$args);
+        return call_user_func($this->callback, $request);
+    }
+
+    /**
+     * Call post middleware
+     *
+     * @param  ResponseInterface      $response
+     * @param  ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     */
+    public function callPost(ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface
+    {
+        return call_user_func($this->callback, $response, $request);
     }
 
     public function type() : MiddlewareType

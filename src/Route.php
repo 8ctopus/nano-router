@@ -16,7 +16,7 @@ class Route extends AbstractRoute
      * Constructor
      *
      * @param RouteType    $type
-     * @param array|string $method
+     * @param array<string>|string $method
      * @param string       $path
      * @param callable     $callback
      *

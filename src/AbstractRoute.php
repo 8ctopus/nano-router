@@ -6,8 +6,15 @@ namespace Oct8pus\NanoRouter;
 
 abstract class AbstractRoute
 {
+    /**
+     * @var array<string>
+     */
     protected array $methods;
     protected string $path;
+
+    /**
+     * @var callable
+     */
     protected $callback;
 
     /**

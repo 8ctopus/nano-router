@@ -72,9 +72,9 @@ final class MiddlewareTest extends TestCase
 
         $request = $this->mockRequest('GET', '/test/');
 
-        self::assertEquals(new Response(200), $middleware->call($request));
+        self::assertEquals(new Response(200), $middleware->callPre($request));
 
-        $middleware = new Middleware(MiddlewareType::Post, 'GET', '~/test/~', static function (ServerRequestInterface $request, ResponseInterface $response) : ?ResponseInterface {
+        $middleware = new Middleware(MiddlewareType::Post, 'GET', '~/test/~', static function (ResponseInterface $response, ServerRequestInterface $request) : ?ResponseInterface {
             switch ($request->getUri()->getPath()) {
                 case '/test/':
                     return $response;
@@ -85,10 +85,10 @@ final class MiddlewareTest extends TestCase
             return $response;
         });
 
-        self::assertEquals(new Response(405), $middleware->call($request, new Response(405)));
+        self::assertEquals(new Response(405), $middleware->callPost(new Response(405), $request));
 
         $request = $this->mockRequest('GET', '/test/2');
-        self::assertEquals(new Response(404), $middleware->call($request, new Response(405)));
+        self::assertEquals(new Response(404), $middleware->callPost(new Response(405), $request));
     }
 
     public function testInvalidRegex() : void
