@@ -39,8 +39,8 @@ class Route
     /**
      * Check if route matches
      *
-     * @param  string $method
-     * @param  string $path
+     * @param string $method
+     * @param string $path
      *
      * @return bool
      */
@@ -52,7 +52,7 @@ class Route
     /**
      * Check if path matches
      *
-     * @param  string $path
+     * @param string $path
      *
      * @return bool
      */
@@ -78,7 +78,7 @@ class Route
     /**
      * Check if method matches
      *
-     * @param  string $method
+     * @param string $method
      *
      * @return bool
      */
@@ -98,7 +98,7 @@ class Route
     /**
      * Call route
      *
-     * @param  ServerRequestInterface $request
+     * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
      */

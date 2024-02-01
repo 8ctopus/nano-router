@@ -16,10 +16,10 @@ class Middleware
     /**
      * Constructor
      *
-     * @param string    $when
-     * @param string    $methods
-     * @param string    $regex
-     * @param callable  $callback
+     * @param string   $when
+     * @param string   $methods
+     * @param string   $regex
+     * @param callable $callback
      *
      * @throws NanoRouterException
      */
@@ -42,8 +42,8 @@ class Middleware
     /**
      * Check if matches
      *
-     * @param  string $method
-     * @param  string $path
+     * @param string $method
+     * @param string $path
      *
      * @return bool
      */
@@ -55,7 +55,7 @@ class Middleware
     /**
      * Check if path matches
      *
-     * @param  string $path
+     * @param string $path
      *
      * @return bool
      */
@@ -67,7 +67,7 @@ class Middleware
     /**
      * Check if method matches
      *
-     * @param  string $method
+     * @param string $method
      *
      * @return bool
      */
