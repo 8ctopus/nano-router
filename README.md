@@ -10,17 +10,25 @@
 
 An experimental PSR-7, PSR-17 router
 
+## features
+
+- very fast (down to 2ms on simple routing)
+- uses PSR-7 and PSR-17 standards
+
+While I consider it still experimental, I have been using it in production to host [legend.octopuslabs.io](https://legend.octopuslabs.io/) without any issues so far.
+
 ## introduction for beginners
 
-The purpose of a router is to match a user request to a request handler, the later will return a response that will be sent back to the user.
+The purpose of a router is to match a user (client) http request to a specific function that will handle the user request and deliver a response to the client.
 
-[PSR-7](https://www.php-fig.org/psr/psr-7/) defines the request and response interfaces, while [PSR-17](https://www.php-fig.org/psr/psr-17/) defines the factories for creating them. In other words, factories are used to create the request and response objects from the user request and the request handler response.
+[PSR-7](https://www.php-fig.org/psr/psr-7/) defines the request and response interfaces, while [PSR-17](https://www.php-fig.org/psr/psr-17/) defines the factories for creating them. In other words, factories are used to create the request and response objects.
 
-Here's some pseudocode that explains the concept:
+Here's some pseudo-code that explains the concept:
 
 ```php
 $router = new Router();
 
+// add route
 $router->addRoute('GET', '/test.php', function (ServerRequestInterface $request) : ResponseInterface {
     return new Response(200, ['content-type' => 'text/plain'], 'You\'ve reached page /test.php');
 })
@@ -28,7 +36,7 @@ $router->addRoute('GET', '/test.php', function (ServerRequestInterface $request)
 // create user request from globals
 $request = ServerRequestCreator::createFromGlobals($_SERVER, $_FILES, $_COOKIE, $_GET, $_POST);
 
-// router finds a handler for the request
+// resolve finds the function that handles the user request, calls it and returns the function's response
 $response = $router->resolve($request);
 
 // send response to client (echoes internally)
@@ -113,7 +121,7 @@ $router
 
         return new Response(404, [], $stream);
     })
-    ->addMiddleware('*', '~(.*)~', 'post', function (ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface {
+    ->addMiddleware('*', '~(.*)~', MiddlewareType::Post, function (ResponseInterface $response, ServerRequestInterface $request) : ResponseInterface {
         return $response->withHeader('X-Powered-By', '8ctopus');
     });
 
@@ -146,11 +154,8 @@ but most of it can be experimented with in the demo
 
     composer fix(-risky)
 
-## todos
+## todo ideas
 
-- add to readme - very fast - can handle 200 requests per second on a aws ec2 instance
-- add to readme legend example?
-- create route class instead of array? impact on performance?
 - add alias routes
 - add basePath
 - class wrapper for subroutes
