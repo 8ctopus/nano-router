@@ -8,8 +8,8 @@ use Psr\Http\Message\ResponseInterface;
 
 class Middleware
 {
-    public readonly string $when;
-    private readonly array|string $methods;
+    private readonly string $when;
+    private readonly array $methods;
     private readonly string $regex;
     private $callback;
 
@@ -17,13 +17,13 @@ class Middleware
      * Constructor
      *
      * @param string   $when
-     * @param string   $methods
+     * @param string|array   $method
      * @param string   $regex
      * @param callable $callback
      *
      * @throws NanoRouterException
      */
-    public function __construct(string $when, array|string $methods, string $regex, callable $callback)
+    public function __construct(string $when, string|array $method, string $regex, callable $callback)
     {
         if (!in_array($when, ['pre', 'post'], true)) {
             throw new NanoRouterException('invalid when clause');
@@ -34,7 +34,7 @@ class Middleware
         }
 
         $this->when = $when;
-        $this->methods = $methods;
+        $this->methods = !is_array($method) ? [$method] : $method;
         $this->regex = $regex;
         $this->callback = $callback;
     }
@@ -73,15 +73,11 @@ class Middleware
      */
     public function methodMatches(string $method) : bool
     {
-        if (is_array($this->methods)) {
-            return in_array($method, $this->methods, true);
-        }
-
-        if ($this->methods === '*') {
+        if ($this->methods[0] === '*') {
             return true;
         }
 
-        return $method === $this->methods;
+        return in_array($method, $this->methods, true);
     }
 
     /**

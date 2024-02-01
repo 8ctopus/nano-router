@@ -10,7 +10,7 @@ use Psr\Http\Message\ServerRequestInterface;
 class Route
 {
     private readonly RouteType $type;
-    private readonly array|string $methods;
+    private readonly array $methods;
     private readonly string $path;
     private $callback;
 
@@ -18,20 +18,20 @@ class Route
      * Constructor
      *
      * @param RouteType $type
-     * @param string    $methods
+     * @param string|array    $method
      * @param string    $path
      * @param callable  $callback
      *
      * @throws NanoRouterException
      */
-    public function __construct(RouteType $type, array|string $methods, string $path, callable $callback)
+    public function __construct(RouteType $type, string|array $method, string $path, callable $callback)
     {
         if ($type === RouteType::Regex && !is_int(@preg_match($path, ''))) {
             throw new NanoRouterException("invalid regex - {$path}");
         }
 
         $this->type = $type;
-        $this->methods = $methods;
+        $this->methods = !is_array($method) ? [$method] : $method;
         $this->path = $path;
         $this->callback = $callback;
     }
@@ -55,6 +55,8 @@ class Route
      * @param string $path
      *
      * @return bool
+     *
+     * @throws NanoRouterException
      */
     public function pathMatches(string $path) : bool
     {
@@ -84,15 +86,11 @@ class Route
      */
     public function methodMatches(string $method) : bool
     {
-        if (is_array($this->methods)) {
-            return in_array($method, $this->methods, true);
-        }
-
-        if ($this->methods === '*') {
+        if ($this->methods[0] === '*') {
             return true;
         }
 
-        return $method === $this->methods;
+        return in_array($method, $this->methods, true);
     }
 
     /**
