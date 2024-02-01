@@ -95,6 +95,13 @@ class Route
         return $method === $this->methods;
     }
 
+    /**
+     * Call route
+     *
+     * @param  ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     */
     public function call(ServerRequestInterface $request) : ResponseInterface
     {
         return call_user_func($this->callback, $request);

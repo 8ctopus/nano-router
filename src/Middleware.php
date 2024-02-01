@@ -85,9 +85,9 @@ class Middleware
     }
 
     /**
-     * Call
+     * Call middleware
      *
-     * @param  [type]            $args
+     * @param $args
      *
      * @return ?ResponseInterface
      */
