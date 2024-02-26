@@ -7,9 +7,9 @@ namespace Oct8pus\NanoRouter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class Route extends AbstractRoute
+class RouteAlias extends Route
 {
-    protected readonly RouteType $type;
+    private readonly string $alias;
 
     /**
      * Constructor
@@ -23,16 +23,7 @@ class Route extends AbstractRoute
      */
     public function __construct(RouteType $type, array|string $method, string $path, callable $callback)
     {
-        parent::__construct();
-
-        if ($type === RouteType::Regex && !is_int(@preg_match($path, ''))) {
-            throw new NanoRouterException("invalid regex - {$path}");
-        }
-
-        $this->type = $type;
-        $this->methods = !is_array($method) ? [$method] : $method;
-        $this->path = $path;
-        $this->callback = $callback;
+        parent::__construct($type, $method, $path, $callback);
     }
 
     /**
@@ -46,15 +37,19 @@ class Route extends AbstractRoute
      */
     public function pathMatches(string $candidate) : bool
     {
+        if (parent::pathMatches($candidate)) {
+            return true;
+        }
+
         switch ($this->type) {
             case RouteType::Exact:
-                return $candidate === $this->path;
+                return $candidate === $this->alias;
 
             case RouteType::StartsWith:
-                return str_starts_with($candidate, $this->path);
+                return str_starts_with($candidate, $this->alias);
 
             case RouteType::Regex:
-                return preg_match($this->path, $candidate) === 1;
+                return preg_match($this->alias, $candidate) === 1;
 
             default:
                 // @codeCoverageIgnoreStart
@@ -73,5 +68,18 @@ class Route extends AbstractRoute
     public function call(ServerRequestInterface $request) : ResponseInterface
     {
         return call_user_func($this->callback, $request);
+    }
+
+    /**
+     * Add route alias
+     *
+     * @param  string $path
+     *
+     * @return self
+     */
+    public function addAlias(string $path) : self
+    {
+        $this->alias = $path;
+        return $this;
     }
 }

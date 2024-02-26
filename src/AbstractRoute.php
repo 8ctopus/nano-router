@@ -38,11 +38,11 @@ abstract class AbstractRoute
     /**
      * Check if path matches
      *
-     * @param string $path
+     * @param string $candidate
      *
      * @return bool
      */
-    abstract public function pathMatches(string $path) : bool;
+    abstract public function pathMatches(string $candidate) : bool;
 
     /**
      * Check if method matches

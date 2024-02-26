@@ -38,13 +38,13 @@ class Middleware extends AbstractRoute
     /**
      * Check if path matches
      *
-     * @param string $path
+     * @param string $candidate
      *
      * @return bool
      */
-    public function pathMatches(string $path) : bool
+    public function pathMatches(string $candidate) : bool
     {
-        return preg_match($this->path, $path) === 1;
+        return preg_match($this->path, $candidate) === 1;
     }
 
     /**
