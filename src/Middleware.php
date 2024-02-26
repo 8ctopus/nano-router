@@ -31,7 +31,7 @@ class Middleware extends AbstractRoute
 
         $this->type = $type;
         $this->methods = !is_array($method) ? [$method] : $method;
-        $this->pathes[] = $pathRegex;
+        $this->path = $pathRegex;
         $this->callback = $callback;
     }
 
@@ -44,7 +44,7 @@ class Middleware extends AbstractRoute
      */
     public function pathMatches(string $path) : bool
     {
-        return preg_match($this->pathes[0], $path) === 1;
+        return preg_match($this->path, $path) === 1;
     }
 
     /**

@@ -10,6 +10,7 @@ use Psr\Http\Message\ServerRequestInterface;
 class Route extends AbstractRoute
 {
     private readonly RouteType $type;
+    private readonly string $alias;
 
     /**
      * Constructor
@@ -31,7 +32,7 @@ class Route extends AbstractRoute
 
         $this->type = $type;
         $this->methods = !is_array($method) ? [$method] : $method;
-        $this->pathes[] = $path;
+        $this->path = $path;
         $this->callback = $callback;
     }
 
@@ -46,33 +47,15 @@ class Route extends AbstractRoute
      */
     public function pathMatches(string $path) : bool
     {
-        switch ($this->type) {
-            case RouteType::Exact:
-                return in_array($path, $this->pathes, true);
-
-            case RouteType::StartsWith:
-                foreach ($this->pathes as $item) {
-                    if (str_starts_with($path, $item)) {
-                        return true;
-                    }
-                }
-
-                return false;
-
-            case RouteType::Regex:
-                foreach ($this->pathes as $item) {
-                    if (preg_match($item, $path) === 1) {
-                        return true;
-                    }
-                }
-
-                return false;
-
-            default:
-                // @codeCoverageIgnoreStart
-                throw new NanoRouterException("Unknown route type - {$this->type}");
-                // @codeCoverageIgnoreEnd
+        if ($this->internalPathMatches($this->path, $path)) {
+            return true;
         }
+
+        if (isset($this->alias) && $this->internalPathMatches($this->alias, $path)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -96,7 +79,34 @@ class Route extends AbstractRoute
      */
     public function addAlias(string $path) : self
     {
-        $this->pathes[] = $path;
+        $this->alias = $path;
         return $this;
+    }
+
+    /**
+     * Check if path matches
+     *
+     * @param  string $path
+     * @param  string $candidate
+     *
+     * @return bool
+     */
+    private function internalPathMatches(string $path, string $candidate) : bool
+    {
+        switch ($this->type) {
+            case RouteType::Exact:
+                return $path === $candidate;
+
+            case RouteType::StartsWith:
+                return str_starts_with($candidate, $path);
+
+            case RouteType::Regex:
+                return preg_match($path, $candidate) === 1;
+
+            default:
+                // @codeCoverageIgnoreStart
+                throw new NanoRouterException("Unknown route type - {$this->type}");
+                // @codeCoverageIgnoreEnd
+        }
     }
 }

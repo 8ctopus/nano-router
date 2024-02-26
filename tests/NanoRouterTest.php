@@ -96,9 +96,9 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
-        // add index route
-        $router->addRouteStartsWith(['HEAD', 'GET'], '/hello/', static function () : ResponseInterface {
-            if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
+        // add route
+        $router->addRouteStartsWith(['HEAD', 'GET'], '/hello/', static function (ServerRequestInterface $request) : ResponseInterface {
+            if ($request->getMethod() === 'HEAD') {
                 return new Response(200);
             }
 

@@ -10,7 +10,7 @@ abstract class AbstractRoute
      * @var array<string>
      */
     protected array $methods;
-    protected array $pathes;
+    protected string $path;
 
     /**
      * @var callable
@@ -20,7 +20,6 @@ abstract class AbstractRoute
     public function __construct()
     {
         $this->methods = [];
-        $this->pathes = [];
     }
 
     /**
