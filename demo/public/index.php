@@ -47,7 +47,7 @@ $route = new Route(RouteType::Exact, 'GET', '/', static function () : ResponseIn
     <li>This is a <a href="/not-found/">broken link</a> for testing purposes</li>
     <li><a href="/admin/test/">route requires http auth (111/111)</a></li>
     <li><a href="/route-exception/">route exception test</a></li>
-    <li><a href="/fatal-exception-handled/">fatal exception test (handled exception = a response is returned)</a></li>
+    <li><a href="/fatal-exception-handled/">fatal exception test (handled exception = http 500 response is returned to the client)</a></li>
     <li><a href="/fatal-exception-unhandled/">fatal exception test (unhandled exception)</a></li>
     </ul>
     </body>
