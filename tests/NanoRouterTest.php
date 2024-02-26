@@ -214,7 +214,7 @@ final class NanoRouterTest extends TestCase
         self::assertSame('index', (string) $response->getBody());
     }
 
-    public function test2RoutesSamePath() : void
+    public function testTwoRoutesSamePathDifferentMethod() : void
     {
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
@@ -235,6 +235,25 @@ final class NanoRouterTest extends TestCase
         $response = $router->resolve($request);
 
         self::assertSame(201, $response->getStatusCode());
+    }
+
+    public function testTwoSameRoutes() : void
+    {
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
+
+        $router->addRoute(new Route(RouteType::Exact, 'GET', '/test/', static function () : ResponseInterface {
+            return new Response(200);
+        }));
+
+        // second route is ignored
+        $router->addRoute(new Route(RouteType::Exact, 'GET', '/test/', static function () : ResponseInterface {
+            return new Response(201);
+        }));
+
+        $request = $this->mockRequest('GET', '/test/');
+        $response = $router->resolve($request);
+
+        self::assertSame(200, $response->getStatusCode());
     }
 
     public function testDefaultRouteExceptionHandler() : void
