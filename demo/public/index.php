@@ -13,7 +13,9 @@ use HttpSoft\Message\Stream;
 use HttpSoft\ServerRequest\ServerRequestCreator;
 use Oct8pus\NanoRouter\MiddlewareType;
 use Oct8pus\NanoRouter\NanoRouter;
+use Oct8pus\NanoRouter\Route;
 use Oct8pus\NanoRouter\RouteException;
+use Oct8pus\NanoRouter\RouteType;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Whoops\Handler\PrettyPageHandler;
@@ -27,7 +29,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 $router = new NanoRouter(Response::class, ServerRequestFactory::class);
 
-$router->addRoute('GET', '/', static function () : ResponseInterface {
+$router->addRoute(new Route(RouteType::Exact, 'GET', '/', static function () : ResponseInterface {
     $stream = new Stream();
 
     $stream->write(<<<'BODY'
@@ -52,9 +54,9 @@ $router->addRoute('GET', '/', static function () : ResponseInterface {
     BODY);
 
     return new Response(200, [], $stream);
-});
+}));
 
-$router->addRoute(['HEAD', 'GET'], '/test/', static function (ServerRequestInterface $request) : ResponseInterface {
+$router->addRoute(new Route(RouteType::Exact, ['HEAD', 'GET'], '/test/', static function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();
 
     $stream->write(<<<BODY
@@ -70,34 +72,34 @@ $router->addRoute(['HEAD', 'GET'], '/test/', static function (ServerRequestInter
     BODY);
 
     return new Response(200, [], $stream);
-});
+}));
 
-$router->addRouteStartsWith('*', '/php', static function (ServerRequestInterface $request) : ResponseInterface {
+$router->addRoute(new Route(RouteType::StartsWith, '*', '/php', static function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();
     $stream->write('match starts with route' . PHP_EOL);
     $stream->write('request target - ' . $request->getRequestTarget());
 
     return new Response(200, ['content-type' => 'text/plain'], $stream);
-});
+}));
 
-$router->addRoute('GET', '/admin/test/', static function () : ResponseInterface {
+$router->addRoute(new Route(RouteType::Exact, 'GET', '/admin/test/', static function () : ResponseInterface {
     $stream = new Stream();
     $stream->write('You\'re logged in');
 
     return new Response(200, ['content-type' => 'text/plain'], $stream);
-});
+}));
 
-$router->addRoute('GET', '/route-exception/', static function () : ResponseInterface {
+$router->addRoute(new Route(RouteType::Exact, 'GET', '/route-exception/', static function () : ResponseInterface {
     throw new RouteException('not authorized', 403);
-});
+}));
 
-$router->addRoute('GET', '/fatal-exception-handled/', static function () : ResponseInterface {
+$router->addRoute(new Route(RouteType::Exact, 'GET', '/fatal-exception-handled/', static function () : ResponseInterface {
     throw new Exception('fatal error', 500);
-});
+}));
 
-$router->addRoute('GET', '/fatal-exception-unhandled/', static function () : ResponseInterface {
+$router->addRoute(new Route(RouteType::Exact, 'GET', '/fatal-exception-unhandled/', static function () : ResponseInterface {
     throw new Exception('fatal error');
-});
+}));
 
 $router->addErrorHandler(404, static function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();

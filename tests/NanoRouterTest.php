@@ -9,7 +9,9 @@ use HttpSoft\Message\Response;
 use HttpSoft\Message\ServerRequestFactory;
 use HttpSoft\Message\Stream;
 use Oct8pus\NanoRouter\MiddlewareType;
+use Oct8pus\NanoRouter\Route;
 use Oct8pus\NanoRouter\RouteException;
+use Oct8pus\NanoRouter\RouteType;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -37,7 +39,7 @@ final class NanoRouterTest extends TestCase
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         // add index route
-        $router->addRoute(['HEAD', 'GET'], '/', static function () : ResponseInterface {
+        $router->addRoute(new Route(RouteType::Exact, ['HEAD', 'GET'], '/', static function () : ResponseInterface {
             if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
                 return new Response(200);
             }
@@ -45,14 +47,14 @@ final class NanoRouterTest extends TestCase
             $stream = new Stream();
             $stream->write('index');
             return new Response(200, [], $stream);
-        });
+        }));
 
         // add another route
-        $router->addRoute('*', '/hello/', static function () : ResponseInterface {
+        $router->addRoute(new Route(RouteType::Exact, '*', '/hello/', static function () : ResponseInterface {
             $stream = new Stream();
             $stream->write('hello');
             return new Response(200, [], $stream);
-        });
+        }));
 
         $request = $this->mockRequest('GET', '/');
         $response = $router->resolve($request);
@@ -97,7 +99,7 @@ final class NanoRouterTest extends TestCase
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         // add route
-        $router->addRouteStartsWith(['HEAD', 'GET'], '/hello/', static function (ServerRequestInterface $request) : ResponseInterface {
+        $router->addRoute(new Route(RouteType::StartsWith, ['HEAD', 'GET'], '/hello/', static function (ServerRequestInterface $request) : ResponseInterface {
             if ($request->getMethod() === 'HEAD') {
                 return new Response(200);
             }
@@ -105,7 +107,7 @@ final class NanoRouterTest extends TestCase
             $stream = new Stream();
             $stream->write('hello');
             return new Response(200, [], $stream);
-        });
+        }));
 
         $request = $this->mockRequest('HEAD', '/');
         $response = $router->resolve($request);
@@ -142,7 +144,7 @@ final class NanoRouterTest extends TestCase
     public function testRegexRoute() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class))
-            ->addRouteRegex(['HEAD', 'GET'], '~/test(.*).php~', static function () {
+            ->addRoute(new Route(RouteType::Regex, ['HEAD', 'GET'], '~/test(.*).php~', static function () {
                 if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
                     return new Response(200);
                 }
@@ -150,7 +152,7 @@ final class NanoRouterTest extends TestCase
                 $stream = new Stream();
                 $stream->write('test regex');
                 return new Response(200, [], $stream);
-            });
+            }));
 
         $request = $this->mockRequest('GET', '/test.php');
         $response = $router->resolve($request);
@@ -185,13 +187,13 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
-        $router->addRoute('GET', '/test/', static function () : ResponseInterface {
+        $router->addRoute(new Route(RouteType::Exact, 'GET', '/test/', static function () : ResponseInterface {
             return new Response(200);
-        });
+        }));
 
-        $router->addRoute('POST', '/test/', static function () : ResponseInterface {
+        $router->addRoute(new Route(RouteType::Exact, 'POST', '/test/', static function () : ResponseInterface {
             return new Response(201);
-        });
+        }));
 
         $request = $this->mockRequest('GET', '/test/');
         $response = $router->resolve($request);
@@ -208,9 +210,9 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
-        $router->addRoute('GET', '/', static function () : ResponseInterface {
+        $router->addRoute(new Route(RouteType::Exact, 'GET', '/', static function () : ResponseInterface {
             throw new RouteException('test', 403);
-        });
+        }));
 
         $request = $this->mockRequest('GET', '/');
         $response = $router->resolve($request);
@@ -224,9 +226,9 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class, self::routeExceptionHandler(...));
 
-        $router->addRoute('GET', '/', static function () : ResponseInterface {
+        $router->addRoute(new Route(RouteType::Exact, 'GET', '/', static function () : ResponseInterface {
             throw new RouteException('test', 403);
-        });
+        }));
 
         $request = $this->mockRequest('GET', '/');
         $response = $router->resolve($request);
@@ -240,9 +242,9 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class, false);
 
-        $router->addRoute('GET', '/', static function () : ResponseInterface {
+        $router->addRoute(new Route(RouteType::Exact, 'GET', '/', static function () : ResponseInterface {
             throw new RouteException('test', 403);
-        });
+        }));
 
         $request = $this->mockRequest('GET', '/');
         $response = $router->resolve($request);
@@ -256,9 +258,9 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
-        $router->addRoute('GET', '/', static function () : ResponseInterface {
+        $router->addRoute(new Route(RouteType::Exact, 'GET', '/', static function () : ResponseInterface {
             throw new Exception('test', 403);
-        });
+        }));
 
         $request = $this->mockRequest('GET', '/');
         $response = $router->resolve($request);
@@ -269,9 +271,9 @@ final class NanoRouterTest extends TestCase
 
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
-        $router->addRoute('GET', '/', static function () : ResponseInterface {
+        $router->addRoute(new Route(RouteType::Exact, 'GET', '/', static function () : ResponseInterface {
             throw new Exception('test');
-        });
+        }));
 
         self::expectException(Exception::class);
         self::expectExceptionMessage('test');
@@ -284,9 +286,9 @@ final class NanoRouterTest extends TestCase
     {
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class, true, false);
 
-        $router->addRoute('GET', '/', static function () : ResponseInterface {
+        $router->addRoute(new Route(RouteType::Exact, 'GET', '/', static function () : ResponseInterface {
             throw new Exception('test', 403);
-        });
+        }));
 
         self::expectException(Exception::class);
         self::expectExceptionMessage('test');

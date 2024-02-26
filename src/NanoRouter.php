@@ -119,47 +119,13 @@ class NanoRouter
     /**
      * Add route
      *
-     * @param array<string>|string $methods
-     * @param string               $path
-     * @param callable             $callback
+     * @param Route $route
      *
      * @return self
      */
-    public function addRoute(array|string $methods, string $path, callable $callback) : self
+    public function addRoute(Route $route) : self
     {
-        $this->routes[] = new Route(RouteType::Exact, $methods, $path, $callback);
-        return $this;
-    }
-
-    /**
-     * Add starts with route
-     *
-     * @param array<string>|string $methods
-     * @param string               $path
-     * @param callable             $callback
-     *
-     * @return self
-     */
-    public function addRouteStartsWith(array|string $methods, string $path, callable $callback) : self
-    {
-        $this->routes[] = new Route(RouteType::StartsWith, $methods, $path, $callback);
-        return $this;
-    }
-
-    /**
-     * Add regex route
-     *
-     * @param array<string>|string $methods
-     * @param string               $regex
-     * @param callable             $callback
-     *
-     * @return self
-     *
-     * @throws NanoRouterException if regex is invalid
-     */
-    public function addRouteRegex(array|string $methods, string $regex, callable $callback) : self
-    {
-        $this->routes[] = new Route(RouteType::Regex, $methods, $regex, $callback);
+        $this->routes[] = $route;
         return $this;
     }
 
