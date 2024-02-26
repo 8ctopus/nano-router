@@ -10,12 +10,18 @@ abstract class AbstractRoute
      * @var array<string>
      */
     protected array $methods;
-    protected string $path;
+    protected array $pathes;
 
     /**
      * @var callable
      */
     protected $callback;
+
+    public function __construct()
+    {
+        $this->methods = [];
+        $this->pathes = [];
+    }
 
     /**
      * Check if matches

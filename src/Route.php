@@ -23,13 +23,15 @@ class Route extends AbstractRoute
      */
     public function __construct(RouteType $type, array|string $method, string $path, callable $callback)
     {
+        parent::__construct();
+
         if ($type === RouteType::Regex && !is_int(@preg_match($path, ''))) {
             throw new NanoRouterException("invalid regex - {$path}");
         }
 
         $this->type = $type;
         $this->methods = !is_array($method) ? [$method] : $method;
-        $this->path = $path;
+        $this->pathes[] = $path;
         $this->callback = $callback;
     }
 
@@ -46,13 +48,25 @@ class Route extends AbstractRoute
     {
         switch ($this->type) {
             case RouteType::Exact:
-                return $this->path === $path;
+                return in_array($path, $this->pathes, true);
 
             case RouteType::StartsWith:
-                return str_starts_with($path, $this->path);
+                foreach ($this->pathes as $item) {
+                    if (str_starts_with($path, $item)) {
+                        return true;
+                    }
+                }
+
+                return false;
 
             case RouteType::Regex:
-                return preg_match($this->path, $path) === 1;
+                foreach ($this->pathes as $item) {
+                    if (preg_match($item, $path) === 1) {
+                        return true;
+                    }
+                }
+
+                return false;
 
             default:
                 // @codeCoverageIgnoreStart
@@ -71,5 +85,18 @@ class Route extends AbstractRoute
     public function call(ServerRequestInterface $request) : ResponseInterface
     {
         return call_user_func($this->callback, $request);
+    }
+
+    /**
+     * Add route alias
+     *
+     * @param  string $path
+     *
+     * @return self
+     */
+    public function addAlias(string $path) : self
+    {
+        $this->pathes[] = $path;
+        return $this;
     }
 }

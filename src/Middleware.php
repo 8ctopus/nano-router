@@ -23,13 +23,15 @@ class Middleware extends AbstractRoute
      */
     public function __construct(MiddlewareType $type, array|string $method, string $pathRegex, callable $callback)
     {
+        parent::__construct();
+
         if (!is_int(@preg_match($pathRegex, ''))) {
             throw new NanoRouterException("invalid regex - {$pathRegex}");
         }
 
         $this->type = $type;
         $this->methods = !is_array($method) ? [$method] : $method;
-        $this->path = $pathRegex;
+        $this->pathes[] = $pathRegex;
         $this->callback = $callback;
     }
 
@@ -42,7 +44,7 @@ class Middleware extends AbstractRoute
      */
     public function pathMatches(string $path) : bool
     {
-        return preg_match($this->path, $path) === 1;
+        return preg_match($this->pathes[0], $path) === 1;
     }
 
     /**
