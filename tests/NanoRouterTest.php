@@ -10,6 +10,7 @@ use HttpSoft\Message\ServerRequestFactory;
 use HttpSoft\Message\Stream;
 use Oct8pus\NanoRouter\MiddlewareType;
 use Oct8pus\NanoRouter\Route;
+use Oct8pus\NanoRouter\RouteAlias;
 use Oct8pus\NanoRouter\RouteException;
 use Oct8pus\NanoRouter\RouteType;
 use Psr\Http\Message\ResponseInterface;
@@ -39,8 +40,8 @@ final class NanoRouterTest extends TestCase
         $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
 
         // add index route
-        $router->addRoute(new Route(RouteType::Exact, ['HEAD', 'GET'], '/', static function () : ResponseInterface {
-            if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
+        $router->addRoute(new Route(RouteType::Exact, ['HEAD', 'GET'], '/', static function (ServerRequestInterface $request) : ResponseInterface {
+            if ($request->getMethod() === 'HEAD') {
                 return new Response(200);
             }
 
@@ -144,8 +145,8 @@ final class NanoRouterTest extends TestCase
     public function testRegexRoute() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class))
-            ->addRoute(new Route(RouteType::Regex, ['HEAD', 'GET'], '~/test(.*).php~', static function () {
-                if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
+            ->addRoute(new Route(RouteType::Regex, ['HEAD', 'GET'], '~/test(.*).php~', static function (ServerRequestInterface $request) {
+                if ($request->getMethod() === 'HEAD') {
                     return new Response(200);
                 }
 
@@ -181,6 +182,36 @@ final class NanoRouterTest extends TestCase
         $response = $router->resolve($request);
 
         self::assertSame(405, $response->getStatusCode());
+    }
+
+    public function testAliasRoute() : void
+    {
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
+
+        $route = new RouteAlias(RouteType::Exact, ['HEAD', 'GET'], '/', static function (ServerRequestInterface $request) : ResponseInterface {
+            if ($request->getMethod() === 'HEAD') {
+                return new Response(200);
+            }
+
+            $stream = new Stream();
+            $stream->write('index');
+            return new Response(200, [], $stream);
+        });
+
+        $route->setAlias('/alias/');
+        $router->addRoute($route);
+
+        $request = $this->mockRequest('GET', '/');
+        $response = $router->resolve($request);
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('index', (string) $response->getBody());
+
+        $request = $this->mockRequest('GET', '/alias/');
+        $response = $router->resolve($request);
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('index', (string) $response->getBody());
     }
 
     public function test2RoutesSamePath() : void

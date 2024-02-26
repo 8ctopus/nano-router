@@ -17,7 +17,7 @@ final class RouteAliasTest extends TestCase
     public function testAlias() : void
     {
         $route = (new RouteAlias(RouteType::Exact, 'GET', '/test/', static function () : void {}))
-            ->addAlias('/new-test/');
+            ->setAlias('/new-test/');
 
         self::assertTrue($route->pathMatches('/test/'));
         self::assertTrue($route->pathMatches('/new-test/'));
@@ -31,7 +31,7 @@ final class RouteAliasTest extends TestCase
         self::assertFalse($route->pathMatches('/new-test2/'));
 
         $route = (new RouteAlias(RouteType::StartsWith, 'GET', '/test/', static function () : void {}))
-            ->addAlias('/new-test/');
+            ->setAlias('/new-test/');
 
         self::assertTrue($route->pathMatches('/test/'));
         self::assertTrue($route->pathMatches('/test/ '));
@@ -47,7 +47,7 @@ final class RouteAliasTest extends TestCase
         self::assertFalse($route->pathMatches('/new-test2/'));
 
         $route = (new RouteAlias(RouteType::Regex, 'GET', '~/test(.*)\.php~', static function () : void {}))
-            ->addAlias('~/new-test(.*)\.php~');
+            ->setAlias('~/new-test(.*)\.php~');
 
         self::assertTrue($route->pathMatches('/test.php'));
         self::assertTrue($route->pathMatches('/test2.php'));

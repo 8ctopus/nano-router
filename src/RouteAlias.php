@@ -77,7 +77,7 @@ class RouteAlias extends Route
      *
      * @return self
      */
-    public function addAlias(string $path) : self
+    public function setAlias(string $path) : self
     {
         $this->alias = $path;
         return $this;
