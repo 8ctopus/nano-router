@@ -14,6 +14,7 @@ use HttpSoft\ServerRequest\ServerRequestCreator;
 use Oct8pus\NanoRouter\MiddlewareType;
 use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\Route;
+use Oct8pus\NanoRouter\RouteAlias;
 use Oct8pus\NanoRouter\RouteException;
 use Oct8pus\NanoRouter\RouteType;
 use Psr\Http\Message\ResponseInterface;
@@ -29,7 +30,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 $router = new NanoRouter(Response::class, ServerRequestFactory::class);
 
-$router->addRoute(new Route(RouteType::Exact, 'GET', '/', static function () : ResponseInterface {
+$route = new Route(RouteType::Exact, 'GET', '/', static function () : ResponseInterface {
     $stream = new Stream();
 
     $stream->write(<<<'BODY'
@@ -54,9 +55,11 @@ $router->addRoute(new Route(RouteType::Exact, 'GET', '/', static function () : R
     BODY);
 
     return new Response(200, [], $stream);
-}));
+});
 
-$router->addRoute(new Route(RouteType::Exact, ['HEAD', 'GET'], '/test/', static function (ServerRequestInterface $request) : ResponseInterface {
+$router->addRoute($route);
+
+$alias = new RouteAlias(RouteType::Exact, ['HEAD', 'GET'], '/test/', static function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();
 
     $stream->write(<<<BODY
@@ -72,7 +75,11 @@ $router->addRoute(new Route(RouteType::Exact, ['HEAD', 'GET'], '/test/', static 
     BODY);
 
     return new Response(200, [], $stream);
-}));
+});
+
+$alias->setAlias('/test-alias/');
+
+$router->addRoute($alias);
 
 $router->addRoute(new Route(RouteType::StartsWith, '*', '/php', static function (ServerRequestInterface $request) : ResponseInterface {
     $stream = new Stream();

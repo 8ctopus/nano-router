@@ -12,7 +12,7 @@ An experimental PSR-7, PSR-17 router
 
 ## features
 
-- very fast (down to 2ms on simple routing)
+- very fast (less than 2ms on simple routing)
 - uses PSR-7 and PSR-17 standards
 
 While I consider it still experimental, I have been using it in production to host [legend.octopuslabs.io](https://legend.octopuslabs.io/) without any issues so far.
@@ -28,10 +28,9 @@ Here's some pseudo-code that explains the concept:
 ```php
 $router = new Router();
 
-// add route
-$router->addRoute('GET', '/test.php', function (ServerRequestInterface $request) : ResponseInterface {
+$router->addRoute(new Route(RouteType::Exact, 'GET', '/test.php', function (ServerRequestInterface $request) : ResponseInterface {
     return new Response(200, ['content-type' => 'text/plain'], 'You\'ve reached page /test.php');
-})
+}));
 
 // create user request from globals
 $request = ServerRequestCreator::createFromGlobals($_SERVER, $_FILES, $_COOKIE, $_GET, $_POST);
@@ -94,26 +93,26 @@ $router = new NanoRouter(Response::class, ServerRequestFactory::class);
 
 $router
     // add simple route
-    ->addRoute('GET', '/test.php', function (ServerRequestInterface $request) : ResponseInterface {
+    ->addRoute(new Route(RouteType::Exact, 'GET', '/test.php', function (ServerRequestInterface $request) : ResponseInterface {
         $stream = new Stream();
         $stream->write('test.php');
 
         return new Response(200, [], $stream);
-    })
+    }))
     // add starts with route
-    ->addRouteStartsWith('GET', '/test/', function (ServerRequestInterface $request) : ResponseInterface {
+    ->addRoute(new Route(RouteType::StartsWith, ['GET', 'POST'], '/test/', function (ServerRequestInterface $request) : ResponseInterface {
         $stream = new Stream();
         $stream->write('request target - '. $request->getRequestTarget());
 
         return new Response(200, [], $stream);
-    })
+    }))
     // add regex route
-    ->addRouteRegex('*', '~/php(.*)/~', function (ServerRequestInterface $request) : ResponseInterface {
+    ->addRoute(new Route(RouteType::Regex, '*', '~/php(.*)/~', function (ServerRequestInterface $request) : ResponseInterface {
         $stream = new Stream();
         $stream->write('request target - '. $request->getRequestTarget());
 
         return new Response(200, [], $stream);
-    })
+    }))
     ->addErrorHandler(404, function (ServerRequestInterface $request) : ResponseInterface {
         $stream = new Stream();
         $stream->write('page not found - ' . $request->getRequestTarget());
@@ -139,7 +138,6 @@ $response = $router->resolve($request);
 
 There is more to it, it's just not in the readme yet, such as:
 
-- multiple route methods
 - pre and post middleware
 - route exception and generic exception handling
 
@@ -155,7 +153,6 @@ but most of it can be experimented with in the demo
 
 ## todo ideas
 
-- add alias routes
 - add basePath
 - class wrapper for subroutes
 - should pre middleware only work on valid requests? now not valid routes are still going through the middleware probably we need both
