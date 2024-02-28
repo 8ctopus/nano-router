@@ -77,7 +77,7 @@ $alias = new RouteAlias(RouteType::Exact, ['HEAD', 'GET'], '/test/', static func
     return new Response(200, [], $stream);
 });
 
-$alias->setAlias('/test-alias/');
+$alias->addAlias('/test-alias/');
 
 $router->addRoute($alias);
 

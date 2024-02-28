@@ -198,7 +198,7 @@ final class NanoRouterTest extends TestCase
             return new Response(200, [], $stream);
         });
 
-        $route->setAlias('/alias/');
+        $route->addAlias('/alias/');
         $router->addRoute($route);
 
         $request = $this->mockRequest('GET', '/');

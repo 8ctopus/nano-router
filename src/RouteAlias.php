@@ -9,7 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class RouteAlias extends Route
 {
-    private readonly string $alias;
+    private array $aliases;
 
     /**
      * Constructor
@@ -23,6 +23,8 @@ class RouteAlias extends Route
      */
     public function __construct(RouteType $type, array|string $method, string $path, callable $callback)
     {
+        $this->aliases = [];
+
         parent::__construct($type, $method, $path, $callback);
     }
 
@@ -41,21 +43,37 @@ class RouteAlias extends Route
             return true;
         }
 
-        switch ($this->type) {
-            case RouteType::Exact:
-                return $candidate === $this->alias;
+        foreach ($this->aliases as $alias) {
+            switch ($this->type) {
+                case RouteType::Exact:
+                    if ($candidate === $alias) {
+                        return true;
+                    }
 
-            case RouteType::StartsWith:
-                return str_starts_with($candidate, $this->alias);
+                    break;
 
-            case RouteType::Regex:
-                return preg_match($this->alias, $candidate) === 1;
+                case RouteType::StartsWith:
+                    if (str_starts_with($candidate, $alias)) {
+                        return true;
+                    }
 
-            default:
-                // @codeCoverageIgnoreStart
-                throw new NanoRouterException("Unknown route type - {$this->type}");
-                // @codeCoverageIgnoreEnd
+                    break;
+
+                case RouteType::Regex:
+                    if (preg_match($alias, $candidate) === 1) {
+                        return true;
+                    }
+
+                    break;
+
+                default:
+                    // @codeCoverageIgnoreStart
+                    throw new NanoRouterException("Unknown route type - {$this->type->value}");
+                    // @codeCoverageIgnoreEnd
+            }
         }
+
+        return false;
     }
 
     /**
@@ -77,9 +95,9 @@ class RouteAlias extends Route
      *
      * @return self
      */
-    public function setAlias(string $path) : self
+    public function addAlias(string $path) : self
     {
-        $this->alias = $path;
+        $this->aliases[] = $path;
         return $this;
     }
 }
