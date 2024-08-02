@@ -14,6 +14,7 @@ An experimental PSR-7, PSR-17 router
 
 - very fast (less than 2ms on simple routing)
 - uses PSR-7 and PSR-17 standards
+- no dependencies besides PSR-7/17
 
 While I consider it still experimental, I have been using it in production to host [legend.octopuslabs.io](https://legend.octopuslabs.io/) without any issues so far.
 
