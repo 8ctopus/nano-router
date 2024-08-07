@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Oct8pus\NanoRouter;
 
-use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
 
 class NanoRouter
 {
@@ -97,7 +97,7 @@ class NanoRouter
                     // call route
                     try {
                         $response = $route->call($request);
-                    } catch (Exception $exception) {
+                    } catch (Throwable $exception) {
                         $response = $this->handleExceptions($exception);
                     }
 
@@ -181,7 +181,7 @@ class NanoRouter
                 // call middleware
                 try {
                     $response = $middleware->callPre($request);
-                } catch (Exception $exception) {
+                } catch (Throwable $exception) {
                     $response = $this->handleExceptions($exception);
                 }
 
@@ -215,7 +215,7 @@ class NanoRouter
                 // call middleware
                 try {
                     $response = $middleware->callPost($response, $request);
-                } catch (Exception $exception) {
+                } catch (Throwable $exception) {
                     $response = $this->handleExceptions($exception);
                 }
             }
@@ -234,13 +234,13 @@ class NanoRouter
     /**
      * Handle exceptions
      *
-     * @param Exception $exception
+     * @param Throwable $exception
      *
      * @return ResponseInterface
      *
-     * @throws Exception
+     * @throws Throwable
      */
-    protected function handleExceptions(Exception $exception) : ResponseInterface
+    protected function handleExceptions(Throwable $exception) : ResponseInterface
     {
         // route exceptions always return an error response
         if ($exception instanceof RouteException) {
@@ -287,11 +287,11 @@ class NanoRouter
     /**
      * Handle exceptions
      *
-     * @param Exception $exception
+     * @param Throwable $exception
      *
      * @return ?ResponseInterface
      */
-    protected function exceptionHandler(Exception $exception) : ?ResponseInterface
+    protected function exceptionHandler(Throwable $exception) : ?ResponseInterface
     {
         $code = $exception->getCode();
 
