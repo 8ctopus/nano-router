@@ -24,7 +24,7 @@
         "httpsoft/http-message": "^1.1",
         "httpsoft/http-emitter": "^1.0",
         "httpsoft/http-server-request": "^1.0",
-        "8ctopus/nano-timer": "^1.0"
+        "8ctopus/nano-timer": "^4.0"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
