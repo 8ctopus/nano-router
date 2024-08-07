@@ -91,7 +91,7 @@ class RouteAlias extends Route
     /**
      * Add route alias
      *
-     * @param  string $path
+     * @param string $path
      *
      * @return self
      */
