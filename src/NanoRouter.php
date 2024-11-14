@@ -26,7 +26,7 @@ class NanoRouter
     /**
      * @var array<int, callable>
      */
-    protected array $errors;
+    protected array $errorHandlers;
 
     /**
      * @var ?callable
@@ -53,7 +53,7 @@ class NanoRouter
 
         $this->routes = [];
         $this->middleware = [];
-        $this->errors = [];
+        $this->errorHandlers = [];
 
         if (is_callable($onRouteException)) {
             $this->onRouteException = $onRouteException;
@@ -132,14 +132,20 @@ class NanoRouter
     /**
      * Add error handler
      *
-     * @param int      $error
+     * @param int|array $codes - zero to handle all errors
      * @param callable $handler
      *
      * @return self
      */
-    public function addErrorHandler(int $error, callable $handler) : self
+    public function addErrorHandler(int|array $codes, callable $handler) : self
     {
-        $this->errors[$error] = $handler;
+        if (!is_array($codes)) {
+            $codes = [$codes];
+        }
+
+        foreach ($codes as $code) {
+            $this->errorHandlers[$code] = $handler;
+        }
         return $this;
     }
 
@@ -312,13 +318,18 @@ class NanoRouter
      */
     private function handleError(int $error, ServerRequestInterface $request) : ResponseInterface
     {
-        $handler = array_key_exists($error, $this->errors) ? $this->errors[$error] : null;
+        // specific handler for this error
+        $handler = array_key_exists($error, $this->errorHandlers) ? $this->errorHandlers[$error] : null;
+
+        if (!$handler) {
+            // generic handler
+            $handler = array_key_exists(0, $this->errorHandlers) ? $this->errorHandlers[0] : null;
+        }
 
         if ($handler) {
-            // call error handler
             return call_user_func($handler, $request);
-        } else {
-            return new $this->responseClass($error);
         }
+
+        return new $this->responseClass($error);
     }
 }
