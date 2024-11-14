@@ -146,6 +146,7 @@ class NanoRouter
         foreach ($codes as $code) {
             $this->errorHandlers[$code] = $handler;
         }
+
         return $this;
     }
 
@@ -327,7 +328,7 @@ class NanoRouter
         }
 
         if ($handler) {
-            return call_user_func($handler, $request);
+            return call_user_func($handler, $request, $error);
         }
 
         return new $this->responseClass($error);
