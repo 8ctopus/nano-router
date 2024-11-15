@@ -136,12 +136,27 @@ $response = $router->resolve($request);
     ->emit($response);
 ```
 
+## exception handling
+
+By default, `Throwable`, and everything inherited from it such as `Exception`, are caught by the router provided the exception occurs within the route code. That functionality can be disabled in the constructor by setting it to `false`.
+
+```php
+new NanoRouter(Response::class, ServerRequestFactory::class, false, false);
+```
+
+The `RouteException` class offers an elegant way to deal with http errors such as `404`, `401`, `429`, .... The router will automatically catch the exception and return the appropriate response to the client.
+
+```php
+throw new RouteException('page not found', 404);
+
+// client sees 404 page
+```
+
 ## advanced functionalities
 
 There is more to it, it's just not in the readme yet, most of it can be experimented within the demo, such as:
 
 - pre and post middleware
-- route exception and generic exception handling
 
 ## run tests
 
