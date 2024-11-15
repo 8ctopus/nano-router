@@ -137,12 +137,10 @@ $response = $router->resolve($request);
 
 ## advanced functionalities
 
-There is more to it, it's just not in the readme yet, such as:
+There is more to it, it's just not in the readme yet, most of it can be experimented within the demo, such as:
 
 - pre and post middleware
 - route exception and generic exception handling
-
-but most of it can be experimented within the demo
 
 ## run tests
 
