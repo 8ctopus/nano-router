@@ -213,7 +213,7 @@ class NanoRouter
     /**
      * Add route exception handler
      *
-     * @param int|array $codes - zero to handle all errors
+     * @param int|array $codes
      * @param callable $handler
      *
      * @return self
@@ -281,7 +281,7 @@ class NanoRouter
     {
         $code = $exception->getCode();
 
-        $handler = array_key_exists($code, $this->routeExceptionHandlers) ? $this->routeExceptionHandlers[$code] : (array_key_exists(0, $this->routeExceptionHandlers) ? $this->routeExceptionHandlers[0] : null);
+        $handler = array_key_exists($code, $this->routeExceptionHandlers) ? $this->routeExceptionHandlers[$code] : null;
 
         if ($handler) {
             return call_user_func($handler, $request, $code);
