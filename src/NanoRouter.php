@@ -228,9 +228,7 @@ class NanoRouter
             }
         }
 
-        $code = $exception->getCode();
-
-        return new $this->responseClass($code);
+        return new $this->responseClass($exception->getCode());
     }
 
     /**
