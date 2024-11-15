@@ -24,11 +24,6 @@ class NanoRouter
     protected array $middleware;
 
     /**
-     * @var array<int, callable>
-     */
-    protected array $routeExceptionHandlers;
-
-    /**
      * @var ?callable
      */
     private $onRouteException;
@@ -53,7 +48,6 @@ class NanoRouter
 
         $this->routes = [];
         $this->middleware = [];
-        $this->routeExceptionHandlers = [];
 
         $this->onRouteException = $onRouteException;
         $this->onException = $onException;
@@ -198,27 +192,6 @@ class NanoRouter
     }
 
     /**
-     * Add route exception handler
-     *
-     * @param int|array $codes
-     * @param callable $handler
-     *
-     * @return self
-     */
-    public function addRouteExceptionHandler(int|array $codes, callable $handler) : self
-    {
-        if (!is_array($codes)) {
-            $codes = [$codes];
-        }
-
-        foreach ($codes as $code) {
-            $this->routeExceptionHandlers[$code] = $handler;
-        }
-
-        return $this;
-    }
-
-    /**
      * Handle exceptions
      *
      * @param Throwable $exception
@@ -262,9 +235,7 @@ class NanoRouter
 
         $code = $exception->getCode();
 
-        $handler = array_key_exists($code, $this->routeExceptionHandlers) ? $this->routeExceptionHandlers[$code] : null;
-
-        return $handler ? call_user_func($handler, $exception, $request) : new $this->responseClass($code);
+        return new $this->responseClass($code);
     }
 
     /**
