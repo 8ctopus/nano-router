@@ -269,7 +269,7 @@ final class NanoRouterTest extends TestCase
 
         self::assertSame(403, $response->getStatusCode());
         self::assertEmpty((string) $response->getBody());
-        self::expectOutputString('Tests\NanoRouterTest - FAILED - 403 test');
+        self::expectOutputString('');
     }
 
     public function testCustomRouteExceptionHandler() : void
@@ -296,12 +296,12 @@ final class NanoRouterTest extends TestCase
             throw new RouteException('test', 403);
         }));
 
-        $request = $this->mockRequest('GET', '/');
-        $response = $router->resolve($request);
+        self::expectException(RouteException::class);
+        self::expectExceptionMessage('test');
+        self::expectExceptionCode(403);
 
-        self::assertSame(403, $response->getStatusCode());
-        self::assertEmpty((string) $response->getBody());
-        self::expectOutputString('');
+        $request = $this->mockRequest('GET', '/');
+        $router->resolve($request);
     }
 
     public function testDefaultExceptionHandler() : void
@@ -330,6 +330,22 @@ final class NanoRouterTest extends TestCase
 
         $request = $this->mockRequest('GET', '/');
         $router->resolve($request);
+    }
+
+    public function testCustomExceptionHandler() : void
+    {
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class, false, self::exceptionHandler(...));
+
+        $router->addRoute(new Route(RouteType::Exact, 'GET', '/', static function () : ResponseInterface {
+            throw new Exception('test', 403);
+        }));
+
+        $request = $this->mockRequest('GET', '/');
+        $response = $router->resolve($request);
+
+        self::assertSame(403, $response->getStatusCode());
+        self::assertEmpty((string) $response->getBody());
+        self::expectOutputString('exception handler called');
     }
 
     public function testNoExceptionHandler() : void
@@ -443,6 +459,11 @@ final class NanoRouterTest extends TestCase
     public function testPostMiddlewareRouteException() : void
     {
         $router = (new NanoRouterMock(Response::class, ServerRequestFactory::class, self::routeExceptionHandler(...)))
+            ->addRoute(new Route(RouteType::Exact, 'GET', '/api/test.php', static function (ServerRequestInterface $request) : ResponseInterface {
+                $request = $request;
+
+                return new Response(200);
+            }))
             ->addMiddleware('GET', '~/api/~', MiddlewareType::Post, static function () : ?ResponseInterface {
                 throw new RouteException('not authorized', 401);
             });
@@ -472,9 +493,11 @@ final class NanoRouterTest extends TestCase
 
     public function testErrorHandler() : void
     {
-        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class);
+        $router = new NanoRouterMock(Response::class, ServerRequestFactory::class, static function (RouteException $exception, ServerRequestInterface $request) : ?ResponseInterface {
+            if ($exception->getCode() !== 404) {
+                return null;
+            }
 
-        $router->addErrorHandler(404, static function (ServerRequestInterface $request) : ResponseInterface {
             $stream = new Stream();
             $stream->write('This page does not exist on the server - ' . $request->getRequestTarget());
             return new Response(404, [], $stream);
@@ -488,23 +511,32 @@ final class NanoRouterTest extends TestCase
         self::assertSame('This page does not exist on the server - /test.php', (string) $response->getBody());
     }
 
-    public static function routeExceptionHandler(RouteException $exception) : void
+    public static function routeExceptionHandler(RouteException $exception, ServerRequestInterface $request) : ResponseInterface
     {
-        $exception = $exception;
-        echo 'route exception handler called';
-    }
+        $request = $request;
 
-    public static function exceptionHandler(Exception $exception) : ?ResponseInterface
-    {
-        $exception = $exception;
-        echo 'exception handler called';
+        echo 'route exception handler called';
+
         return new Response($exception->getCode());
     }
 
-    public static function exceptionHandlerThrow(Exception $exception) : ?ResponseInterface
+    public static function exceptionHandler(Exception $exception, ServerRequestInterface $request) : ResponseInterface
     {
         $exception = $exception;
+        $request = $request;
+
         echo 'exception handler called';
+
+        return new Response($exception->getCode());
+    }
+
+    public static function exceptionHandlerThrow(Exception $exception, ServerRequestInterface $request) : ?ResponseInterface
+    {
+        $exception = $exception;
+        $request = $request;
+
+        echo 'exception handler called';
+
         return null;
     }
 }
