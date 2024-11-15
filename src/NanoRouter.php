@@ -93,6 +93,8 @@ class NanoRouter
 
         foreach ($this->routes as $route) {
             if ($route->pathMatches($path)) {
+                $matches = true;
+
                 if ($route->methodMatches($method)) {
                     // call route
                     try {
@@ -102,11 +104,13 @@ class NanoRouter
                     }
 
                     break;
-                } else {
-                    // potential response if no other route matches
-                    $response = $this->handleError(405, $request);
                 }
             }
+        }
+
+        if (isset($matches)) {
+            // potential response if no other route matches
+            $response = $this->handleError(405, $request);
         }
 
         if (!isset($response)) {
