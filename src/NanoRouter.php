@@ -98,7 +98,7 @@ class NanoRouter
                     try {
                         $response = $route->call($request);
                     } catch (Throwable $exception) {
-                        $response = $this->handleExceptions($exception);
+                        $response = $this->handleException($exception);
                     }
 
                     break;
@@ -189,7 +189,7 @@ class NanoRouter
                 try {
                     $response = $middleware->callPre($request);
                 } catch (Throwable $exception) {
-                    $response = $this->handleExceptions($exception);
+                    $response = $this->handleException($exception);
                 }
 
                 if ($response instanceof ResponseInterface) {
@@ -223,7 +223,7 @@ class NanoRouter
                 try {
                     $response = $middleware->callPost($response, $request);
                 } catch (Throwable $exception) {
-                    $response = $this->handleExceptions($exception);
+                    $response = $this->handleException($exception);
                 }
             }
         }
@@ -239,7 +239,7 @@ class NanoRouter
     }
 
     /**
-     * Handle exceptions
+     * Handle exception
      *
      * @param Throwable $exception
      *
@@ -247,7 +247,7 @@ class NanoRouter
      *
      * @throws Throwable
      */
-    protected function handleExceptions(Throwable $exception) : ResponseInterface
+    protected function handleException(Throwable $exception) : ResponseInterface
     {
         // route exceptions always return an error response
         if ($exception instanceof RouteException) {
