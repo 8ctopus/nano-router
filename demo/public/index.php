@@ -28,7 +28,30 @@ require_once __DIR__ . '/../../vendor/autoload.php';
     ->pushHandler(new PrettyPageHandler())
     ->register();
 
-$router = new NanoRouter(Response::class, ServerRequestFactory::class);
+$router = new NanoRouter(Response::class, ServerRequestFactory::class, static function (RouteException $exception, ServerRequestInterface $request) : ?ResponseInterface {
+    $code = $exception->getCode();
+
+    if ($code === 404) {
+        $stream = new Stream();
+        $stream->write(<<<BODY
+        <html>
+        <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" crossorigin="anonymous" integrity="0269018275915a04492010a90829b0b9cfe66ce59358a7a99055e29a8d6742a9">
+        </head>
+        <body class="container">
+        <h1>Sorry we lost that page</h1>
+        <h2>{$request->getRequestTarget()}</h2>
+        </body>
+        </html>
+        BODY);
+
+        return new Response(404, [], $stream);
+    } elseif ($code === 405) {
+        return new Response(405);
+    }
+
+    return null;
+});
 
 $route = new Route(RouteType::Exact, 'GET', '/', static function () : ResponseInterface {
     $stream = new Stream();
@@ -47,8 +70,8 @@ $route = new Route(RouteType::Exact, 'GET', '/', static function () : ResponseIn
     <li>This is a <a href="/not-found/">broken link</a> for testing purposes</li>
     <li><a href="/admin/test/">route requires http auth (111/111)</a></li>
     <li><a href="/route-exception/">route exception test</a></li>
-    <li><a href="/fatal-exception-handled/">fatal exception test (handled exception = http 500 response is returned to the client)</a></li>
-    <li><a href="/fatal-exception-unhandled/">fatal exception test (unhandled exception)</a></li>
+    <li><a href="/handled-exception/">handled exception test</a></li>
+    <li><a href="/unhandled-exception/">unhandled exception test</a></li>
     </ul>
     </body>
     </html>
@@ -100,34 +123,13 @@ $router->addRoute(new Route(RouteType::Exact, 'GET', '/route-exception/', static
     throw new RouteException('not authorized', 403);
 }));
 
-$router->addRoute(new Route(RouteType::Exact, 'GET', '/fatal-exception-handled/', static function () : ResponseInterface {
-    throw new Exception('fatal error', 500);
+$router->addRoute(new Route(RouteType::Exact, 'GET', '/handled-exception/', static function () : ResponseInterface {
+    throw new Exception('handled exception', 500);
 }));
 
-$router->addRoute(new Route(RouteType::Exact, 'GET', '/fatal-exception-unhandled/', static function () : ResponseInterface {
-    throw new Exception('fatal error');
+$router->addRoute(new Route(RouteType::Exact, 'GET', '/unhandled-exception/', static function () : ResponseInterface {
+    throw new Exception('unhandled exception');
 }));
-
-$router->addErrorHandler(404, static function (ServerRequestInterface $request) : ResponseInterface {
-    $stream = new Stream();
-    $stream->write(<<<BODY
-    <html>
-    <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" crossorigin="anonymous" integrity="0269018275915a04492010a90829b0b9cfe66ce59358a7a99055e29a8d6742a9">
-    </head>
-    <body class="container">
-    <h1>Sorry we lost that page</h1>
-    <h2>{$request->getRequestTarget()}</h2>
-    </body>
-    </html>
-    BODY);
-
-    return new Response(404, [], $stream);
-});
-
-$router->addErrorHandler(405, static function () : ResponseInterface {
-    return new Response(405);
-});
 
 $router->addMiddleware('*', '~(.*)~', MiddlewareType::Post, static function (ResponseInterface $response) : ResponseInterface {
     return $response->withHeader('X-Powered-By', '8ctopus');
