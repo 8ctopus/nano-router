@@ -522,7 +522,6 @@ final class NanoRouterTest extends TestCase
 
     public static function exceptionHandler(Exception $exception, ServerRequestInterface $request) : ResponseInterface
     {
-        $exception = $exception;
         $request = $request;
 
         echo 'exception handler called';

@@ -8,8 +8,4 @@ use Oct8pus\NanoRouter\NanoRouter;
 
 class NanoRouterMock extends NanoRouter
 {
-    protected static function errorLog(string $message) : void
-    {
-        echo $message;
-    }
 }
