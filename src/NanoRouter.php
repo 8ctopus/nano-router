@@ -203,12 +203,7 @@ class NanoRouter
      */
     protected function handleExceptions(Throwable $exception, ServerRequestInterface $request) : ResponseInterface
     {
-        if ($exception instanceof RouteException) {
-            // route exceptions always return an error response
-            return $this->handleRouteException($exception, $request);
-        }
-
-        return $this->handleException($exception);
+        return ($exception instanceof RouteException) ? $this->handleRouteException($exception, $request) : $this->handleException($exception, $request);
     }
 
     /**
@@ -242,17 +237,18 @@ class NanoRouter
      * Handle exception
      *
      * @param Throwable $exception
+     * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
      */
-    protected function handleException(Throwable $exception) : ResponseInterface
+    protected function handleException(Throwable $exception, ServerRequestInterface $request) : ResponseInterface
     {
         if ($this->onException === false) {
             throw $exception;
         }
 
         if (is_callable($this->onException)) {
-            $response = call_user_func($this->onException, $exception);
+            $response = call_user_func($this->onException, $exception, $request);
 
             if ($response) {
                 return $response;
