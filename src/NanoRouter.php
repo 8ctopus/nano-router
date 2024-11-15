@@ -275,9 +275,9 @@ class NanoRouter
      * @param RouteException $exception
      * @param ServerRequestInterface $request
      *
-     * @return ?ResponseInterface
+     * @return ResponseInterface
      */
-    protected function handleRouteException(RouteException $exception, ServerRequestInterface $request) : ?ResponseInterface
+    protected function handleRouteException(RouteException $exception, ServerRequestInterface $request) : ResponseInterface
     {
         $code = $exception->getCode();
 
