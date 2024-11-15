@@ -92,24 +92,24 @@ class NanoRouter
         $method = $request->getMethod();
 
         foreach ($this->routes as $route) {
-            if ($route->pathMatches($path)) {
-                $matches = true;
+            if (!$route->pathMatches($path)) {
+                continue;
+            }
 
-                if ($route->methodMatches($method)) {
-                    // call route
-                    try {
-                        $response = $route->call($request);
-                    } catch (Throwable $exception) {
-                        $response = $this->handleException($exception);
-                    }
+            $matches = true;
 
-                    break;
+            if ($route->methodMatches($method)) {
+                try {
+                    $response = $route->call($request);
+                } catch (Throwable $exception) {
+                    $response = $this->handleException($exception);
                 }
+
+                break;
             }
         }
 
         if (isset($matches)) {
-            // potential response if no other route matches
             $response = $this->handleError(405, $request);
         }
 
