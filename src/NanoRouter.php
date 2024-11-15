@@ -60,7 +60,7 @@ class NanoRouter
         } elseif ($onRouteException === false) {
             $this->onRouteException = null;
         } else {
-            $this->onRouteException = self::routeExceptionHandler(...);
+            $this->onRouteException = self::handleRouteException(...);
         }
 
         if (is_callable($onException)) {
@@ -278,7 +278,7 @@ class NanoRouter
      *
      * @return void
      */
-    protected function routeExceptionHandler(RouteException $exception) : void
+    protected function handleRouteException(RouteException $exception) : void
     {
         $trace = $exception->getTrace();
 
