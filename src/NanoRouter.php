@@ -96,7 +96,7 @@ class NanoRouter
                 continue;
             }
 
-            $matches = true;
+            $match = true;
 
             if ($route->methodMatches($method)) {
                 try {
@@ -109,12 +109,8 @@ class NanoRouter
             }
         }
 
-        if (isset($matches)) {
-            $response = $this->handleError(405, $request);
-        }
-
         if (!isset($response)) {
-            $response = $this->handleError(404, $request);
+            $response = $this->handleError(isset($match) ? 405 : 404, $request);
         }
 
         return $this->postMiddleware($response, $request);
@@ -276,7 +272,7 @@ class NanoRouter
     }
 
     /**
-     * Handle route exceptions
+     * Handle route exception
      *
      * @param RouteException $exception
      *
@@ -296,7 +292,7 @@ class NanoRouter
     }
 
     /**
-     * Handle exceptions
+     * Handle exception
      *
      * @param Throwable $exception
      *
