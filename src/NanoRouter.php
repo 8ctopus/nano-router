@@ -26,7 +26,7 @@ class NanoRouter
     /**
      * @var array<int, callable>
      */
-    protected array $errorHandlers;
+    protected array $routeExceptionHandlers;
 
     /**
      * @var ?callable
@@ -53,7 +53,7 @@ class NanoRouter
 
         $this->routes = [];
         $this->middleware = [];
-        $this->errorHandlers = [];
+        $this->routeExceptionHandlers = [];
 
         if (is_callable($onRouteException)) {
             $this->onRouteException = $onRouteException;
@@ -102,7 +102,7 @@ class NanoRouter
                 try {
                     $response = $route->call($request);
                 } catch (Throwable $exception) {
-                    $response = $this->handleExceptions($exception);
+                    $response = $this->handleExceptions($exception, $request);
                 }
 
                 break;
@@ -110,7 +110,7 @@ class NanoRouter
         }
 
         if (!isset($response)) {
-            $response = $this->handleError(isset($match) ? 405 : 404, $request);
+            $response = $this->handleRouteException(new RouteException('', isset($match) ? 405 : 404), $request);
         }
 
         return $this->postMiddleware($response, $request);
@@ -126,27 +126,6 @@ class NanoRouter
     public function addRoute(Route $route) : self
     {
         $this->routes[] = $route;
-        return $this;
-    }
-
-    /**
-     * Add error handler
-     *
-     * @param int|array $codes - zero to handle all errors
-     * @param callable $handler
-     *
-     * @return self
-     */
-    public function addErrorHandler(int|array $codes, callable $handler) : self
-    {
-        if (!is_array($codes)) {
-            $codes = [$codes];
-        }
-
-        foreach ($codes as $code) {
-            $this->errorHandlers[$code] = $handler;
-        }
-
         return $this;
     }
 
@@ -189,7 +168,7 @@ class NanoRouter
                 try {
                     $response = $middleware->callPre($request);
                 } catch (Throwable $exception) {
-                    $response = $this->handleExceptions($exception);
+                    $response = $this->handleExceptions($exception, $request);
                 }
 
                 if ($response instanceof ResponseInterface) {
@@ -223,7 +202,7 @@ class NanoRouter
                 try {
                     $response = $middleware->callPost($response, $request);
                 } catch (Throwable $exception) {
-                    $response = $this->handleExceptions($exception);
+                    $response = $this->handleExceptions($exception, $request);
                 }
             }
         }
@@ -231,28 +210,47 @@ class NanoRouter
         return $response;
     }
 
-    protected static function errorLog(string $message) : void
+    /**
+     * Add route exception handler
+     *
+     * @param int|array $codes - zero to handle all errors
+     * @param callable $handler
+     *
+     * @return self
+     */
+    public function addRouteExceptionHandler(int|array $codes, callable $handler) : self
     {
-        // @codeCoverageIgnoreStart
-        error_log($message);
-        // @codeCoverageIgnoreEnd
+        if (!is_array($codes)) {
+            $codes = [$codes];
+        }
+
+        foreach ($codes as $code) {
+            $this->routeExceptionHandlers[$code] = $handler;
+        }
+
+        return $this;
     }
 
     /**
      * Handle exceptions
      *
      * @param Throwable $exception
+     * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
      *
      * @throws Throwable
      */
-    protected function handleExceptions(Throwable $exception) : ResponseInterface
+    protected function handleExceptions(Throwable $exception, ServerRequestInterface $request) : ResponseInterface
     {
         // route exceptions always return an error response
         if ($exception instanceof RouteException) {
             if (is_callable($this->onRouteException)) {
-                call_user_func($this->onRouteException, $exception);
+                $response = call_user_func($this->onRouteException, $exception, $request);
+
+                if ($response) {
+                    return $response;
+                }
             }
 
             return new $this->responseClass($exception->getCode());
@@ -275,20 +273,21 @@ class NanoRouter
      * Handle route exception
      *
      * @param RouteException $exception
+     * @param ServerRequestInterface $request
      *
-     * @return void
+     * @return ?ResponseInterface
      */
-    protected function handleRouteException(RouteException $exception) : void
+    protected function handleRouteException(RouteException $exception, ServerRequestInterface $request) : ?ResponseInterface
     {
-        $trace = $exception->getTrace();
+        $code = $exception->getCode();
 
-        $where = '';
+        $handler = array_key_exists($code, $this->routeExceptionHandlers) ? $this->routeExceptionHandlers[$code] : (array_key_exists(0, $this->routeExceptionHandlers) ? $this->routeExceptionHandlers[0] : null);
 
-        if (count($trace)) {
-            $where = array_key_exists('class', $trace[0]) ? $trace[0]['class'] : $trace[0]['function'];
+        if ($handler) {
+            return call_user_func($handler, $request, $code);
         }
 
-        static::errorLog("{$where} - FAILED - {$exception->getCode()} {$exception->getMessage()}");
+        return new $this->responseClass($code);
     }
 
     /**
@@ -307,30 +306,5 @@ class NanoRouter
         }
 
         return null;
-    }
-
-    /**
-     * Handle error
-     *
-     * @param int                    $error
-     * @param ServerRequestInterface $request
-     *
-     * @return ResponseInterface
-     */
-    private function handleError(int $error, ServerRequestInterface $request) : ResponseInterface
-    {
-        // specific handler for this error
-        $handler = array_key_exists($error, $this->errorHandlers) ? $this->errorHandlers[$error] : null;
-
-        if (!$handler) {
-            // generic handler
-            $handler = array_key_exists(0, $this->errorHandlers) ? $this->errorHandlers[0] : null;
-        }
-
-        if ($handler) {
-            return call_user_func($handler, $request, $error);
-        }
-
-        return new $this->responseClass($error);
     }
 }
