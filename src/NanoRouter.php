@@ -283,11 +283,7 @@ class NanoRouter
 
         $handler = array_key_exists($code, $this->routeExceptionHandlers) ? $this->routeExceptionHandlers[$code] : null;
 
-        if ($handler) {
-            return call_user_func($handler, $request, $code);
-        }
-
-        return new $this->responseClass($code);
+        return $handler ? call_user_func($handler, $request, $code) : new $this->responseClass($code);
     }
 
     /**
