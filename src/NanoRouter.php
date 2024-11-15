@@ -55,21 +55,8 @@ class NanoRouter
         $this->middleware = [];
         $this->routeExceptionHandlers = [];
 
-        if (is_callable($onRouteException)) {
-            $this->onRouteException = $onRouteException;
-        } elseif ($onRouteException === false) {
-            $this->onRouteException = null;
-        } else {
-            $this->onRouteException = self::handleRouteException(...);
-        }
-
-        if (is_callable($onException)) {
-            $this->onException = $onException;
-        } elseif ($onException === false) {
-            $this->onException = null;
-        } else {
-            $this->onException = self::handleException(...);
-        }
+        $this->onRouteException = $onRouteException;
+        $this->onException = $onException;
     }
 
     /**
@@ -110,7 +97,7 @@ class NanoRouter
         }
 
         if (!isset($response)) {
-            $response = $this->handleRouteException(new RouteException('', isset($match) ? 405 : 404), $request);
+            $response = $this->handleExceptions(new RouteException('', isset($match) ? 405 : 404), $request);
         }
 
         return $this->postMiddleware($response, $request);
@@ -243,30 +230,12 @@ class NanoRouter
      */
     protected function handleExceptions(Throwable $exception, ServerRequestInterface $request) : ResponseInterface
     {
-        // route exceptions always return an error response
         if ($exception instanceof RouteException) {
-            if (is_callable($this->onRouteException)) {
-                $response = call_user_func($this->onRouteException, $exception, $request);
-
-                if ($response) {
-                    return $response;
-                }
-            }
-
-            return new $this->responseClass($exception->getCode());
+            // route exceptions always return an error response
+            return $this->handleRouteException($exception, $request);
         }
 
-        // exceptions can be converted to a response, if not throw
-        if (is_callable($this->onException)) {
-            $response = call_user_func($this->onException, $exception);
-
-            if ($response) {
-                return $response;
-            }
-        }
-
-        // otherwise the exception is rethrown
-        throw $exception;
+        return $this->handleException($exception);
     }
 
     /**
@@ -279,11 +248,23 @@ class NanoRouter
      */
     protected function handleRouteException(RouteException $exception, ServerRequestInterface $request) : ResponseInterface
     {
+        if ($this->onRouteException === false) {
+            throw $exception;
+        }
+
+        if (is_callable($this->onRouteException)) {
+            $response = call_user_func($this->onRouteException, $exception, $request);
+
+            if ($response) {
+                return $response;
+            }
+        }
+
         $code = $exception->getCode();
 
         $handler = array_key_exists($code, $this->routeExceptionHandlers) ? $this->routeExceptionHandlers[$code] : null;
 
-        return $handler ? call_user_func($handler, $request, $code) : new $this->responseClass($code);
+        return $handler ? call_user_func($handler, $exception, $request) : new $this->responseClass($code);
     }
 
     /**
@@ -291,16 +272,30 @@ class NanoRouter
      *
      * @param Throwable $exception
      *
-     * @return ?ResponseInterface
+     * @return ResponseInterface
      */
-    protected function handleException(Throwable $exception) : ?ResponseInterface
+    protected function handleException(Throwable $exception) : ResponseInterface
     {
+        if ($this->onException === false) {
+            throw $exception;
+        }
+
+        if (is_callable($this->onException)) {
+            $response = call_user_func($this->onException, $exception);
+
+            if ($response) {
+                return $response;
+            }
+
+            throw $exception;
+        }
+
         $code = $exception->getCode();
 
         if ($code >= 200 && $code < 600) {
             return new $this->responseClass($code);
         }
 
-        return null;
+        throw $exception;
     }
 }
