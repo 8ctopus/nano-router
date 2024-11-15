@@ -29,14 +29,15 @@ Here's some pseudo-code that explains the concept:
 ```php
 $router = new Router();
 
+// add route
 $router->addRoute(new Route(RouteType::Exact, 'GET', '/test.php', function (ServerRequestInterface $request) : ResponseInterface {
-    return new Response(200, ['content-type' => 'text/plain'], 'You\'ve reached page /test.php');
+    return new Response(200, ['Content-Type' => 'text/plain'], 'You\'ve reached the test page');
 }));
 
-// create user request from globals
+// create user http request
 $request = ServerRequestCreator::createFromGlobals($_SERVER, $_FILES, $_COOKIE, $_GET, $_POST);
 
-// resolve finds the function that handles the user request, calls it and returns the function's response
+// resolve finds the function that handles the user request, calls it and returns its response
 $response = $router->resolve($request);
 
 // send response to client (echoes internally)
@@ -155,6 +156,6 @@ There is more to it, it's just not in the readme yet, most of it can be experime
 - add basePath
 - class wrapper for subroutes
 - should pre middleware only work on valid requests? now not valid routes are still going through the middleware probably we need both
-- check psr-15 middleware
 - add starts with middleware
+- check psr-15 middleware
 - how to easily route inside class?
