@@ -8,6 +8,7 @@
   displayDetailsOnTestsThatTriggerNotices="true"
   displayDetailsOnTestsThatTriggerWarnings="true"
   displayDetailsOnTestsThatTriggerErrors="true"
+  displayDetailsOnPhpunitDeprecations="false"
 >
   <testsuites>
     <testsuite name="test">
