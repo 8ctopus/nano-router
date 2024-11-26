@@ -91,7 +91,7 @@ class NanoRouter
         }
 
         if (!isset($response)) {
-            $response = $this->handleExceptions(new RouteException('', isset($match) ? 405 : 404), $request);
+            $response = $this->handleExceptions(new RouteException($path, isset($match) ? 405 : 404), $request);
         }
 
         return $this->postMiddleware($response, $request);
