@@ -194,7 +194,7 @@ class NanoRouter
     /**
      * Handle exceptions
      *
-     * @param Throwable $exception
+     * @param Throwable              $exception
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
@@ -209,7 +209,7 @@ class NanoRouter
     /**
      * Handle route exception
      *
-     * @param RouteException $exception
+     * @param RouteException         $exception
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
@@ -234,7 +234,7 @@ class NanoRouter
     /**
      * Handle exception
      *
-     * @param Throwable $exception
+     * @param Throwable              $exception
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface

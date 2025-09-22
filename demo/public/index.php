@@ -46,7 +46,9 @@ $router = new NanoRouter(Response::class, ServerRequestFactory::class, static fu
         BODY);
 
         return new Response(404, [], $stream);
-    } elseif ($code === 405) {
+    }
+
+    if ($code === 405) {
         return new Response(405);
     }
 
