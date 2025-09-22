@@ -9,18 +9,19 @@ use HttpSoft\Message\Response;
 use HttpSoft\Message\ServerRequestFactory;
 use HttpSoft\Message\Stream;
 use Oct8pus\NanoRouter\MiddlewareType;
+use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\Route;
 use Oct8pus\NanoRouter\RouteAlias;
 use Oct8pus\NanoRouter\RouteException;
 use Oct8pus\NanoRouter\RouteType;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @internal
- *
- * @covers \Oct8pus\NanoRouter\NanoRouter
  */
+#[CoversClass(NanoRouter::class)]
 final class NanoRouterTest extends TestCase
 {
     public function test404Route() : void

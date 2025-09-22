@@ -10,13 +10,13 @@ use Oct8pus\NanoRouter\NanoRouter;
 use Oct8pus\NanoRouter\Route;
 use Oct8pus\NanoRouter\RouteType;
 use Oct8pus\NanoTimer\NanoTimer;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use Psr\Http\Message\ResponseInterface;
 
 /**
  * @internal
- *
- * @coversNothing
  */
+#[CoversNothing]
 final class PerformanceTest extends TestCase
 {
     public function testRoute() : void

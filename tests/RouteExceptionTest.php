@@ -6,13 +6,13 @@ namespace Tests;
 
 use Oct8pus\NanoRouter\NanoRouterException;
 use Oct8pus\NanoRouter\RouteException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- *
- * @covers \Oct8pus\NanoRouter\RouteException
  */
+#[CoversClass(RouteException::class)]
 final class RouteExceptionTest extends TestCase
 {
     public function testOK() : void

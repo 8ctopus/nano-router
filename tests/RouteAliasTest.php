@@ -6,12 +6,12 @@ namespace Tests;
 
 use Oct8pus\NanoRouter\RouteAlias;
 use Oct8pus\NanoRouter\RouteType;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * @internal
- *
- * @covers \Oct8pus\NanoRouter\RouteAlias
  */
+#[CoversClass(RouteAlias::class)]
 final class RouteAliasTest extends TestCase
 {
     public function testAlias() : void

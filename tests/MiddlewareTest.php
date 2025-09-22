@@ -8,14 +8,14 @@ use HttpSoft\Message\Response;
 use Oct8pus\NanoRouter\Middleware;
 use Oct8pus\NanoRouter\MiddlewareType;
 use Oct8pus\NanoRouter\NanoRouterException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @internal
- *
- * @covers \Oct8pus\NanoRouter\Middleware
  */
+#[CoversClass(Middleware::class)]
 final class MiddlewareTest extends TestCase
 {
     public function testPathMatches() : void

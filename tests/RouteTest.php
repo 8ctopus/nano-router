@@ -8,13 +8,13 @@ use HttpSoft\Message\Response;
 use Oct8pus\NanoRouter\NanoRouterException;
 use Oct8pus\NanoRouter\Route;
 use Oct8pus\NanoRouter\RouteType;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Psr\Http\Message\ResponseInterface;
 
 /**
  * @internal
- *
- * @covers \Oct8pus\NanoRouter\Route
  */
+#[CoversClass(Route::class)]
 final class RouteTest extends TestCase
 {
     public function testPathMatches() : void
