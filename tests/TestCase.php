@@ -22,3 +22,4 @@ abstract class TestCase extends BaseTestCase
         return ServerRequestCreator::createFromGlobals($_SERVER, $_FILES, $_COOKIE, $_GET, $_POST);
     }
 }
+
